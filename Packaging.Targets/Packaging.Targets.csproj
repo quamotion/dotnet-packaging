@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <TargetFramework>netstandard1.4</TargetFramework>
+    <VersionPrefix>0.1.1</VersionPrefix>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="TarballTask.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Framework" Version="0.1.0-preview-00044-160929" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="0.1.0-preview-00044-160929" />
+    <PackageReference Include="NETStandard.Library" Version="1.6" />
+    <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="build\*.targets">
+      <Pack>true</Pack>
+      <PackagePath>\</PackagePath>
+    </Content>
+  </ItemGroup>
+</Project>

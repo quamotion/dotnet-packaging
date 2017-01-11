@@ -7,13 +7,17 @@ before_build:
   - ps: Push-AppVeyorArtifact dotnet_install.txt
   - dotnet --version
   - dotnet restore dotnet-tarball\dotnet-tarball.csproj
+  - dotnet restore Packaging.Targets\Packaging.Targets.csproj
 
 build_script:
   - dotnet build dotnet-tarball\dotnet-tarball.csproj -c Release
   - dotnet pack dotnet-tarball\dotnet-tarball.csproj -c Release --version-suffix r%APPVEYOR_BUILD_NUMBER%
+  - dotnet build Packaging.Targets\Packaging.Targets.csproj -c Release
+  - dotnet pack Packaging.Targets\Packaging.Targets.csproj -c Release --version-suffix r%APPVEYOR_BUILD_NUMBER%
 
 on_success:
   - ps: Push-AppVeyorArtifact dotnet-tarball\bin\Release\dotnet-tarball.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
+  - ps: Push-AppVeyorArtifact Packaging.Targets\bin\Release\Packaging.Targets.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
 
 nuget:
   project_feed: true
