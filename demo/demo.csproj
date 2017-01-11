@@ -4,17 +4,17 @@
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
-
   <PropertyGroup>
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>
   </PropertyGroup>
-
   <ItemGroup>
+    <PackageReference Include="Packaging.Targets" Version="0.1.1-*">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
     <DotNetCliToolReference Include="dotnet-tarball">
-        <Version>0.1.1-*</Version>
+      <Version>0.1.1-*</Version>
     </DotNetCliToolReference>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="1.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="1.0.0" />

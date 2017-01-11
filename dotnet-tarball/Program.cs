@@ -19,5 +19,6 @@ class Program
         };
 
         process.Start();
+        process.WaitForExit();
     }
 }
