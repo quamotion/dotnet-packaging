@@ -3,6 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
-    <VersionPrefix>0.1.0-preview</VersionPrefix>
+    <VersionPrefix>0.1.1</VersionPrefix>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Should be $(OutputPath)\$(ProjectRuntimeConfigFileName) but the file does not exist when this is evaluated -->
+    <Content Include="$(ProjectRuntimeConfigFileName)">
+      <Pack>true</Pack>
+      <PackagePath>lib/$(TargetFramework)</PackagePath>
+    </Content>
+  </ItemGroup>
 </Project>

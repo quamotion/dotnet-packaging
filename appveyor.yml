@@ -2,7 +2,7 @@ version: '0.1.{build}'
 
 before_build:
   - choco install -y wget
-  - wget https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.exe -O dotnet-dev-win-x64.latest.exe
+  - wget https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.exe -O dotnet-dev-win-x64.latest.exe -nv
   - dotnet-dev-win-x64.latest.exe /install /quiet /log dotnet_install.txt
   - ps: Push-AppVeyorArtifact dotnet_install.txt
   - dotnet --version
@@ -13,7 +13,7 @@ build_script:
   - dotnet pack dotnet-tarball\dotnet-tarball.csproj -c Release --version-suffix r%APPVEYOR_BUILD_NUMBER%
 
 on_success:
-  - ps: Push-AppVeyorArtifact dotnet-tarball\bin\Release\dotnet-tarball.1.0.0-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
+  - ps: Push-AppVeyorArtifact dotnet-tarball\bin\Release\dotnet-tarball.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
 
 nuget:
   project_feed: true

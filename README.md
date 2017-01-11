@@ -1,5 +1,7 @@
 # Packaging utilities for .NET Core
 
+[![Build status](https://ci.appveyor.com/api/projects/status/ac3j676f9g8r0g15?svg=true)](https://ci.appveyor.com/project/qmfrederik/dotnet-packaging)
+
 This repository contains command-line extensions for the .NET Core CLI which make it easy to create
 deployment packages (such as `.zip` files, tarballs or installers) for .NET Core applications.
 
