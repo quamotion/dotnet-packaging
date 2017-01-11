@@ -7,10 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Should be $(OutputPath)\$(ProjectRuntimeConfigFileName) but the file does not exist when this is evaluated -->
-    <Content Include="$(ProjectRuntimeConfigFileName)">
-      <Pack>true</Pack>
-      <PackagePath>lib/$(TargetFramework)</PackagePath>
-    </Content>
+    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
+      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
+    </BuiltProjectOutputGroupOutput>
   </ItemGroup>
 </Project>
