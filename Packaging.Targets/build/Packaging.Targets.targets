@@ -11,4 +11,40 @@
              TargetRuntime="$(TargetRuntime)"
              TargetFramework="$(TargetFramework)"/>
   </Target>
+
+  <!-- Support for building Windows Installer (.msi) packages -->
+  <PropertyGroup>
+    <SetupProductName>$(TargetName)</SetupProductName>
+    <SetupProductManufacturer>$(TargetName)</SetupProductManufacturer>
+    <SetupFeatureId>$(TargetName)Feature</SetupFeatureId>
+    <SetupFeatureName>$(TargetName)</SetupFeatureName>
+    <SetupInstallFolderName>$(TargetName)</SetupInstallFolderName>
+    <SetupProductVersion>1.0.0.0</SetupProductVersion>
+    <SetupProductLanguage>1033</SetupProductLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <WixArguments>-nologo -dPublishDir="$(PublishDir)\" -dSetupProductName="$(SetupProductName)" -dSetupProductManufacturer="$(SetupProductManufacturer)" -dSetupFeatureId="$(SetupFeatureId)" -dSetupFeatureName="$(SetupFeatureName)" -dSetupInstallFolderName="$(SetupInstallFolderName)" -dSetupProductVersion="$(SetupProductVersion)" -dSetupProductLanguage="$(SetupProductLanguage)"</WixArguments>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <WixInstallPath>C:\Program Files (x86)\WiX Toolset v3.10\</WixInstallPath>
+    <HarvestSourceFilePath>$(IntermediateOutputPath)$(TargetName).harvest.wxs</HarvestSourceFilePath>
+    <HarvestObjectFilePath>$(IntermediateOutputPath)$(TargetName).harvest.wixobj</HarvestObjectFilePath>
+    <ProductSourceFilePath>$(MSBuildThisFileDirectory)\Product.wxs</ProductSourceFilePath>
+    <ProductObjectFilePath>$(IntermediateOutputPath)$(TargetName).product.wixobj</ProductObjectFilePath>
+    <SetupFilePath>$(TargetDir)$(TargetName).msi</SetupFilePath>
+    <Heat>$(WixInstallPath)bin\heat.exe</Heat>
+    <Candle>$(WixInstallPath)bin\candle.exe</Candle>
+    <Light>$(WixInstallPath)bin\light.exe</Light>
+  </PropertyGroup>
+  <Target Name="Msi" DependsOnTargets="Publish">
+    <!-- $(PublishDir) ends with a \, which would escape the " that follows it. So we add an additional \ -->
+    <Exec Command='"$(Heat)" dir "$(PublishDir)\" -nologo -scom -sreg -sfrag -srd -gg -dr INSTALLFOLDER -cg SourceComponentGroup -var var.PublishDir -o $(HarvestSourceFilePath)'/>
+
+    <Exec Command='"$(Candle)" $(WixArguments) "$(HarvestSourceFilePath)" -o "$(HarvestObjectFilePath)"'/>
+    <Exec Command='"$(Candle)" $(WixArguments) "$(ProductSourceFilePath)" -o "$(ProductObjectFilePath)"'/>
+
+    <Exec Command='"$(Light)" $(WixArguments) "$(HarvestObjectFilePath)" "$(ProductObjectFilePath)" -o "$(SetupFilePath)"'/>
+  </Target>
 </Project>
