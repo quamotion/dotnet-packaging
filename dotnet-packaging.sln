@@ -8,8 +8,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Packaging.Targets", "Packaging.Targets\Packaging.Targets.csproj", "{FBB98D7F-35FD-463E-B3B3-5B67ECE22907}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-zip", "dotnet-zip\dotnet-zip.csproj", "{045283FC-CBB5-42A6-AD34-D8951D811DC0}"
-EndProject
-Global
+EndProjectGlobal
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

@@ -4,7 +4,7 @@ version: '0.1.{build}'
 
 before_build:
   - dotnet restore dotnet-packaging.sln
-  
+
 build_script:
   - dotnet pack dotnet-packaging.sln -c Release --version-suffix r%APPVEYOR_BUILD_NUMBER%
 
