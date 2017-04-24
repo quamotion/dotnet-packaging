@@ -23,7 +23,7 @@
       <Pack>true</Pack>
       <PackagePath>build\</PackagePath>
     </Content>
-    <Content Include="$(NugetPackageFolder)\sharpziplib.netstandard\0.86.0.1\lib\netstandard1.3\SharpZipLib.NETStandard.dll" Link="false">
+    <Content Include="$(NugetPackageFolder)\sharpziplib.netstandard\0.86.0.1\lib\netstandard1.3\SharpZipLib.NETStandard.dll" Link="SharpZipLib.NETStandard.dll">
       <Pack>true</Pack>
       <PackagePath>lib\netstandard1.4\</PackagePath>
     </Content>

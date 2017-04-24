@@ -1,6 +1,6 @@
 ﻿namespace Packaging.Targets.Rpm
 {
-    internal class IndexRecord
+    internal struct IndexRecord
     {
         /// <summary>
         /// Value identifying the purpose of the data associated with this Index Record.
@@ -23,5 +23,11 @@
         /// Size of the data associated with this Index Record. The count is the number of elements whose size is defined by the type of this Record.
         /// </summary>
         public uint Count;
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.Tag.ToString();
+        }
     }
 }

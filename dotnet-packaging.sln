@@ -9,6 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Packaging.Targets", "Packag
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-zip", "dotnet-zip\dotnet-zip.csproj", "{045283FC-CBB5-42A6-AD34-D8951D811DC0}"
 EndProjectGlobal
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Packaging.Targets.Tests", "Packaging.Targets.Tests\Packaging.Targets.Tests.csproj", "{794FEF8B-7496-4CF9-BFE0-65CBFD3D962A}"
+EndProject
+Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -26,6 +29,10 @@ EndProjectGlobal
 		{045283FC-CBB5-42A6-AD34-D8951D811DC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{045283FC-CBB5-42A6-AD34-D8951D811DC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{045283FC-CBB5-42A6-AD34-D8951D811DC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{794FEF8B-7496-4CF9-BFE0-65CBFD3D962A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{794FEF8B-7496-4CF9-BFE0-65CBFD3D962A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{794FEF8B-7496-4CF9-BFE0-65CBFD3D962A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{794FEF8B-7496-4CF9-BFE0-65CBFD3D962A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Packaging.Targets.Rpm
 {
@@ -41,7 +40,7 @@ namespace Packaging.Targets.Rpm
         /// A NUL terminated string that provides the package name. This name shall conform with the Package Naming section of this specification.
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 66)]
-        public byte[] Name;
+        public byte[] NameBytes;
 
         /// <summary>
         /// Value indicating the Operating System for which this package is valid. This value shall be 1.
@@ -57,6 +56,15 @@ namespace Packaging.Targets.Rpm
         /// Reserved space. The value is undefined.
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-        public byte[] Resvered;
+        public byte[] Reserved;
+
+        public string Name
+        {
+            get
+            {
+                var length = Array.FindIndex(this.NameBytes, 0, (x) => x == 0);
+                return Encoding.ASCII.GetString(this.NameBytes, 0, length);
+            }
+        }
     }
 }
