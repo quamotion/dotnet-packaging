@@ -12,6 +12,7 @@ namespace Packaging.Targets.Tests.Rpm
             using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
             {
                 var package = RpmPackageReader.Read(stream);
+                RpmPayloadReader.Read(package);
             }
         }
     }

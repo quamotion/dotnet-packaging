@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Packaging.Targets.Rpm
 {
@@ -10,11 +11,11 @@ namespace Packaging.Targets.Rpm
             set;
         }
 
-        public Collection<IndexRecord> Records
+        public Dictionary<IndexTag, IndexRecord> Records
         {
             get;
             set;
-        } = new Collection<IndexRecord>();
+        } = new Dictionary<IndexTag, IndexRecord>();
 
         public byte[] Data
         {
