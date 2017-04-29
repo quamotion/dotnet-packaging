@@ -9,8 +9,15 @@ using Xunit;
 
 namespace Packaging.Targets.Tests.IO
 {
+    /// <summary>
+    /// Tests the <see cref="CpioFile"/> class.
+    /// </summary>
     public class CpioFileTests
     {
+        /// <summary>
+        /// Tests the opening an reading of entries from a <see cref="CpioFile"/>
+        /// object.
+        /// </summary>
         [Fact]
         public void OpenCpioFileTests()
         {
@@ -58,6 +65,35 @@ namespace Packaging.Targets.Tests.IO
             Assert.Equal("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", entryHashes[0]);
             Assert.Equal("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", entryHashes[1]);
             Assert.Equal("811ee67ae433927d702c675c53dfe53811b1479aa9eedd91666b548a4797a7bc", entryHashes[2]);
+        }
+
+        /// <summary>
+        /// Tests the saving of data to a <see cref="CpioFile"/> object, by copying one CPIO
+        /// stream to another.
+        /// </summary>
+        [Fact]
+        public void WriteCpioFileTests()
+        {
+            using (Stream stream = File.OpenRead(@"IO\test.cpio"))
+            using (CpioFile source = new CpioFile(stream, true))
+            using (MemoryStream output = new MemoryStream())
+            using (Stream expectedOutput = File.OpenRead(@"IO\test.cpio"))
+            using (Stream validatingOutput = new ValidatingCompositeStream(null, output, expectedOutput))
+            using (CpioFile target = new CpioFile(validatingOutput, true))
+            {
+                int index = 0;
+
+                while (source.Read())
+                {
+                    using (Stream file = source.Open())
+                    {
+                        target.Write(source.EntryHeader, source.EntryName, file);
+                        index++;
+                    }
+                }
+
+                target.WriteTrailer();
+            }
         }
     }
 }

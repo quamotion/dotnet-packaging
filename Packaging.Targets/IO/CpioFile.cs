@@ -105,6 +105,72 @@ namespace Packaging.Targets.IO
         }
 
         /// <summary>
+        /// Adds an entry to the <see cref="CpioFile"/>
+        /// </summary>
+        /// <param name="header">
+        /// A <see cref="CpioHeader"/> with the item metaata. The <see cref="CpioHeader.Signature"/>,
+        /// <see cref="CpioHeader.NameSize"/> and <see cref="CpioHeader.Filesize"/> values are overwritten.
+        /// </param>
+        /// <param name="name">
+        /// The file name of the entry.
+        /// </param>
+        /// <param name="data">
+        /// A <see cref="Stream"/> which contains the file data.
+        /// </param>
+        public void Write(CpioHeader header, string name, Stream data)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            byte[] nameBytes = Encoding.UTF8.GetBytes(name);
+
+            // We make sure the magic and size fields have the correct values. All other fields
+            // are the responsibility of the caller.
+            header.Signature = "070701";
+            header.NameSize = (uint)(nameBytes.Length + 1);
+            header.FileSize = (uint)data.Length;
+
+            this.stream.WriteStruct(header);
+            this.stream.Write(nameBytes, 0, nameBytes.Length);
+
+            // The pathname is followed by NUL bytes so that the total size of the fixed
+            // header plus pathname is a multiple of four.
+            var headerSize = Marshal.SizeOf<CpioHeader>() + nameBytes.Length;
+            var paddingSize = PaddingSize(headerSize);
+
+            for (int i = 0; i < paddingSize; i++)
+            {
+                this.stream.WriteByte(0);
+            }
+
+            data.Position = 0;
+            data.CopyTo(this.stream);
+
+            // The file data is padded to a multiple of four bytes.
+            paddingSize = PaddingSize((int)data.Length);
+
+            for (int i = 0; i < paddingSize; i++)
+            {
+                this.stream.WriteByte(0);
+            }
+        }
+
+        /// <summary>
+        /// Writes the trailer entry.
+        /// </summary>
+        public void WriteTrailer()
+        {
+            this.Write(CpioHeader.Empty, "TRAILER!!!", new MemoryStream(Array.Empty<byte>()));
+        }
+
+        /// <summary>
         /// Reads the next entry in the <see cref="CpioFile"/>.
         /// </summary>
         /// <returns>
