@@ -89,6 +89,14 @@ namespace Packaging.Targets.IO
         }
 
         /// <summary>
+        /// Gets the header of the current entry.
+        /// </summary>
+        public CpioHeader EntryHeader
+        {
+            get { return this.entryHeader; }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the current entry is a directory.
         /// </summary>
         public bool IsDirectory
@@ -124,15 +132,15 @@ namespace Packaging.Targets.IO
 
             this.entryHeader = this.stream.ReadStruct<CpioHeader>();
 
-            if (this.entryHeader.Magic != "070701")
+            if (this.entryHeader.Signature != "070701")
             {
                 throw new InvalidDataException("The magic for the file entry is invalid");
             }
 
-            byte[] nameBytes = new byte[this.entryHeader.NameLength];
+            byte[] nameBytes = new byte[this.entryHeader.NameSize];
             this.stream.Read(nameBytes, 0, nameBytes.Length);
 
-            this.entryName = Encoding.UTF8.GetString(nameBytes, 0, (int)this.entryHeader.NameLength - 1);
+            this.entryName = Encoding.UTF8.GetString(nameBytes, 0, (int)this.entryHeader.NameSize - 1);
 
             // The pathname is followed by NUL bytes so that the total size of the fixed
             // header plus pathname is a multiple of four.
@@ -147,7 +155,7 @@ namespace Packaging.Targets.IO
             this.stream.Read(nameBytes, 0, paddingSize);
 
             this.entryDataOffset = this.stream.Position;
-            this.entryDataLength = this.entryHeader.ContentLength;
+            this.entryDataLength = this.entryHeader.FileSize;
             this.entryStream = new SubStream(this.stream, this.entryDataOffset, this.entryDataLength, leaveParentOpen: true);
 
             return this.entryName != "TRAILER!!!";
