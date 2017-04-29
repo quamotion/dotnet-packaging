@@ -17,9 +17,10 @@ namespace Packaging.Targets.Rpm
             get;
             set;
         }
+
         public override string ToString()
         {
-            return $"{this.Header.Tag}: {this.Value} ({this.Header.Type})";
+            return $"{this.Value} ({this.Header.Type})";
         }
     }
 }

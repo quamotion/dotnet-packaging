@@ -1,4 +1,6 @@
-﻿namespace Packaging.Targets.Rpm
+﻿using System;
+
+namespace Packaging.Targets.Rpm
 {
     internal struct IndexHeader
     {
@@ -6,7 +8,7 @@
         /// Value identifying the purpose of the data associated with this Index Record.
         /// The value of this field is dependent on the context in which the Index Record is used.
         /// </summary>
-        public IndexTag Tag;
+        public uint Tag;
 
         /// <summary>
         /// Value identifying the type of the data associated with this Index Record.
@@ -23,11 +25,5 @@
         /// Size of the data associated with this Index Record. The count is the number of elements whose size is defined by the type of this Record.
         /// </summary>
         public uint Count;
-
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            return this.Tag.ToString();
-        }
     }
 }

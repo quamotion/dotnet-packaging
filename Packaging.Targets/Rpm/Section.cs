@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Packaging.Targets.Rpm
 {
-    internal class Section
+    internal class Section<K>
     {
         public RpmHeader Header
         {
@@ -11,11 +11,11 @@ namespace Packaging.Targets.Rpm
             set;
         }
 
-        public Dictionary<IndexTag, IndexRecord> Records
+        public Dictionary<K, IndexRecord> Records
         {
             get;
             set;
-        } = new Dictionary<IndexTag, IndexRecord>();
+        } = new Dictionary<K, IndexRecord>();
 
         public byte[] Data
         {

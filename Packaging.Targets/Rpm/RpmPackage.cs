@@ -10,13 +10,13 @@ namespace Packaging.Targets.Rpm
             set;
         }
 
-        public Section Header
+        public Section<IndexTag> Header
         {
             get;
             set;
         }
 
-        public Section Signature
+        public Section<SignatureTag> Signature
         {
             get;
             set;
