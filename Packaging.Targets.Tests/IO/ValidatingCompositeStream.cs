@@ -75,7 +75,7 @@ namespace Packaging.Targets.Tests
         /// <inheritdoc/>
         public override long Position
         {
-            get { throw new NotImplementedException(); }
+            get { return this.output.Position; }
             set { throw new NotImplementedException(); }
         }
 

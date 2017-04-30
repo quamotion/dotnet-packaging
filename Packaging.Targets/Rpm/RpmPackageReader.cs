@@ -77,21 +77,66 @@ namespace Packaging.Targets.Rpm
                         break;
 
                     case IndexType.RPM_INT16_TYPE:
-                        Array.Copy(section.Data, offset, int16Buffer, 0, 2);
-                        Array.Reverse(int16Buffer);
-                        record.Value = BitConverter.ToInt16(int16Buffer, 0);
+                        Collection<short> shortValues = new Collection<short>();
+
+                        for (int i = 0; i < record.Header.Count; i++)
+                        {
+                            Array.Copy(section.Data, offset + i * sizeof(short), int16Buffer, 0, sizeof(short));
+                            Array.Reverse(int16Buffer);
+                            shortValues.Add(BitConverter.ToInt16(int16Buffer, 0));
+                        }
+
+                        if (shortValues.Count == 1)
+                        {
+                            record.Value = shortValues[0];
+                        }
+                        else
+                        {
+                            record.Value = shortValues;
+                        }
+
                         break;
 
                     case IndexType.RPM_INT32_TYPE:
-                        Array.Copy(section.Data, offset, int32Buffer, 0, 4);
-                        Array.Reverse(int32Buffer);
-                        record.Value = BitConverter.ToInt16(int32Buffer, 0);
+                        Collection<int> intValues = new Collection<int>();
+
+                        for (int i = 0; i < record.Header.Count; i++)
+                        {
+                            Array.Copy(section.Data, offset + i * sizeof(int), int32Buffer, 0, sizeof(int));
+                            Array.Reverse(int32Buffer);
+                            intValues.Add(BitConverter.ToInt32(int32Buffer, 0));
+                        }
+
+                        if (intValues.Count == 1)
+                        {
+                            record.Value = intValues[0];
+                        }
+                        else
+                        {
+                            record.Value = intValues;
+                        }
+
                         break;
 
                     case IndexType.RPM_INT64_TYPE:
-                        Array.Copy(section.Data, offset, int64Buffer, 0, 8);
-                        Array.Reverse(int64Buffer);
-                        record.Value = BitConverter.ToInt16(int64Buffer, 0);
+                        Collection<long> longValues = new Collection<long>();
+
+                        for (int i = 0; i < record.Header.Count; i++)
+                        {
+                            Array.Copy(section.Data, offset + i * sizeof(long), int64Buffer, 0, sizeof(long));
+                            Array.Reverse(int64Buffer);
+                            longValues.Add(BitConverter.ToInt64(int64Buffer, 0));
+                        }
+
+                        if (longValues.Count == 1)
+                        {
+                            record.Value = longValues[0];
+                        }
+                        else
+                        {
+                            record.Value = longValues;
+                        }
+
                         break;
 
                     case IndexType.RPM_STRING_TYPE:
@@ -151,6 +196,7 @@ namespace Packaging.Targets.Rpm
             }
 
             offset += stringLength;
+            offset += 1;
             return value;
         }
     }

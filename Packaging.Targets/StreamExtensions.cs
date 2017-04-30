@@ -135,5 +135,53 @@ namespace Packaging.Targets
                 }
             }
         }
+
+        /// <summary>
+        /// Writes a <see cref="short"/> to a <see cref="Stream"/> using big-endian encoding.
+        /// </summary>
+        /// <param name="stream">
+        /// The <see cref="Stream"/> to which to write the value.
+        /// </param>
+        /// <param name="value">
+        /// The value to write to the stream.
+        /// </param>
+        public static void WriteBE(this Stream stream, short value)
+        {
+            var data = BitConverter.GetBytes(value);
+            Array.Reverse(data);
+            stream.Write(data, 0, data.Length);
+        }
+
+        /// <summary>
+        /// Writes a <see cref="short"/> to a <see cref="Stream"/> using big-endian encoding.
+        /// </summary>
+        /// <param name="stream">
+        /// The <see cref="Stream"/> to which to write the value.
+        /// </param>
+        /// <param name="value">
+        /// The value to write to the stream.
+        /// </param>
+        public static void WriteBE(this Stream stream, int value)
+        {
+            var data = BitConverter.GetBytes(value);
+            Array.Reverse(data);
+            stream.Write(data, 0, data.Length);
+        }
+
+        /// <summary>
+        /// Writes a <see cref="short"/> to a <see cref="Stream"/> using big-endian encoding.
+        /// </summary>
+        /// <param name="stream">
+        /// The <see cref="Stream"/> to which to write the value.
+        /// </param>
+        /// <param name="value">
+        /// The value to write to the stream.
+        /// </param>
+        public static void WriteBE(this Stream stream, long value)
+        {
+            var data = BitConverter.GetBytes(value);
+            Array.Reverse(data);
+            stream.Write(data, 0, data.Length);
+        }
     }
 }
