@@ -16,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.2" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
   </ItemGroup>
   <ItemGroup>
@@ -27,5 +28,10 @@
       <Pack>true</Pack>
       <PackagePath>lib\netstandard1.4\</PackagePath>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="lzma.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

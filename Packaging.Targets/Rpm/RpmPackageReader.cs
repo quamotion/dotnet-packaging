@@ -26,6 +26,13 @@ namespace Packaging.Targets.Rpm
             package.Lead = stream.ReadStruct<RpmLead>();
 
             package.Signature = ReadSection<SignatureTag>(stream, h => (SignatureTag)h.Tag);
+
+            if (stream.Position % 8 != 0)
+            {
+                stream.Position += 8 - (stream.Position % 8);
+            }
+
+            package.HeaderOffset = stream.Position;
             package.Header = ReadSection<IndexTag>(stream, h => (IndexTag)h.Tag);
 
             package.PayloadOffset = stream.Position;
@@ -33,11 +40,9 @@ namespace Packaging.Targets.Rpm
             return package;
         }
 
-        private static Section<K> ReadSection<K>(Stream stream, Func<IndexHeader, K> getTag)
+        public static Section<K> ReadSection<K>(Stream stream, Func<IndexHeader, K> getTag)
         {
             Section<K> section = new Section<K>();
-
-            stream.Position += stream.Position % 8;
 
             section.Header = stream.ReadStruct<RpmHeader>();
 

@@ -25,6 +25,9 @@
     <None Update="Rpm\libplist-2.0.1.151-1.1.x86_64.rpm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Rpm\_key.pub">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

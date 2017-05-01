@@ -1,5 +1,8 @@
 ﻿using Packaging.Targets.Rpm;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Packaging.Targets.Tests.Rpm
@@ -22,7 +25,6 @@ namespace Packaging.Targets.Tests.Rpm
             using (Stream output = new ValidatingCompositeStream(null, actual, expected))
             {
                 var package = RpmPackageReader.Read(stream);
-
                 RpmPackageWriter.Write(output, package);
             }
         }

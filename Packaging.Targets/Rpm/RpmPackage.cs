@@ -22,6 +22,12 @@ namespace Packaging.Targets.Rpm
             set;
         }
 
+        public long HeaderOffset
+        {
+            get;
+            set;
+        }
+
         public long PayloadOffset
         {
             get;

@@ -7,6 +7,11 @@ namespace Packaging.Targets.Rpm
     internal enum SignatureTag
     {
         /// <summary>
+        /// The signature tag differentiates a signature header from a metadata header, and identifies the original contents of the signature header.
+        /// </summary>
+        RPMTAG_HEADERSIGNATURES = 62,
+
+        /// <summary>
         /// This tag specifies the combined size of the Header and Payload sections.
         /// </summary>
         RPMSIGTAG_SIZE = 1000,

@@ -19,11 +19,11 @@ namespace Packaging.Targets.Rpm
         /// Location in the Store of the data associated with this Index Record. This value should between 0 and the value contained 
         /// in <see cref="RpmHeader.Size"/>.
         /// </summary>
-        public uint Offset;
+        public int Offset;
 
         /// <summary>
         /// Size of the data associated with this Index Record. The count is the number of elements whose size is defined by the type of this Record.
         /// </summary>
-        public uint Count;
+        public int Count;
     }
 }
