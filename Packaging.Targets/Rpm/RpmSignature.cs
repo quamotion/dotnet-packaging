@@ -161,7 +161,7 @@ namespace Packaging.Targets.Rpm
         /// <returns>
         /// A byte array representing the same value.
         /// </returns>
-        private static byte[] StringToByteArray(string hex)
+        internal static byte[] StringToByteArray(string hex)
         {
             int NumberChars = hex.Length;
             byte[] bytes = new byte[NumberChars / 2];

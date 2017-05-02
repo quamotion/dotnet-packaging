@@ -1,6 +1,8 @@
 ﻿using Packaging.Targets.Rpm;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Packaging.Targets.Tests.Rpm
@@ -55,6 +57,33 @@ namespace Packaging.Targets.Tests.Rpm
                 Assert.Equal("http://www.libimobiledevice.org/", metadata.Url);
                 Assert.Equal("obs://build.opensuse.org/home:qmfrederik", metadata.Vendor);
                 Assert.Equal("2.0.1.151", metadata.Version);
+
+                var entries = metadata.ChangelogEntries.ToArray();
+                Assert.Equal(0x21, entries.Length);
+                Assert.Equal(new DateTimeOffset(2014, 1, 24, 12, 0, 0, TimeSpan.Zero), entries[0].Date);
+                Assert.Equal("Daniel Mach <dmach@redhat.com> - 1.10-4", entries[0].Name);
+                Assert.Equal("- Mass rebuild 2014-01-24", entries[0].Text);
+
+                var files = metadata.Files.ToArray();
+                Assert.Equal(9, files.Length);
+                Assert.Equal("ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, BuildID[sha1]=44864a4aec49ec94f3dc1486068ff0d308e3ae37, stripped", files[0].Class);
+                Assert.Equal(RpmFileColor.RPMFC_ELF64, files[0].Color);
+                Assert.Equal(6, files[0].Dependencies.Count);
+                Assert.Equal(IndexTag.RPMTAG_REQUIRENAME, files[0].Dependencies[0].Type);
+                Assert.Equal(0x0a, files[0].Dependencies[0].Index);
+                Assert.Equal(1, files[0].Device);
+                Assert.Equal(RpmFileFlags.None, files[0].Flags);
+                Assert.Equal("root", files[0].GroupName);
+                Assert.Equal(1, files[0].Inode);
+                Assert.Equal("", files[0].Lang);
+                Assert.Equal("", files[0].LinkTo);
+                Assert.Equal(new byte[] { 0xf5, 0x17, 0x06, 0x2e, 0xe2, 0x60, 0xd9, 0x30, 0x4e, 0x74, 0xef, 0xed, 0xbb, 0x51, 0xf2, 0x53, 0x21, 0xde, 0xd8, 0x71, 0xcb, 0xb7, 0xcc, 0x68, 0x0c, 0xa2, 0x9b, 0x48, 0x0a, 0x11, 0x03, 0xbd }, files[0].MD5Hash);
+                Assert.Equal(LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG, files[0].Mode);
+                Assert.Equal(new DateTimeOffset(2017, 4, 21, 20, 56, 27, TimeSpan.Zero), files[0].ModifiedTime);
+                Assert.Equal(0, files[0].Rdev);
+                Assert.Equal(0x2ca0, files[0].Size);
+                Assert.Equal("root", files[0].UserName);
+                Assert.Equal(RpmVerifyFlags.RPMVERIFY_ALL, files[0].VerifyFlags);
             }
         }
     }

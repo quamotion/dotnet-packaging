@@ -3,6 +3,11 @@
     /// <seealso href="https://github.com/rpm-software-management/rpm/blob/master/lib/rpmtag.h"/>
     internal enum IndexTag
     {
+        /// <summary>
+        /// Unknown tag
+        /// </summary>
+        RPMTAG_NOT_FOUND = -1,
+
         RPMTAG_HEADERIMAGE = 61,
 
         /// <summary>

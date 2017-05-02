@@ -283,15 +283,140 @@ namespace Packaging.Targets.Rpm
             get { return this.GetInt(IndexTag.RPMTAG_FILEDIGESTALGO); }
         }
 
+        /// <summary>
+        /// Gets all change log entries.
+        /// </summary>
+        public IEnumerable<ChangelogEntry> ChangelogEntries
+        {
+            get
+            {
+                var times = this.GetIntArray(IndexTag.RPMTAG_CHANGELOGTIME);
+                var names = this.GetStringArray(IndexTag.RPMTAG_CHANGELOGNAME);
+                var text = this.GetStringArray(IndexTag.RPMTAG_CHANGELOGTEXT);
+
+                int count = Math.Min(times.Count, Math.Min(names.Count, text.Count));
+
+                for (int i = 0; i < count; i++)
+                {
+                    yield return new ChangelogEntry()
+                    {
+                        Date = DateTimeOffset.FromUnixTimeSeconds(times[i]),
+                        Name = names[i],
+                        Text = text[i]
+                    };
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a list of all files embedded in this package.
+        /// </summary>
+        public IEnumerable<RpmFile> Files
+        {
+            get
+            {
+                var sizes = this.GetIntArray(IndexTag.RPMTAG_FILESIZES);
+                var modes = this.GetShortArray(IndexTag.RPMTAG_FILEMODES);
+                var rdevs = this.GetShortArray(IndexTag.RPMTAG_FILERDEVS);
+                var mtimes = this.GetIntArray(IndexTag.RPMTAG_FILEMTIMES);
+                var md5s = this.GetStringArray(IndexTag.RPMTAG_FILEMD5S);
+                var linkTos = this.GetStringArray(IndexTag.RPMTAG_FILELINKTOS);
+                var flags = this.GetIntArray(IndexTag.RPMTAG_FILEFLAGS);
+                var usernames = this.GetStringArray(IndexTag.RPMTAG_FILEUSERNAME);
+                var groupnames = this.GetStringArray(IndexTag.RPMTAG_FILEGROUPNAME);
+                var verifyFlags = this.GetIntArray(IndexTag.RPMTAG_FILEVERIFYFLAGS);
+                var devices = this.GetIntArray(IndexTag.RPMTAG_FILEDEVICES);
+                var inodes = this.GetIntArray(IndexTag.RPMTAG_FILEINODES);
+                var langs = this.GetStringArray(IndexTag.RPMTAG_FILELANGS);
+                var colors = this.GetIntArray(IndexTag.RPMTAG_FILECOLORS);
+                var classes = this.GetIntArray(IndexTag.RPMTAG_FILECLASS);
+                var dependsX = this.GetIntArray(IndexTag.RPMTAG_FILEDEPENDSX);
+                var dependsN = this.GetIntArray(IndexTag.RPMTAG_FILEDEPENDSN);
+
+                var classDict = this.GetStringArray(IndexTag.RPMTAG_CLASSDICT);
+                var dependsDict = this.GetIntArray(IndexTag.RPMTAG_DEPENDSDICT);
+
+                for (int i = 0; i < sizes.Count; i++)
+                {
+                    Collection<Dependency> dependencies = new Collection<Dependency>();
+
+                    for (int j = dependsX[i]; j < dependsX[i] + dependsN[i]; j++)
+                    {
+                        // https://github.com/rpm-software-management/rpm/blob/8f509d669b9ae79c86dd510c5a4bc5109f60d733/build/rpmfc.c#L734
+                        var value = dependsDict[j];
+
+                        var dependencyType = GetDependencyTag((char)((value >> 24) & 0xFF));
+                        var index = value & 0x00ffffff;
+
+                        dependencies.Add(
+                            new Dependency()
+                            {
+                                Type = dependencyType,
+                                Index = index
+                            });
+                    }
+
+                    // File mode is stored as an ASCII representation!
+                    // "This is an ascii representation of the hexadecimal number representing the bit as defined for the st_mode field of the stat structure defined for the stat function."
+                    var fileModeString = Encoding.ASCII.GetString(BitConverter.GetBytes(modes[i]));
+
+                    yield return new RpmFile()
+                    {
+                        Size = sizes[i],
+                        Mode = (LinuxFileMode)modes[i],
+                        Rdev = rdevs[i],
+                        ModifiedTime = DateTimeOffset.FromUnixTimeSeconds(mtimes[i]),
+                        MD5Hash = RpmSignature.StringToByteArray(md5s[i]),
+                        LinkTo = linkTos[i],
+                        Flags = (RpmFileFlags)flags[i],
+                        UserName = usernames[i],
+                        GroupName = groupnames[i],
+                        VerifyFlags = (RpmVerifyFlags)verifyFlags[i],
+                        Device = devices[i],
+                        Inode = inodes[i],
+                        Lang = langs[i],
+                        Color = (RpmFileColor)colors[i],
+                        Class = classDict[classes[i]],
+                        Dependencies = dependencies
+                    };
+                }
+            }
+        }
+
         // Changelog
         // Require_*: Dependencies
         // Provide_*: Dependencies
         // Dirs
         // Files
 
+        protected IndexTag GetDependencyTag(char deptype)
+        {
+            switch (deptype)
+            {
+                case 'P':
+                    return IndexTag.RPMTAG_PROVIDENAME;
+                case 'R':
+                    return IndexTag.RPMTAG_REQUIRENAME;
+                case 'r':
+                    return IndexTag.RPMTAG_RECOMMENDNAME;
+                case 's':
+                    return IndexTag.RPMTAG_SUGGESTNAME;
+                case 'S':
+                    return IndexTag.RPMTAG_SUPPLEMENTNAME;
+                case 'e':
+                    return IndexTag.RPMTAG_ENHANCENAME;
+                case 'C':
+                    return IndexTag.RPMTAG_CONFLICTNAME;
+                case 'O':
+                    return IndexTag.RPMTAG_OBSOLETENAME;
+                default:
+                    return IndexTag.RPMTAG_NOT_FOUND;
+            }
+        }
+
         protected Collection<string> GetStringArray(IndexTag tag)
         {
-            return this.GetValue<Collection<string>>(tag, IndexType.RPM_STRING_ARRAY_TYPE, false);
+            return this.GetValue<Collection<string>>(tag, IndexType.RPM_STRING_ARRAY_TYPE, null);
         }
 
         protected string GetLocalizedString(IndexTag tag)
@@ -311,12 +436,22 @@ namespace Packaging.Targets.Rpm
             return this.GetValue<int>(tag, IndexType.RPM_INT32_TYPE, false);
         }
 
+        protected Collection<int> GetIntArray(IndexTag tag)
+        {
+            return this.GetValue<Collection<int>>(tag, IndexType.RPM_INT32_TYPE, true);
+        }
+
+        protected Collection<short> GetShortArray(IndexTag tag)
+        {
+            return this.GetValue<Collection<short>>(tag, IndexType.RPM_INT16_TYPE, true);
+        }
+
         protected byte[] GetByteArray(IndexTag tag)
         {
             return this.GetValue<byte[]>(tag, IndexType.RPM_BIN_TYPE, true);
         }
 
-        protected T GetValue<T>(IndexTag tag, IndexType type, bool plural)
+        protected T GetValue<T>(IndexTag tag, IndexType type, bool? plural)
         {
             if (!this.Package.Header.Records.ContainsKey(tag))
             {
@@ -325,7 +460,7 @@ namespace Packaging.Targets.Rpm
 
             var record = this.Package.Header.Records[tag];
 
-            if (record.Header.Count > 1 != plural)
+            if (plural != null && record.Header.Count > 1 != plural)
             {
                 throw new ArgumentOutOfRangeException(nameof(tag));
             }
