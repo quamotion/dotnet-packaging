@@ -151,5 +151,20 @@ namespace Packaging.Targets.Rpm
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets the name of the file.
+        /// </summary>
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.Name;
+        }
     }
 }

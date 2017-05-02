@@ -333,6 +333,10 @@ namespace Packaging.Targets.Rpm
                 var dependsX = this.GetIntArray(IndexTag.RPMTAG_FILEDEPENDSX);
                 var dependsN = this.GetIntArray(IndexTag.RPMTAG_FILEDEPENDSN);
 
+                var baseNames = this.GetStringArray(IndexTag.RPMTAG_BASENAMES);
+                var dirIndexes = this.GetIntArray(IndexTag.RPMTAG_DIRINDEXES);
+                var dirNames = this.GetStringArray(IndexTag.RPMTAG_DIRNAMES);
+
                 var classDict = this.GetStringArray(IndexTag.RPMTAG_CLASSDICT);
                 var dependsDict = this.GetIntArray(IndexTag.RPMTAG_DEPENDSDICT);
 
@@ -360,6 +364,9 @@ namespace Packaging.Targets.Rpm
                     // "This is an ascii representation of the hexadecimal number representing the bit as defined for the st_mode field of the stat structure defined for the stat function."
                     var fileModeString = Encoding.ASCII.GetString(BitConverter.GetBytes(modes[i]));
 
+                    var directoryName = dirNames[dirIndexes[i]];
+                    var name = $"{directoryName}{baseNames[i]}";
+
                     yield return new RpmFile()
                     {
                         Size = sizes[i],
@@ -377,7 +384,48 @@ namespace Packaging.Targets.Rpm
                         Lang = langs[i],
                         Color = (RpmFileColor)colors[i],
                         Class = classDict[classes[i]],
-                        Dependencies = dependencies
+                        Dependencies = dependencies,
+                        Name = name
+                    };
+                }
+            }
+        }
+
+        public IEnumerable<PackageDependency> Dependencies
+        {
+            get
+            {
+                var flags = GetIntArray(IndexTag.RPMTAG_REQUIREFLAGS);
+                var names = GetStringArray(IndexTag.RPMTAG_REQUIRENAME);
+                var vers = GetStringArray(IndexTag.RPMTAG_REQUIREVERSION);
+
+                for (int i = 0; i < flags.Count; i++)
+                {
+                    yield return new PackageDependency()
+                    {
+                        Flags = (RpmSense)flags[i],
+                        Name = names[i],
+                        Version = vers[i]
+                    };
+                }
+            }
+        }
+
+        public IEnumerable<PackageDependency> Provides
+        {
+            get
+            {
+                var flags = GetIntArray(IndexTag.RPMTAG_PROVIDEFLAGS);
+                var names = GetStringArray(IndexTag.RPMTAG_PROVIDENAME);
+                var vers = GetStringArray(IndexTag.RPMTAG_PROVIDEVERSION);
+
+                for (int i = 0; i < flags.Count; i++)
+                {
+                    yield return new PackageDependency()
+                    {
+                        Flags = (RpmSense)flags[i],
+                        Name = names[i],
+                        Version = vers[i]
                     };
                 }
             }

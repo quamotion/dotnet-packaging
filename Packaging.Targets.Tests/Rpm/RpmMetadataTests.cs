@@ -84,6 +84,19 @@ namespace Packaging.Targets.Tests.Rpm
                 Assert.Equal(0x2ca0, files[0].Size);
                 Assert.Equal("root", files[0].UserName);
                 Assert.Equal(RpmVerifyFlags.RPMVERIFY_ALL, files[0].VerifyFlags);
+                Assert.Equal("/usr/bin/plistutil", files[0].Name);
+
+                var dependencies = metadata.Dependencies.ToArray();
+                Assert.Equal(0x13, dependencies.Length);
+                Assert.Equal(RpmSense.RPMSENSE_INTERP | RpmSense.RPMSENSE_SCRIPT_POST, dependencies[0].Flags);
+                Assert.Equal("", dependencies[0].Version);
+                Assert.Equal("/sbin/ldconfig", dependencies[0].Name);
+
+                var provides = metadata.Provides.ToArray();
+                Assert.Equal(4, provides.Length);
+                Assert.Equal(RpmSense.RPMSENSE_EQUAL, provides[0].Flags);
+                Assert.Equal("2.0.1.151-1.1", provides[0].Version);
+                Assert.Equal("libplist", provides[0].Name);
             }
         }
     }
