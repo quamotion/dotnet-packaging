@@ -9,15 +9,14 @@
     <Compile Include="TarballTask.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Framework" Version="0.1.0-preview-00044-160929" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="0.1.0-preview-00044-160929" />
-    <PackageReference Include="NETStandard.Library" Version="1.6" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="build\*.*">
       <Pack>true</Pack>
-      <PackagePath>\</PackagePath>
+      <PackagePath>build\</PackagePath>
     </Content>
     <Content Include="$(NugetPackageFolder)\sharpziplib.netstandard\0.86.0.1\lib\netstandard1.3\SharpZipLib.NETStandard.dll" Link="false">
       <Pack>true</Pack>
