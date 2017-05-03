@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-tarball", "dotnet-tarball\dotnet-tarball.csproj", "{7CC0E2CC-8D01-41A2-A8A6-951161D7E413}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Packaging.Targets", "Packaging.Targets\Packaging.Targets.csproj", "{FBB98D7F-35FD-463E-B3B3-5B67ECE22907}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-zip", "dotnet-zip\dotnet-zip.csproj", "{045283FC-CBB5-42A6-AD34-D8951D811DC0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7CC0E2CC-8D01-41A2-A8A6-951161D7E413}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CC0E2CC-8D01-41A2-A8A6-951161D7E413}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CC0E2CC-8D01-41A2-A8A6-951161D7E413}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CC0E2CC-8D01-41A2-A8A6-951161D7E413}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBB98D7F-35FD-463E-B3B3-5B67ECE22907}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBB98D7F-35FD-463E-B3B3-5B67ECE22907}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBB98D7F-35FD-463E-B3B3-5B67ECE22907}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBB98D7F-35FD-463E-B3B3-5B67ECE22907}.Release|Any CPU.Build.0 = Release|Any CPU
+		{045283FC-CBB5-42A6-AD34-D8951D811DC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{045283FC-CBB5-42A6-AD34-D8951D811DC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{045283FC-CBB5-42A6-AD34-D8951D811DC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{045283FC-CBB5-42A6-AD34-D8951D811DC0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
