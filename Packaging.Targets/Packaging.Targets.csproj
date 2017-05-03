@@ -3,6 +3,15 @@
     <TargetFramework>netstandard1.4</TargetFramework>
     <VersionPrefix>0.1.1</VersionPrefix>
     <NugetPackageFolder Condition="$(NugetPackageFolder) == ''">$(USERPROFILE)\.nuget\packages</NugetPackageFolder>
+    <Authors>Frederik Carlier</Authors>
+    <Company>Quamotion</Company>
+    <Product>Packaging Tools for .NET CLI</Product>
+    <Description>This package supports the dotnet-pack and dotnet-zip packages. Once you've installed this package together with dotnet-zip or dotnet-tarball, you can run commands such as dotnet zip or dotnet tarball to generate .zip or .tar.gz archives which contain the published output of your project.</Description>
+    <Copyright>Copyright (c) Frederik Carlier and Contributors</Copyright>
+    <PackageLicenseUrl>https://github.com/qmfrederik/dotnet-packaging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/qmfrederik/dotnet-packaging/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/qmfrederik/dotnet-packaging/</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
