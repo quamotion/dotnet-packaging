@@ -1,15 +1,23 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="Packaging.Targets.TarballTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard1.4\Packaging.Targets.dll" />
-
-  <PropertyGroup>
-    <TarballPath>$(TargetDir)$(TargetName).zip</TarballPath>
-  </PropertyGroup>
+  <UsingTask TaskName="Packaging.Targets.ZipTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard1.4\Packaging.Targets.dll" />
 
   <Target Name="CreateTarball" DependsOnTargets="Publish">
+    <PropertyGroup>
+      <TarballPath>$(TargetDir)$(TargetName).$(AssemblyFileVersion)-$(RuntimeIdentifier).tar.gz</TarballPath>
+    </PropertyGroup>
+
     <TarballTask PublishDir="$(PublishDir)"
-             TarballPath="$(TarballPath)"
-             TargetRuntime="$(TargetRuntime)"
-             TargetFramework="$(TargetFramework)"/>
+             TarballPath="$(TarballPath)"/>
+  </Target>
+
+  <Target Name="CreateZip" DependsOnTargets="Publish">
+    <PropertyGroup>
+      <ZipPath>$(TargetDir)$(TargetName).$(AssemblyFileVersion)-$(RuntimeIdentifier).zip</ZipPath>
+    </PropertyGroup>
+
+    <ZipTask PublishDir="$(PublishDir)"
+             ZipPath="$(ZipPath)"/>
   </Target>
 
   <!-- Support for building Windows Installer (.msi) packages -->
