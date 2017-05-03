@@ -5,17 +5,17 @@
     <VersionPrefix>0.1.1</VersionPrefix>
     <Authors>Frederik Carlier</Authors>
     <Company>Quamotion</Company>
+    <Description>Create .zip files of your .NET Core projects straight from the command line.
+
+Once you've installed this package as a .NET CLI tool, run dotnet zip to generate a .zip file which contains the publish output of your .NET Project.
+
+See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet tarball.</Description>
     <Copyright>Copyright (c) Frederik Carlier and Contributors</Copyright>
     <PackageLicenseUrl>https://github.com/qmfrederik/dotnet-packaging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/qmfrederik/dotnet-packaging/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/qmfrederik/dotnet-packaging/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>dotnet cli packaging tarball tar.gz archive</PackageTags>
-    <Description>Create tarballs (.tar.gz files) of your .NET Core projects straight from the command line.
-
-Once you've installed this package as a .NET CLI tool, run dotnet tar to generate a .tar.gz file which contains the publish output of your .NET Project.
-
-See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet tarball.</Description>
+    <PackageTags>dotnet cli packaging zip archive</PackageTags>
     <Product>Packaging Tools for .NET CLI</Product>
   </PropertyGroup>
   <ItemGroup>

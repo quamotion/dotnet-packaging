@@ -1,0 +1,7 @@
+{
+  "version": "1.0", // required
+  "publicReleaseRefSpec": [
+    "^refs/heads/master$",
+    "^refs/tags/v\\d\\.\\d"
+  ]
+}

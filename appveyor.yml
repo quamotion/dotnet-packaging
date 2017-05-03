@@ -1,22 +1,16 @@
+image: Visual Studio 2017
+
 version: '0.1.{build}'
 
 before_build:
-  - choco install -y wget
-  - wget https://dotnetcli.blob.core.windows.net/dotnet/Sdk/rel-1.0.0/dotnet-dev-win-x64.latest.exe -O dotnet-dev-win-x64.latest.exe -nv
-  - dotnet-dev-win-x64.latest.exe /install /quiet /log dotnet_install.txt
-  - ps: Push-AppVeyorArtifact dotnet_install.txt
-  - dotnet --version
-  - dotnet restore dotnet-tarball\dotnet-tarball.csproj
-  - dotnet restore Packaging.Targets\Packaging.Targets.csproj
-
+  - dotnet restore dotnet-packaging.sln
+  
 build_script:
-  - dotnet build dotnet-tarball\dotnet-tarball.csproj -c Release
-  - dotnet pack dotnet-tarball\dotnet-tarball.csproj -c Release --version-suffix r%APPVEYOR_BUILD_NUMBER%
-  - dotnet build Packaging.Targets\Packaging.Targets.csproj -c Release
-  - dotnet pack Packaging.Targets\Packaging.Targets.csproj -c Release --version-suffix r%APPVEYOR_BUILD_NUMBER%
+  - dotnet pack dotnet-packaging.sln -c Release --version-suffix r%APPVEYOR_BUILD_NUMBER%
 
 on_success:
   - ps: Push-AppVeyorArtifact dotnet-tarball\bin\Release\dotnet-tarball.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
+  - ps: Push-AppVeyorArtifact dotnet-zip\bin\Release\dotnet-zip.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
   - ps: Push-AppVeyorArtifact Packaging.Targets\bin\Release\Packaging.Targets.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
 
 nuget:
