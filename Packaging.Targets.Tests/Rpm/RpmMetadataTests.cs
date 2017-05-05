@@ -1,4 +1,5 @@
-﻿using Packaging.Targets.Rpm;
+﻿using Packaging.Targets.IO;
+using Packaging.Targets.Rpm;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;

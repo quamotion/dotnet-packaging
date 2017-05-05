@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace Packaging.Targets.Rpm
+namespace Packaging.Targets.IO
 {
     /// <summary>
     /// Represents the Unix-style file permission flags. Taken from <c>&lt;sys/stat.h&gt;</c>.
     /// </summary>
     /// <seealso href="http://minnie.tuhs.org/cgi-bin/utree.pl?file=4.4BSD/usr/include/sys/stat.h"/>
     [Flags]
-    internal enum LinuxFileMode : ushort
+    public enum LinuxFileMode : ushort
     {
         /// <summary>
         /// Set user ID on execution

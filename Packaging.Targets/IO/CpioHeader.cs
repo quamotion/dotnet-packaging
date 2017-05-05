@@ -117,7 +117,7 @@ namespace Packaging.Targets.IO
                     Gid = 0,
                     Ino = 0,
                     Mode = 0,
-                    Mtime = 0,
+                    Mtime = DateTimeOffset.FromUnixTimeSeconds(0),
                     NameSize = 0,
                     Nlink = 1,
                     RDevMajor = 0,
@@ -149,10 +149,10 @@ namespace Packaging.Targets.IO
         /// <summary>
         /// Gets or sets the value of the <see cref="mode"/> field as a <see cref="uint"/>.
         /// </summary>
-        public uint Mode
+        public LinuxFileMode Mode
         {
-            get { return Convert.ToUInt32(new string(this.mode), 16); }
-            set { this.mode = value.ToString("x8").ToCharArray(); }
+            get { return (LinuxFileMode)Convert.ToUInt32(new string(this.mode), 16); }
+            set { this.mode = ((uint)value).ToString("x8").ToCharArray(); }
         }
 
         /// <summary>
@@ -185,10 +185,10 @@ namespace Packaging.Targets.IO
         /// <summary>
         /// Gets or sets the value of the <see cref="mtime"/> field as a <see cref="uint"/>.
         /// </summary>
-        public uint Mtime
+        public DateTimeOffset Mtime
         {
-            get { return Convert.ToUInt32(new string(this.mtime), 16); }
-            set { this.mtime = value.ToString("x8").ToCharArray(); }
+            get { return DateTimeOffset.FromUnixTimeSeconds((long)Convert.ToUInt32(new string(this.mtime), 16)); }
+            set { this.mtime = value.ToUnixTimeSeconds().ToString("x8").ToCharArray(); }
         }
 
         /// <summary>

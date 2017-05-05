@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Packaging.Targets.IO;
+using System;
 using System.Collections.ObjectModel;
 
 namespace Packaging.Targets.Rpm

@@ -53,8 +53,8 @@ namespace Packaging.Targets.Tests.IO
             Assert.Equal(0u, entryHeaders[0].FileSize);
             Assert.Equal(0u, entryHeaders[0].Gid);
             Assert.Equal(0x24fafu, entryHeaders[0].Ino);
-            Assert.Equal(0x41edu, entryHeaders[0].Mode);
-            Assert.Equal(0x471c8630u, entryHeaders[0].Mtime);
+            Assert.Equal((LinuxFileMode)0x41edu, entryHeaders[0].Mode);
+            Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(0x471c8630u), entryHeaders[0].Mtime);
             Assert.Equal(0x02u, entryHeaders[0].NameSize);
             Assert.Equal(0x8u, entryHeaders[0].Nlink);
             Assert.Equal(0u, entryHeaders[0].RDevMajor);
