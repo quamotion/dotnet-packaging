@@ -14,7 +14,31 @@ namespace Packaging.Targets.Tests.Rpm
     internal class PlistFileAnalyzer : FileAnalyzer
     {
         /// <inheritdoc/>
-        public override Collection<string> DetermineDependencies(string filename, CpioHeader fileHeader, byte[] header)
+        public override Collection<string> DetermineProvides(string filename, CpioHeader fileHeader, byte[] header)
+        {
+            switch (filename)
+            {
+                case "/usr/bin/plistutil":
+                    return new Collection<string>()
+                    {
+                    };
+                case "/usr/lib64/libplist++.so.3.1.0":
+                    return new Collection<string>()
+                    {
+                        "libplist++.so.3()(64bit)",
+                    };
+                case "/usr/lib64/libplist.so.3.1.0":
+                    return new Collection<string>()
+                    {
+                        "libplist.so.3()(64bit)",
+                    };
+            }
+
+            return base.DetermineProvides(filename, fileHeader, header);
+        }
+
+        /// <inheritdoc/>
+        public override Collection<string> DetermineRequires(string filename, CpioHeader fileHeader, byte[] header)
         {
             switch (filename)
             {
@@ -31,7 +55,6 @@ namespace Packaging.Targets.Tests.Rpm
                 case "/usr/lib64/libplist++.so.3.1.0":
                     return new Collection<string>()
                     {
-                        "libplist++.so.3()(64bit)",
                         "libgcc_s.so.1(GCC_3.0)(64bit)",
                         "libpthread.so.0(GLIBC_2.2.5)(64bit)",
                         "libc.so.6(GLIBC_2.14)(64bit)",
@@ -49,7 +72,6 @@ namespace Packaging.Targets.Tests.Rpm
                 case "/usr/lib64/libplist.so.3.1.0":
                     return new Collection<string>()
                     {
-                        "libplist.so.3()(64bit)",
                         "libpthread.so.0(GLIBC_2.2.5)(64bit)",
                         "libc.so.6(GLIBC_2.14)(64bit)",
                         "libc.so.6(GLIBC_2.2.5)(64bit)",
@@ -59,7 +81,7 @@ namespace Packaging.Targets.Tests.Rpm
                     };
             }
 
-            return base.DetermineDependencies(filename, fileHeader, header);
+            return base.DetermineRequires(filename, fileHeader, header);
         }
 
         /// <inheritdoc/>

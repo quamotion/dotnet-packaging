@@ -17,7 +17,7 @@ namespace Packaging.Targets.Tests.Rpm
         /// Tests the various properties of the <see cref="RpmMetadata"/> class.
         /// </summary>
         [Fact]
-        public void MetadataPropertiesTest()
+        public void ReadMetadataPropertiesTest()
         {
             using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
             {
@@ -68,8 +68,8 @@ namespace Packaging.Targets.Tests.Rpm
                 Assert.Equal(9, files.Length);
                 Assert.Equal("ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, BuildID[sha1]=44864a4aec49ec94f3dc1486068ff0d308e3ae37, stripped", files[0].Class);
                 Assert.Equal(RpmFileColor.RPMFC_ELF64, files[0].Color);
-                Assert.Equal(6, files[0].Dependencies.Count);
-                Assert.Equal("libpthread.so.0(GLIBC_2.2.5)(64bit)", files[0].Dependencies[0]);
+                Assert.Equal(6, files[0].Requires.Count);
+                Assert.Equal("libpthread.so.0(GLIBC_2.2.5)(64bit)", files[0].Requires[0]);
                 Assert.Equal(1, files[0].Device);
                 Assert.Equal(RpmFileFlags.None, files[0].Flags);
                 Assert.Equal("root", files[0].GroupName);
@@ -97,6 +97,105 @@ namespace Packaging.Targets.Tests.Rpm
                 Assert.Equal("2.0.1.151-1.1", provides[0].Version);
                 Assert.Equal("libplist", provides[0].Name);
             }
+        }
+
+        /// <summary>
+        /// Tests the <see cref="RpmMetadata.Files"/> setter.
+        /// </summary>
+        [Fact]
+        public void SetFilesTest()
+        {
+            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            {
+                var originalPackage = RpmPackageReader.Read(stream);
+                var package = new RpmPackage();
+
+                using (var payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
+                using (var cpio = new CpioFile(payloadStream, false))
+                {
+                    RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
+                    var files = creator.CreateFiles(cpio);
+
+                    var metadata = new PublicRpmMetadata(package);
+
+                    // It looks like this list is actually sorted.
+                    metadata.SetStringArrayPublic(
+                        IndexTag.RPMTAG_REQUIRENAME,
+                        new string[]
+                        {
+                            "/sbin/ldconfig",
+                            "/sbin/ldconfig",
+                            "libc.so.6()(64bit)",
+                            "libc.so.6(GLIBC_2.14)(64bit)",
+                            "libc.so.6(GLIBC_2.2.5)(64bit)",
+                            "libgcc_s.so.1()(64bit)",
+                            "libgcc_s.so.1(GCC_3.0)(64bit)",
+                            "libm.so.6()(64bit)",
+                            "libplist.so.3()(64bit)",
+                            "libpthread.so.0()(64bit)",
+                            "libpthread.so.0(GLIBC_2.2.5)(64bit)",
+                            "libstdc++.so.6()(64bit)",
+                            "libstdc++.so.6(CXXABI_1.3)(64bit)",
+                            "libstdc++.so.6(GLIBCXX_3.4)(64bit)",
+                            "rpmlib(CompressedFileNames)",
+                            "rpmlib(FileDigests)",
+                            "rpmlib(PayloadFilesHavePrefix)",
+                            "rtld(GNU_HASH)",
+                            "rpmlib(PayloadIsXz)",
+                        });
+
+                    metadata.SetStringArrayPublic(
+                        IndexTag.RPMTAG_PROVIDENAME,
+                        new string[]
+                        {
+                            "libplist",
+                            "libplist(x86-64)",
+                            "libplist++.so.3()(64bit)",
+                            "libplist.so.3()(64bit)"
+                        });
+
+                    metadata.Files = files;
+
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILESIZES, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEMODES, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILERDEVS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEMTIMES, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEDIGESTS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILELINKTOS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEFLAGS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEUSERNAME, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEGROUPNAME, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEVERIFYFLAGS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEDEVICES, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEINODES, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILELANGS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILECOLORS, originalPackage, package);
+
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILECLASS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_CLASSDICT, originalPackage, package);
+
+                    this.AssertTagEqual(IndexTag.RPMTAG_BASENAMES, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_DIRINDEXES, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_DIRNAMES, originalPackage, package);
+
+                    this.AssertTagEqual(IndexTag.RPMTAG_REQUIRENAME, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_PROVIDENAME, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEDEPENDSN, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_FILEDEPENDSX, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_DEPENDSDICT, originalPackage, package);
+                }
+            }
+        }
+
+        private void AssertTagEqual(IndexTag tag, RpmPackage originalPackage, RpmPackage package)
+        {
+            var originalRecord = originalPackage.Header.Records[tag];
+            var record = package.Header.Records[tag];
+
+            Assert.Equal(originalRecord.Value, record.Value);
+            Assert.Equal(originalRecord.Header.Count, record.Header.Count);
+            Assert.Equal(originalRecord.Header.Tag, record.Header.Tag);
+            Assert.Equal(originalRecord.Header.Type, record.Header.Type);
         }
     }
 }

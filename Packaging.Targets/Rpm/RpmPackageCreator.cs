@@ -132,7 +132,8 @@ namespace Packaging.Targets.Rpm
                     Lang = "",
                     Color = this.analyzer.DetermineColor(fileName, payload.EntryHeader, header),
                     Class = this.analyzer.DetermineClass(fileName, payload.EntryHeader, header),
-                    Dependencies = this.analyzer.DetermineDependencies(fileName, payload.EntryHeader, header),
+                    Requires = this.analyzer.DetermineRequires(fileName, payload.EntryHeader, header),
+                    Provides = this.analyzer.DetermineProvides(fileName, payload.EntryHeader, header),
                     Name = fileName
                 };
 

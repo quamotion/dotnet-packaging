@@ -4,6 +4,12 @@ namespace Packaging.Targets.Rpm
 {
     internal class RpmPackage
     {
+        public RpmPackage()
+        {
+            this.Header = new Section<IndexTag>();
+            this.Signature = new Section<SignatureTag>();
+        }
+
         public RpmLead Lead
         {
             get;

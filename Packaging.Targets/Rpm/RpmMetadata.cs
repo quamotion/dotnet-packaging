@@ -278,7 +278,7 @@ namespace Packaging.Targets.Rpm
         {
             get { return this.GetByteArray(IndexTag.RPMTAG_SOURCEPKGID); }
         }
-        
+
         /// <summary>
         /// Gets the hashing algorithm used to calculate the hash of files embedded
         /// in this RPM archive.
@@ -347,7 +347,8 @@ namespace Packaging.Targets.Rpm
 
                 for (int i = 0; i < sizes.Count; i++)
                 {
-                    Collection<string> dependencies = new Collection<string>();
+                    Collection<string> requires = new Collection<string>();
+                    Collection<string> provides = new Collection<string>();
 
                     for (int j = dependsX[i]; j < dependsX[i] + dependsN[i]; j++)
                     {
@@ -360,12 +361,20 @@ namespace Packaging.Targets.Rpm
                         var values = this.GetStringArray(dependencyType);
                         var dependency = values[index];
 
-                        dependencies.Add(dependency);
-                    }
+                        switch(dependencyType)
+                        {
+                            case IndexTag.RPMTAG_REQUIRENAME:
+                                requires.Add(dependency);
+                                break;
 
-                    // File mode is stored as an ASCII representation!
-                    // "This is an ascii representation of the hexadecimal number representing the bit as defined for the st_mode field of the stat structure defined for the stat function."
-                    var fileModeString = Encoding.ASCII.GetString(BitConverter.GetBytes(modes[i]));
+                            case IndexTag.RPMTAG_PROVIDENAME:
+                                provides.Add(dependency);
+                                break;
+
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(dependencyType));
+                        }
+                    }
 
                     var directoryName = dirNames[dirIndexes[i]];
                     var name = $"{directoryName}{baseNames[i]}";
@@ -387,12 +396,175 @@ namespace Packaging.Targets.Rpm
                         Lang = langs[i],
                         Color = (RpmFileColor)colors[i],
                         Class = classDict[classes[i]],
-                        Dependencies = dependencies,
+                        Requires = requires,
+                        Provides = provides,
                         Name = name
                     };
                 }
             }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                var files = value.ToArray();
+
+                var sizes = new int[files.Length];
+                var modes = new short[files.Length];
+                var rdevs = new short[files.Length];
+                var mtimes = new int[files.Length];
+                var md5s = new string[files.Length];
+                var linkTos = new string[files.Length];
+                var flags = new int[files.Length];
+                var usernames = new string[files.Length];
+                var groupnames = new string[files.Length];
+                var verifyFlags = new int[files.Length];
+                var devices = new int[files.Length];
+                var inodes = new int[files.Length];
+                var langs = new string[files.Length];
+                var colors = new int[files.Length];
+                var classes = new int[files.Length];
+
+                var baseNames = new string[files.Length];
+                var dirIndexes = new int[files.Length];
+                var dirNames = new Collection<string>();
+
+                var dependsX = new int[files.Length];
+                var dependsN = new int[files.Length];
+                var classDict = new Collection<string>();
+                var dependsDict = new Collection<int>();
+                var requireNames = new Collection<string>();
+                foreach (var requireName in this.GetStringArray(IndexTag.RPMTAG_REQUIRENAME))
+                {
+                    requireNames.Add(requireName);
+                }
+
+                var provideNames = new Collection<string>();
+                foreach (var provideName in this.GetStringArray(IndexTag.RPMTAG_PROVIDENAME))
+                {
+                    provideNames.Add(provideName);
+                }
+
+                for (int i = 0; i < files.Length; i++)
+                {
+                    var file = files[i];
+                    sizes[i] = file.Size;
+                    modes[i] = (short)file.Mode;
+                    rdevs[i] = file.Rdev;
+                    mtimes[i] = (int)file.ModifiedTime.ToUnixTimeSeconds();
+                    md5s[i] = BitConverter.ToString(file.MD5Hash).Replace("-", string.Empty).ToLowerInvariant();
+                    linkTos[i] = file.LinkTo;
+                    usernames[i] = file.UserName;
+                    groupnames[i] = file.GroupName;
+                    verifyFlags[i] = (int)file.VerifyFlags;
+                    devices[i] = file.Device;
+                    inodes[i] = file.Inode;
+                    langs[i] = file.Lang;
+                    colors[i] = (int)file.Color;
+                    flags[i] = (int)file.Flags;
+
+                    if (!classDict.Contains(file.Class))
+                    {
+                        classDict.Add(file.Class);
+                    }
+                    classes[i] = classDict.IndexOf(file.Class);
+
+                    var dirName = Path.GetDirectoryName(file.Name).Replace('\\', '/') + '/';
+                    var fileName = Path.GetFileName(file.Name);
+
+                    if (!dirNames.Contains(dirName))
+                    {
+                        dirNames.Add(dirName);
+                    }
+
+                    dirIndexes[i] = dirNames.IndexOf(dirName);
+                    baseNames[i] = fileName;
+
+
+                    /*
+                    Collection<string> dependencies = new Collection<string>();
+
+                    for (int j = dependsX[i]; j < dependsX[i] + dependsN[i]; j++)
+                    {
+                        // https://github.com/rpm-software-management/rpm/blob/8f509d669b9ae79c86dd510c5a4bc5109f60d733/build/rpmfc.c#L734
+                        var value = dependsDict[j];
+
+                        var dependencyType = GetDependencyTag((char)((value >> 24) & 0xFF));
+                        var index = value & 0x00ffffff;
+
+                        var values = this.GetStringArray(dependencyType);
+                        var dependency = values[index];
+
+                        dependencies.Add(dependency);
+                    }*/
+
+                    int dependX = dependsDict.Count;
+                    dependsN[i] = file.Requires.Count + file.Provides.Count;
+                    dependsX[i] = dependsN[i] == 0 ? 0 : dependX;
+
+                    foreach (var provide in file.Provides)
+                    {
+                        byte type = (byte)GetDependencyType(IndexTag.RPMTAG_PROVIDENAME);
+
+                        if (!provideNames.Contains(provide))
+                        {
+                            provideNames.Add(provide);
+                        }
+
+                        var index = provideNames.IndexOf(provide);
+                        index |= (type << 24);
+
+                        dependsDict.Add(index);
+                    }
+
+                    foreach (var dependency in file.Requires)
+                    {
+                        byte type = (byte)GetDependencyType(IndexTag.RPMTAG_REQUIRENAME);
+
+                        if (!requireNames.Contains(dependency))
+                        {
+                            requireNames.Add(dependency);
+                        }
+
+                        var index = requireNames.IndexOf(dependency);
+                        index |= (type << 24);
+
+                        dependsDict.Add(index);
+                    }
+                }
+
+                this.SetIntArray(IndexTag.RPMTAG_FILESIZES, sizes);
+                this.SetShortArray(IndexTag.RPMTAG_FILEMODES, modes);
+                this.SetShortArray(IndexTag.RPMTAG_FILERDEVS, rdevs);
+                this.SetIntArray(IndexTag.RPMTAG_FILEMTIMES, mtimes);
+                this.SetStringArray(IndexTag.RPMTAG_FILEDIGESTS, md5s);
+                this.SetStringArray(IndexTag.RPMTAG_FILELINKTOS, linkTos);
+                this.SetIntArray(IndexTag.RPMTAG_FILEFLAGS, flags);
+                this.SetStringArray(IndexTag.RPMTAG_FILEUSERNAME, usernames);
+                this.SetStringArray(IndexTag.RPMTAG_FILEGROUPNAME, groupnames);
+                this.SetIntArray(IndexTag.RPMTAG_FILEVERIFYFLAGS, verifyFlags);
+                this.SetIntArray(IndexTag.RPMTAG_FILEDEVICES, devices);
+                this.SetIntArray(IndexTag.RPMTAG_FILEINODES, inodes);
+                this.SetStringArray(IndexTag.RPMTAG_FILELANGS, langs);
+                this.SetIntArray(IndexTag.RPMTAG_FILECOLORS, colors);
+                this.SetIntArray(IndexTag.RPMTAG_FILECLASS, classes);
+                this.SetIntArray(IndexTag.RPMTAG_FILEDEPENDSX, dependsX);
+                this.SetIntArray(IndexTag.RPMTAG_FILEDEPENDSN, dependsN);
+
+                this.SetStringArray(IndexTag.RPMTAG_BASENAMES, baseNames);
+                this.SetIntArray(IndexTag.RPMTAG_DIRINDEXES, dirIndexes);
+                this.SetStringArray(IndexTag.RPMTAG_DIRNAMES, dirNames.ToArray());
+
+                this.SetStringArray(IndexTag.RPMTAG_CLASSDICT, classDict.ToArray());
+                this.SetIntArray(IndexTag.RPMTAG_DEPENDSDICT, dependsDict.ToArray());
+                this.SetStringArray(IndexTag.RPMTAG_REQUIRENAME, requireNames.ToArray());
+                this.SetStringArray(IndexTag.RPMTAG_PROVIDENAME, provideNames.ToArray());
+            }
         }
+
 
         public IEnumerable<PackageDependency> Dependencies
         {
@@ -434,11 +606,30 @@ namespace Packaging.Targets.Rpm
             }
         }
 
-        // Changelog
-        // Require_*: Dependencies
-        // Provide_*: Dependencies
-        // Dirs
-        // Files
+        protected char GetDependencyType(IndexTag tag)
+        {
+            switch (tag)
+            {
+                case IndexTag.RPMTAG_PROVIDENAME:
+                    return 'P';
+                case IndexTag.RPMTAG_REQUIRENAME:
+                    return 'R';
+                case IndexTag.RPMTAG_RECOMMENDNAME:
+                    return 'r';
+                case IndexTag.RPMTAG_SUGGESTNAME:
+                    return 'S';
+                case IndexTag.RPMTAG_SUPPLEMENTNAME:
+                    return 'S';
+                case IndexTag.RPMTAG_ENHANCENAME:
+                    return 'e';
+                case IndexTag.RPMTAG_CONFLICTNAME:
+                    return 'C';
+                case IndexTag.RPMTAG_OBSOLETENAME:
+                    return 'O';
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(tag));
+            }
+        }
 
         protected IndexTag GetDependencyTag(char deptype)
         {
@@ -467,7 +658,21 @@ namespace Packaging.Targets.Rpm
 
         protected Collection<string> GetStringArray(IndexTag tag)
         {
-            return this.GetValue<Collection<string>>(tag, IndexType.RPM_STRING_ARRAY_TYPE, null);
+            var value = this.GetValue<Collection<string>>(tag, IndexType.RPM_STRING_ARRAY_TYPE, null);
+
+            if (value == null)
+            {
+                return new Collection<string>();
+            }
+            else
+            {
+                return value;
+            }
+        }
+
+        protected void SetStringArray(IndexTag tag, string[] value)
+        {
+            this.SetValue(tag, IndexType.RPM_STRING_ARRAY_TYPE, value);
         }
 
         protected string GetLocalizedString(IndexTag tag)
@@ -491,10 +696,19 @@ namespace Packaging.Targets.Rpm
         {
             return this.GetValue<Collection<int>>(tag, IndexType.RPM_INT32_TYPE, true);
         }
+        protected void SetIntArray(IndexTag tag, int[] value)
+        {
+            this.SetValue(tag, IndexType.RPM_INT32_TYPE, value);
+        }
 
         protected Collection<short> GetShortArray(IndexTag tag)
         {
             return this.GetValue<Collection<short>>(tag, IndexType.RPM_INT16_TYPE, true);
+        }
+
+        protected void SetShortArray(IndexTag tag, short[] value)
+        {
+            this.SetValue(tag, IndexType.RPM_INT16_TYPE, value);
         }
 
         protected byte[] GetByteArray(IndexTag tag)
@@ -506,7 +720,18 @@ namespace Packaging.Targets.Rpm
         {
             if (!this.Package.Header.Records.ContainsKey(tag))
             {
-                throw new ArgumentOutOfRangeException(nameof(tag));
+                this.Package.Header.Records.Add(tag,
+                    new IndexRecord()
+                    {
+                        Header = new IndexHeader()
+                        {
+                            Count = 0,
+                            Offset = -1,
+                            Tag = (uint)tag,
+                            Type = type
+                        },
+                        Value = default(T)
+                    });
             }
 
             var record = this.Package.Header.Records[tag];
@@ -522,6 +747,37 @@ namespace Packaging.Targets.Rpm
             }
 
             return (T)record.Value;
+        }
+
+        protected void SetValue<T>(IndexTag tag, IndexType type, T[] value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            var collection = new Collection<T>(value);
+
+            IndexRecord record = new IndexRecord()
+            {
+                Header = new IndexHeader()
+                {
+                    Count = collection.Count,
+                    Offset = 0,
+                    Tag = (uint)tag,
+                    Type = type
+                },
+                Value = collection
+            };
+
+            if (!this.Package.Header.Records.ContainsKey(tag))
+            {
+                this.Package.Header.Records.Add(tag, record);
+            }
+            else
+            {
+                this.Package.Header.Records[tag] = record;
+            }
         }
     }
 }

@@ -41,7 +41,8 @@ namespace Packaging.Targets.Tests.Rpm
 
                         Assert.Equal(originalFile.Class, file.Class);
                         Assert.Equal(originalFile.Color, file.Color);
-                        Assert.Equal(originalFile.Dependencies, file.Dependencies);
+                        Assert.Equal(originalFile.Requires, file.Requires);
+                        Assert.Equal(originalFile.Provides, file.Provides);
                         Assert.Equal(originalFile.Device, file.Device);
                         Assert.Equal(originalFile.Flags, file.Flags);
                         Assert.Equal(originalFile.GroupName, file.GroupName);

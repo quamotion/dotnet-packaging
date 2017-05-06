@@ -40,7 +40,24 @@ namespace Packaging.Targets.Rpm
         /// <returns>
         /// The dependencies for the file.
         /// </returns>
-        Collection<string> DetermineDependencies(string fileName, CpioHeader fileHeader, byte[] header);
+        Collection<string> DetermineRequires(string fileName, CpioHeader fileHeader, byte[] header);
+
+        /// <summary>
+        /// Gets the dependencies fulfilled by this file.
+        /// </summary>
+        /// <param name="fileName">
+        /// The name of the file to analyze.
+        /// </param>
+        /// <param name="fileHeader">
+        /// The <see cref="CpioHeader"/> of the file to analyze.
+        /// </param>
+        /// <param name="header">
+        /// The first bytes of the file to analyze.
+        /// </param>
+        /// <returns>
+        /// The dependencies fulfilled by the file.
+        /// </returns>
+        Collection<string> DetermineProvides(string fileName, CpioHeader fileHeader, byte[] header);
 
         /// <summary>
         /// Gets the <see cref="RpmFileColor"/> for this file.
