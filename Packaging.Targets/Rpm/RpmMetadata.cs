@@ -278,10 +278,14 @@ namespace Packaging.Targets.Rpm
         {
             get { return this.GetByteArray(IndexTag.RPMTAG_SOURCEPKGID); }
         }
-
-        public int FileDigetsAlgo
+        
+        /// <summary>
+        /// Gets the hashing algorithm used to calculate the hash of files embedded
+        /// in this RPM archive.
+        /// </summary>
+        public PgpHashAlgo FileDigetsAlgo
         {
-            get { return this.GetInt(IndexTag.RPMTAG_FILEDIGESTALGO); }
+            get { return (PgpHashAlgo)this.GetInt(IndexTag.RPMTAG_FILEDIGESTALGO); }
         }
 
         /// <summary>
@@ -320,7 +324,7 @@ namespace Packaging.Targets.Rpm
                 var modes = this.GetShortArray(IndexTag.RPMTAG_FILEMODES);
                 var rdevs = this.GetShortArray(IndexTag.RPMTAG_FILERDEVS);
                 var mtimes = this.GetIntArray(IndexTag.RPMTAG_FILEMTIMES);
-                var md5s = this.GetStringArray(IndexTag.RPMTAG_FILEMD5S);
+                var md5s = this.GetStringArray(IndexTag.RPMTAG_FILEDIGESTS);
                 var linkTos = this.GetStringArray(IndexTag.RPMTAG_FILELINKTOS);
                 var flags = this.GetIntArray(IndexTag.RPMTAG_FILEFLAGS);
                 var usernames = this.GetStringArray(IndexTag.RPMTAG_FILEUSERNAME);
@@ -343,7 +347,7 @@ namespace Packaging.Targets.Rpm
 
                 for (int i = 0; i < sizes.Count; i++)
                 {
-                    Collection<Dependency> dependencies = new Collection<Dependency>();
+                    Collection<string> dependencies = new Collection<string>();
 
                     for (int j = dependsX[i]; j < dependsX[i] + dependsN[i]; j++)
                     {
@@ -353,12 +357,10 @@ namespace Packaging.Targets.Rpm
                         var dependencyType = GetDependencyTag((char)((value >> 24) & 0xFF));
                         var index = value & 0x00ffffff;
 
-                        dependencies.Add(
-                            new Dependency()
-                            {
-                                Type = dependencyType,
-                                Index = index
-                            });
+                        var values = this.GetStringArray(dependencyType);
+                        var dependency = values[index];
+
+                        dependencies.Add(dependency);
                     }
 
                     // File mode is stored as an ASCII representation!

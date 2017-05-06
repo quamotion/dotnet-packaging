@@ -19,7 +19,6 @@ namespace Packaging.Targets.Tests.Rpm
         [Fact]
         public void MetadataPropertiesTest()
         {
-
             using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
             {
                 var package = RpmPackageReader.Read(stream);
@@ -35,7 +34,7 @@ namespace Packaging.Targets.Tests.Rpm
                 Assert.Equal("libplist is a library for manipulating Apple Binary and XML Property Lists", metadata.Description);
                 Assert.Equal("home:qmfrederik / CentOS_7", metadata.Distribution);
                 Assert.Equal("obs://build.opensuse.org/home:qmfrederik/CentOS_7/adfeea138cd469466e6fa13a3c88fb8f-libplist", metadata.DistUrl);
-                Assert.Equal(8, metadata.FileDigetsAlgo);
+                Assert.Equal(PgpHashAlgo.PGPHASHALGO_SHA256, metadata.FileDigetsAlgo);
                 Assert.Equal("System Environment/Libraries", metadata.Group);
                 Assert.Equal(-976, metadata.ImmutableRegionSize);
                 Assert.Equal("LGPLv2+", metadata.License);
@@ -70,8 +69,7 @@ namespace Packaging.Targets.Tests.Rpm
                 Assert.Equal("ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, BuildID[sha1]=44864a4aec49ec94f3dc1486068ff0d308e3ae37, stripped", files[0].Class);
                 Assert.Equal(RpmFileColor.RPMFC_ELF64, files[0].Color);
                 Assert.Equal(6, files[0].Dependencies.Count);
-                Assert.Equal(IndexTag.RPMTAG_REQUIRENAME, files[0].Dependencies[0].Type);
-                Assert.Equal(0x0a, files[0].Dependencies[0].Index);
+                Assert.Equal("libpthread.so.0(GLIBC_2.2.5)(64bit)", files[0].Dependencies[0]);
                 Assert.Equal(1, files[0].Device);
                 Assert.Equal(RpmFileFlags.None, files[0].Flags);
                 Assert.Equal("root", files[0].GroupName);

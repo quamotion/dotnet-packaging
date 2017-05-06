@@ -136,7 +136,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets or sets the class of the file.
+        /// Gets or sets the class of the file. This is usually the output of the <c>file</c> command for this file.
         /// </summary>
         public string Class
         {
@@ -145,9 +145,10 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets or sets a list of all dependencies of this file.
+        /// Gets or sets a list of all dependencies of this file. If the file is an ELF file, the dependencies
+        /// are the ELF dependencies.
         /// </summary>
-        public Collection<Dependency> Dependencies
+        public Collection<string> Dependencies
         {
             get;
             set;

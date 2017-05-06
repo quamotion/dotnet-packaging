@@ -159,7 +159,8 @@
         /// <summary>
         /// This tag specifies the ASCII representation of the MD5 sum of the corresponding file contents. This value is empty if the corresponding archive entry is not a regular file.
         /// </summary>
-        RPMTAG_FILEMD5S = 1035,
+        /// <seealso cref="https://fedoraproject.org/wiki/RPM_file_format_changes_to_support_SHA-256"/>
+        RPMTAG_FILEDIGESTS = 1035,
 
         /// <summary>
         /// The target for a symlink, otherwise NULL.
