@@ -10,6 +10,32 @@ namespace Packaging.Targets.Rpm
     internal class PackageDependency
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="PackageDependency"/> class.
+        /// </summary>
+        public PackageDependency()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PackageDependency"/> class.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the dependency.
+        /// </param>
+        /// <param name="flags">
+        /// The dependency flags.
+        /// </param>
+        /// <param name="version">
+        /// The dependency version.
+        /// </param>
+        public PackageDependency(string name, RpmSense flags, string version)
+        {
+            this.Name = name;
+            this.Flags = flags;
+            this.Version = version;
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating the dependency constraints.
         /// </summary>
         public RpmSense Flags
@@ -34,6 +60,27 @@ namespace Packaging.Targets.Rpm
         {
             get;
             set;
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            var other = obj as PackageDependency;
+
+            if (other == null)
+            {
+                return false;
+            }
+
+            return string.Equals(this.Name, other.Name, StringComparison.Ordinal)
+                && this.Flags == other.Flags
+                && string.Equals(this.Version, other.Version, StringComparison.Ordinal);
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{this.Name} {this.Flags} {this.Version}";
         }
     }
 }

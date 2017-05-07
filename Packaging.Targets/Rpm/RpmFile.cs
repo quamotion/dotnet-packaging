@@ -148,7 +148,7 @@ namespace Packaging.Targets.Rpm
         /// Gets or sets a list of all dependencies of this file. If the file is an ELF file, the dependencies
         /// are the ELF dependencies.
         /// </summary>
-        public Collection<string> Requires
+        public Collection<PackageDependency> Requires
         {
             get;
             set;
@@ -158,7 +158,7 @@ namespace Packaging.Targets.Rpm
         /// Gets or sets a list of all dependencies fulfilled by this file. If the file is an ELF file,
         /// these are the ELF provides.
         /// </summary>
-        public Collection<string> Provides
+        public Collection<PackageDependency> Provides
         {
             get;
             set;

@@ -40,7 +40,7 @@ namespace Packaging.Targets.Rpm
         /// <returns>
         /// The dependencies for the file.
         /// </returns>
-        Collection<string> DetermineRequires(string fileName, CpioHeader fileHeader, byte[] header);
+        Collection<PackageDependency> DetermineRequires(string fileName, CpioHeader fileHeader, byte[] header);
 
         /// <summary>
         /// Gets the dependencies fulfilled by this file.
@@ -57,7 +57,7 @@ namespace Packaging.Targets.Rpm
         /// <returns>
         /// The dependencies fulfilled by the file.
         /// </returns>
-        Collection<string> DetermineProvides(string fileName, CpioHeader fileHeader, byte[] header);
+        Collection<PackageDependency> DetermineProvides(string fileName, CpioHeader fileHeader, byte[] header);
 
         /// <summary>
         /// Gets the <see cref="RpmFileColor"/> for this file.

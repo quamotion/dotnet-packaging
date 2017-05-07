@@ -69,7 +69,9 @@ namespace Packaging.Targets.Tests.Rpm
                 Assert.Equal("ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, BuildID[sha1]=44864a4aec49ec94f3dc1486068ff0d308e3ae37, stripped", files[0].Class);
                 Assert.Equal(RpmFileColor.RPMFC_ELF64, files[0].Color);
                 Assert.Equal(6, files[0].Requires.Count);
-                Assert.Equal("libpthread.so.0(GLIBC_2.2.5)(64bit)", files[0].Requires[0]);
+                Assert.Equal("libpthread.so.0(GLIBC_2.2.5)(64bit)", files[0].Requires[0].Name);
+                Assert.Equal(RpmSense.RPMSENSE_FIND_REQUIRES, files[0].Requires[0].Flags);
+                Assert.Equal("", files[0].Requires[0].Version);
                 Assert.Equal(1, files[0].Device);
                 Assert.Equal(RpmFileFlags.None, files[0].Flags);
                 Assert.Equal("root", files[0].GroupName);
@@ -144,6 +146,56 @@ namespace Packaging.Targets.Tests.Rpm
                             "rpmlib(PayloadIsXz)",
                         });
 
+                    metadata.SetIntArrayPublic(
+                        IndexTag.RPMTAG_REQUIREFLAGS,
+                        new int[]
+                        {
+                            (int)(RpmSense.RPMSENSE_INTERP | RpmSense.RPMSENSE_SCRIPT_POST),
+                            (int)(RpmSense.RPMSENSE_INTERP | RpmSense.RPMSENSE_SCRIPT_POSTUN),
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)(RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB),
+                            (int)(RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB),
+                            (int)(RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB),
+                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
+                            (int)(RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB),
+                        });
+
+                    metadata.SetStringArrayPublic(
+                        IndexTag.RPMTAG_REQUIREVERSION,
+                        new string[]
+                        {
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "3.0.4-1",
+                            "4.6.0-1",
+                            "4.0-1",
+                            "",
+                            "5.2-1",
+                        });
+
                     metadata.SetStringArrayPublic(
                         IndexTag.RPMTAG_PROVIDENAME,
                         new string[]
@@ -152,6 +204,26 @@ namespace Packaging.Targets.Tests.Rpm
                             "libplist(x86-64)",
                             "libplist++.so.3()(64bit)",
                             "libplist.so.3()(64bit)"
+                        });
+
+                    metadata.SetIntArrayPublic(
+                        IndexTag.RPMTAG_PROVIDEFLAGS,
+                        new int[]
+                        {
+                            (int)RpmSense.RPMSENSE_FIND_PROVIDES,
+                            (int)RpmSense.RPMSENSE_FIND_PROVIDES,
+                            (int)RpmSense.RPMSENSE_FIND_PROVIDES,
+                            (int)RpmSense.RPMSENSE_FIND_PROVIDES
+                        });
+
+                    metadata.SetStringArrayPublic(
+                        IndexTag.RPMTAG_PROVIDEVERSION,
+                        new string[]
+                        {
+                            "",
+                            "",
+                            "",
+                            ""
                         });
 
                     metadata.Files = files;
@@ -179,7 +251,11 @@ namespace Packaging.Targets.Tests.Rpm
                     this.AssertTagEqual(IndexTag.RPMTAG_DIRNAMES, originalPackage, package);
 
                     this.AssertTagEqual(IndexTag.RPMTAG_REQUIRENAME, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_REQUIREFLAGS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_REQUIREVERSION, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_PROVIDENAME, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_REQUIREFLAGS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_REQUIREVERSION, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_FILEDEPENDSN, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_FILEDEPENDSX, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_DEPENDSDICT, originalPackage, package);

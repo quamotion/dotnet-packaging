@@ -15,5 +15,10 @@ namespace Packaging.Targets.Tests.Rpm
         {
             base.SetStringArray(tag, value);
         }
+
+        public void SetIntArrayPublic(IndexTag tag, int[] value)
+        {
+            base.SetIntArray(tag, value);
+        }
     }
 }

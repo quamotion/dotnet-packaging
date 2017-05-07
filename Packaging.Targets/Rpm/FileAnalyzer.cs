@@ -11,19 +11,19 @@ namespace Packaging.Targets.Rpm
     internal class FileAnalyzer : IFileAnalyzer
     {
         /// <inheritdoc/>
-        public virtual Collection<string> DetermineRequires(string filename, CpioHeader fileHeader, byte[] header)
+        public virtual Collection<PackageDependency> DetermineRequires(string filename, CpioHeader fileHeader, byte[] header)
         {
             // For now, report no dependencies at all. Could be enhanced if ELF parsing is available.
-            var dependencies = new Collection<string>();
+            var dependencies = new Collection<PackageDependency>();
 
             return dependencies;
         }
 
         /// <inheritdoc/>
-        public virtual Collection<string> DetermineProvides(string filename, CpioHeader fileHeader, byte[] header)
+        public virtual Collection<PackageDependency> DetermineProvides(string filename, CpioHeader fileHeader, byte[] header)
         {
             // For now, report no provides at all. Could be enhanced if ELF parsing is available.
-            var dependencies = new Collection<string>();
+            var dependencies = new Collection<PackageDependency>();
 
             return dependencies;
         }
