@@ -119,114 +119,15 @@ namespace Packaging.Targets.Tests.Rpm
                     var files = creator.CreateFiles(cpio);
 
                     var metadata = new PublicRpmMetadata(package);
+                    metadata.Name = "libplist";
+                    metadata.Version = "2.0.1.151";
+                    metadata.Arch = "x86_64";
 
-                    // It looks like this list is actually sorted.
-                    metadata.SetStringArrayPublic(
-                        IndexTag.RPMTAG_REQUIRENAME,
-                        new string[]
-                        {
-                            "/sbin/ldconfig",
-                            "/sbin/ldconfig",
-                            "libc.so.6()(64bit)",
-                            "libc.so.6(GLIBC_2.14)(64bit)",
-                            "libc.so.6(GLIBC_2.2.5)(64bit)",
-                            "libgcc_s.so.1()(64bit)",
-                            "libgcc_s.so.1(GCC_3.0)(64bit)",
-                            "libm.so.6()(64bit)",
-                            "libplist.so.3()(64bit)",
-                            "libpthread.so.0()(64bit)",
-                            "libpthread.so.0(GLIBC_2.2.5)(64bit)",
-                            "libstdc++.so.6()(64bit)",
-                            "libstdc++.so.6(CXXABI_1.3)(64bit)",
-                            "libstdc++.so.6(GLIBCXX_3.4)(64bit)",
-                            "rpmlib(CompressedFileNames)",
-                            "rpmlib(FileDigests)",
-                            "rpmlib(PayloadFilesHavePrefix)",
-                            "rtld(GNU_HASH)",
-                            "rpmlib(PayloadIsXz)",
-                        });
-
-                    metadata.SetIntArrayPublic(
-                        IndexTag.RPMTAG_REQUIREFLAGS,
-                        new int[]
-                        {
-                            (int)(RpmSense.RPMSENSE_INTERP | RpmSense.RPMSENSE_SCRIPT_POST),
-                            (int)(RpmSense.RPMSENSE_INTERP | RpmSense.RPMSENSE_SCRIPT_POSTUN),
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)(RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB),
-                            (int)(RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB),
-                            (int)(RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB),
-                            (int)RpmSense.RPMSENSE_FIND_REQUIRES,
-                            (int)(RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB),
-                        });
-
-                    metadata.SetStringArrayPublic(
-                        IndexTag.RPMTAG_REQUIREVERSION,
-                        new string[]
-                        {
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "3.0.4-1",
-                            "4.6.0-1",
-                            "4.0-1",
-                            "",
-                            "5.2-1",
-                        });
-
-                    metadata.SetStringArrayPublic(
-                        IndexTag.RPMTAG_PROVIDENAME,
-                        new string[]
-                        {
-                            "libplist",
-                            "libplist(x86-64)",
-                            "libplist++.so.3()(64bit)",
-                            "libplist.so.3()(64bit)"
-                        });
-
-                    metadata.SetIntArrayPublic(
-                        IndexTag.RPMTAG_PROVIDEFLAGS,
-                        new int[]
-                        {
-                            (int)RpmSense.RPMSENSE_FIND_PROVIDES,
-                            (int)RpmSense.RPMSENSE_FIND_PROVIDES,
-                            (int)RpmSense.RPMSENSE_FIND_PROVIDES,
-                            (int)RpmSense.RPMSENSE_FIND_PROVIDES
-                        });
-
-                    metadata.SetStringArrayPublic(
-                        IndexTag.RPMTAG_PROVIDEVERSION,
-                        new string[]
-                        {
-                            "",
-                            "",
-                            "",
-                            ""
-                        });
+                    creator.AddPackageProvides(metadata);
+                    creator.AddLdDependencies(metadata);
 
                     metadata.Files = files;
+                    creator.AddRpmDependencies(metadata);
 
                     this.AssertTagEqual(IndexTag.RPMTAG_FILESIZES, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_FILEMODES, originalPackage, package);
@@ -250,11 +151,14 @@ namespace Packaging.Targets.Tests.Rpm
                     this.AssertTagEqual(IndexTag.RPMTAG_DIRINDEXES, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_DIRNAMES, originalPackage, package);
 
+                    // The require and provides records contain file dependencies, as well as package dependencies.
+                    // That's why there's a call to AddLdDependencies and AddRpmDependencies, to make sure
+                    // these dependencies are written out in order.
                     this.AssertTagEqual(IndexTag.RPMTAG_REQUIRENAME, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_REQUIREFLAGS, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_REQUIREVERSION, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_PROVIDENAME, originalPackage, package);
-                    this.AssertTagEqual(IndexTag.RPMTAG_REQUIREFLAGS, originalPackage, package);
+                    this.AssertTagEqual(IndexTag.RPMTAG_PROVIDEFLAGS, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_REQUIREVERSION, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_FILEDEPENDSN, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_FILEDEPENDSX, originalPackage, package);

@@ -71,6 +71,7 @@ namespace Packaging.Targets.Rpm
         public string Name
         {
             get { return this.GetString(IndexTag.RPMTAG_NAME); }
+            set { this.SetString(IndexTag.RPMTAG_NAME, value); }
         }
 
         /// <summary>
@@ -79,6 +80,7 @@ namespace Packaging.Targets.Rpm
         public string Version
         {
             get { return this.GetString(IndexTag.RPMTAG_VERSION); }
+            set { this.SetString(IndexTag.RPMTAG_VERSION, value); }
         }
 
         /// <summary>
@@ -184,6 +186,7 @@ namespace Packaging.Targets.Rpm
         public string Arch
         {
             get { return this.GetString(IndexTag.RPMTAG_ARCH); }
+            set { this.SetString(IndexTag.RPMTAG_ARCH, value); }
         }
 
         /// <summary>
@@ -464,19 +467,32 @@ namespace Packaging.Targets.Rpm
                 var dependsN = new int[files.Length];
                 var classDict = new Collection<string>();
                 var dependsDict = new Collection<int>();
-                var requireNames = new Collection<string>();
-                var requireFlags = new Collection<RpmSense>();
-                var requireVersions = new Collection<string>();
-                requireNames.AddRange(this.GetStringArray(IndexTag.RPMTAG_REQUIRENAME));
-                requireFlags.AddRange(this.GetIntArray(IndexTag.RPMTAG_REQUIREFLAGS).Select(v => (RpmSense)v));
-                requireVersions.AddRange(this.GetStringArray(IndexTag.RPMTAG_REQUIREVERSION));
 
-                var provideNames = new Collection<string>();
-                var provideFlags = new Collection<RpmSense>();
-                var provideVersions = new Collection<string>();
-                provideNames.AddRange(this.GetStringArray(IndexTag.RPMTAG_PROVIDENAME));
-                provideFlags.AddRange(this.GetIntArray(IndexTag.RPMTAG_PROVIDEFLAGS).Select(v => (RpmSense)v));
-                provideVersions.AddRange(this.GetStringArray(IndexTag.RPMTAG_PROVIDEVERSION));
+                var currentDependencies = this.Dependencies.ToList();
+                var currentProvides = this.Provides.ToList();
+
+                // Prepopulate the new dependencies in sorted order
+                var allDependencies = files
+                    .SelectMany(f => f.Requires)
+                    .Distinct()
+                    .Where(d => !currentDependencies.Contains(d))
+                    .OrderBy(f => f.Name)
+                    .ToList();
+
+                var allProvides = files
+                    .SelectMany(f => f.Provides)
+                    .Distinct()
+                    .Where(d => !currentProvides.Contains(d))
+                    .ToList();
+
+                currentDependencies.AddRange(allDependencies);
+                this.Dependencies = currentDependencies;
+
+                currentProvides.AddRange(allProvides);
+                this.Provides = currentProvides;
+
+                var requireNames = this.GetStringArray(IndexTag.RPMTAG_REQUIRENAME);
+                var provideNames = this.GetStringArray(IndexTag.RPMTAG_PROVIDENAME);
 
                 for (int i = 0; i < files.Length; i++)
                 {
@@ -521,14 +537,7 @@ namespace Packaging.Targets.Rpm
                     {
                         byte type = (byte)GetDependencyType(IndexTag.RPMTAG_PROVIDENAME);
 
-                        if (!provideNames.Contains(provide.Name))
-                        {
-                            // Incomplete - we should check for not only name but also flags & version
-                            provideNames.Add(provide.Name);
-                            provideFlags.Add(provide.Flags);
-                            provideVersions.Add(provide.Version);
-                        }
-
+                        // Incomplete - we should check for not only name but also flags & version
                         var index = provideNames.IndexOf(provide.Name);
                         index |= (type << 24);
 
@@ -539,14 +548,7 @@ namespace Packaging.Targets.Rpm
                     {
                         byte type = (byte)GetDependencyType(IndexTag.RPMTAG_REQUIRENAME);
 
-                        if (!requireNames.Contains(dependency.Name))
-                        {
-                            // Incomplete - we should check for not only name but also flags & version
-                            requireNames.Add(dependency.Name);
-                            requireFlags.Add(dependency.Flags);
-                            requireVersions.Add(dependency.Version);
-                        }
-
+                        // Incomplete - we should check for not only name but also flags & version
                         var index = requireNames.IndexOf(dependency.Name);
                         index |= (type << 24);
 
@@ -578,12 +580,6 @@ namespace Packaging.Targets.Rpm
 
                 this.SetStringArray(IndexTag.RPMTAG_CLASSDICT, classDict.ToArray());
                 this.SetIntArray(IndexTag.RPMTAG_DEPENDSDICT, dependsDict.ToArray());
-                this.SetStringArray(IndexTag.RPMTAG_REQUIRENAME, requireNames.ToArray());
-                this.SetIntArray(IndexTag.RPMTAG_REQUIREFLAGS, requireFlags.Select(v => (int)v).ToArray());
-                this.SetStringArray(IndexTag.RPMTAG_REQUIREVERSION, requireVersions.ToArray());
-                this.SetStringArray(IndexTag.RPMTAG_PROVIDENAME, provideNames.ToArray());
-                this.SetIntArray(IndexTag.RPMTAG_PROVIDEFLAGS, provideFlags.Select(v => (int)v).ToArray());
-                this.SetStringArray(IndexTag.RPMTAG_PROVIDEVERSION, provideVersions.ToArray());
             }
         }
 
@@ -606,6 +602,26 @@ namespace Packaging.Targets.Rpm
                     };
                 }
             }
+
+            set
+            {
+                var dependencies = value.ToArray();
+
+                var flags = new int[dependencies.Length];
+                var names = new string[dependencies.Length];
+                var vers = new string[dependencies.Length];
+
+                for (int i = 0; i < dependencies.Length; i++)
+                {
+                    flags[i] = (int)dependencies[i].Flags;
+                    names[i] = dependencies[i].Name;
+                    vers[i] = dependencies[i].Version;
+                }
+
+                this.SetIntArray(IndexTag.RPMTAG_REQUIREFLAGS, flags);
+                this.SetStringArray(IndexTag.RPMTAG_REQUIRENAME, names);
+                this.SetStringArray(IndexTag.RPMTAG_REQUIREVERSION, vers);
+            }
         }
 
         public IEnumerable<PackageDependency> Provides
@@ -625,6 +641,26 @@ namespace Packaging.Targets.Rpm
                         Version = vers[i]
                     };
                 }
+            }
+
+            set
+            {
+                var provides = value.ToArray();
+
+                var flags = new int[provides.Length];
+                var names = new string[provides.Length];
+                var vers = new string[provides.Length];
+
+                for (int i = 0; i < provides.Length; i++)
+                {
+                    flags[i] = (int)provides[i].Flags;
+                    names[i] = provides[i].Name;
+                    vers[i] = provides[i].Version;
+                }
+
+                this.SetIntArray(IndexTag.RPMTAG_PROVIDEFLAGS, flags);
+                this.SetStringArray(IndexTag.RPMTAG_PROVIDENAME, names);
+                this.SetStringArray(IndexTag.RPMTAG_PROVIDEVERSION, vers);
             }
         }
 
@@ -680,7 +716,7 @@ namespace Packaging.Targets.Rpm
 
         protected Collection<string> GetStringArray(IndexTag tag)
         {
-            var value = this.GetValue<Collection<string>>(tag, IndexType.RPM_STRING_ARRAY_TYPE, null);
+            var value = this.GetValue<Collection<string>>(tag, IndexType.RPM_STRING_ARRAY_TYPE);
 
             if (value == null)
             {
@@ -699,24 +735,38 @@ namespace Packaging.Targets.Rpm
 
         protected string GetLocalizedString(IndexTag tag)
         {
-            var localizedValues = this.GetValue<Collection<string>>(tag, IndexType.RPM_I18NSTRING_TYPE, false);
+            var localizedValues = this.GetValue<Collection<string>>(tag, IndexType.RPM_I18NSTRING_TYPE);
 
             return localizedValues.First();
         }
 
         protected string GetString(IndexTag tag)
         {
-            return this.GetValue<string>(tag, IndexType.RPM_STRING_TYPE, false);
+            return this.GetValue<string>(tag, IndexType.RPM_STRING_TYPE);
+        }
+
+        protected void SetString(IndexTag tag, string value)
+        {
+            this.SetSingleValue<string>(tag, IndexType.RPM_STRING_TYPE, value);
         }
 
         protected int GetInt(IndexTag tag)
         {
-            return this.GetValue<int>(tag, IndexType.RPM_INT32_TYPE, false);
+            return this.GetValue<int>(tag, IndexType.RPM_INT32_TYPE);
         }
 
         protected Collection<int> GetIntArray(IndexTag tag)
         {
-            return this.GetValue<Collection<int>>(tag, IndexType.RPM_INT32_TYPE, true);
+            var value = this.GetValue<Collection<int>>(tag, IndexType.RPM_INT32_TYPE);
+
+            if (value == null)
+            {
+                return new Collection<int>();
+            }
+            else
+            {
+                return value;
+            }
         }
 
         protected void SetIntArray(IndexTag tag, int[] value)
@@ -726,7 +776,7 @@ namespace Packaging.Targets.Rpm
 
         protected Collection<short> GetShortArray(IndexTag tag)
         {
-            return this.GetValue<Collection<short>>(tag, IndexType.RPM_INT16_TYPE, true);
+            return this.GetValue<Collection<short>>(tag, IndexType.RPM_INT16_TYPE);
         }
 
         protected void SetShortArray(IndexTag tag, short[] value)
@@ -736,10 +786,10 @@ namespace Packaging.Targets.Rpm
 
         protected byte[] GetByteArray(IndexTag tag)
         {
-            return this.GetValue<byte[]>(tag, IndexType.RPM_BIN_TYPE, true);
+            return this.GetValue<byte[]>(tag, IndexType.RPM_BIN_TYPE);
         }
 
-        protected T GetValue<T>(IndexTag tag, IndexType type, bool? plural)
+        protected T GetValue<T>(IndexTag tag, IndexType type)
         {
             if (!this.Package.Header.Records.ContainsKey(tag))
             {
@@ -758,11 +808,6 @@ namespace Packaging.Targets.Rpm
             }
 
             var record = this.Package.Header.Records[tag];
-
-            if (plural != null && record.Header.Count > 1 != plural)
-            {
-                throw new ArgumentOutOfRangeException(nameof(tag));
-            }
 
             if (record.Header.Type != type)
             {
@@ -791,6 +836,30 @@ namespace Packaging.Targets.Rpm
                     Type = type
                 },
                 Value = collection
+            };
+
+            if (!this.Package.Header.Records.ContainsKey(tag))
+            {
+                this.Package.Header.Records.Add(tag, record);
+            }
+            else
+            {
+                this.Package.Header.Records[tag] = record;
+            }
+        }
+
+        protected void SetSingleValue<T>(IndexTag tag, IndexType type, T value)
+        {
+            IndexRecord record = new IndexRecord()
+            {
+                Header = new IndexHeader()
+                {
+                    Count = 1,
+                    Offset = 0,
+                    Tag = (uint)tag,
+                    Type = type
+                },
+                Value = value
             };
 
             if (!this.Package.Header.Records.ContainsKey(tag))
