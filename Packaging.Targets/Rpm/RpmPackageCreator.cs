@@ -155,7 +155,7 @@ namespace Packaging.Targets.Rpm
         {
             var provides = metadata.Provides.ToList();
 
-            var packageProvides = new PackageDependency(metadata.Name, RpmSense.RPMSENSE_EQUAL, metadata.Version);
+            var packageProvides = new PackageDependency(metadata.Name, RpmSense.RPMSENSE_EQUAL, $"{metadata.Version}-{metadata.Release}");
 
             var normalizedArch = metadata.Arch;
             if (normalizedArch == "x86_64")
@@ -163,7 +163,7 @@ namespace Packaging.Targets.Rpm
                 normalizedArch = "x86-64";
             }
 
-            var packageArchProvides = new PackageDependency($"{metadata.Name}({normalizedArch})", RpmSense.RPMSENSE_EQUAL, metadata.Version);
+            var packageArchProvides = new PackageDependency($"{metadata.Name}({normalizedArch})", RpmSense.RPMSENSE_EQUAL, $"{metadata.Version}-{metadata.Release}");
 
             if (!provides.Contains(packageProvides))
             {

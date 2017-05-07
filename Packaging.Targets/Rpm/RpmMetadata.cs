@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Packaging.Targets.Rpm
 {
@@ -43,14 +42,32 @@ namespace Packaging.Targets.Rpm
                 // https://dentrassi.de/2016/04/15/writing-rpm-files-in-plain-java/
                 // https://blog.bethselamin.de/posts/argh-pm.html
                 // For now, we're always assuming the entire header and the entire signature is immutable
-
-                var immutableSignatureRegion = (byte[])this.Package.Header.Records[IndexTag.RPMTAG_HEADERIMMUTABLE].Value;
+                var immutableSignatureRegion = this.GetByteArray(IndexTag.RPMTAG_HEADERIMMUTABLE);
 
                 using (MemoryStream s = new MemoryStream(immutableSignatureRegion))
                 {
                     var h = s.ReadStruct<IndexHeader>();
                     return h.Offset;
                 }
+            }
+
+            set
+            {
+                IndexHeader header = default(IndexHeader);
+                header.Offset = value;
+                header.Count = 0x10;
+                header.Type = IndexType.RPM_BIN_TYPE;
+                header.Tag = (uint)(IndexTag.RPMTAG_HEADERIMMUTABLE);
+
+                byte[] data;
+
+                using (MemoryStream s = new MemoryStream())
+                {
+                    s.WriteStruct(header);
+                    data = s.ToArray();
+                }
+
+                this.SetByteArray(IndexTag.RPMTAG_HEADERIMMUTABLE, data);
             }
         }
 
@@ -59,10 +76,8 @@ namespace Packaging.Targets.Rpm
         /// </summary>
         public Collection<string> Locales
         {
-            get
-            {
-                return this.GetStringArray(IndexTag.RPMTAG_HEADERI18NTABLE);
-            }
+            get { return this.GetStringArray(IndexTag.RPMTAG_HEADERI18NTABLE); }
+            set { this.SetStringArray(IndexTag.RPMTAG_HEADERI18NTABLE, value.ToArray()); }
         }
 
         /// <summary>
@@ -89,6 +104,7 @@ namespace Packaging.Targets.Rpm
         public string Release
         {
             get { return this.GetString(IndexTag.RPMTAG_RELEASE); }
+            set { this.SetString(IndexTag.RPMTAG_RELEASE, value); }
         }
 
         /// <summary>
@@ -97,6 +113,7 @@ namespace Packaging.Targets.Rpm
         public string Summary
         {
             get { return this.GetLocalizedString(IndexTag.RPMTAG_SUMMARY); }
+            set { this.SetLocalizedString(IndexTag.RPMTAG_SUMMARY, value); }
         }
 
         /// <summary>
@@ -105,14 +122,16 @@ namespace Packaging.Targets.Rpm
         public string Description
         {
             get { return this.GetLocalizedString(IndexTag.RPMTAG_DESCRIPTION); }
+            set { this.SetLocalizedString(IndexTag.RPMTAG_DESCRIPTION, value); }
         }
 
         /// <summary>
         /// Gets the date and time at which the package was built.
         /// </summary>
-        public int BuildTime
+        public DateTimeOffset BuildTime
         {
-            get { return this.GetInt(IndexTag.RPMTAG_BUILDTIME); }
+            get { return DateTimeOffset.FromUnixTimeSeconds(this.GetInt(IndexTag.RPMTAG_BUILDTIME)); }
+            set { this.SetInt(IndexTag.RPMTAG_BUILDTIME, (int)value.ToUnixTimeSeconds()); }
         }
 
         /// <summary>
@@ -121,6 +140,7 @@ namespace Packaging.Targets.Rpm
         public string BuildHost
         {
             get { return this.GetString(IndexTag.RPMTAG_BUILDHOST); }
+            set { this.SetString(IndexTag.RPMTAG_BUILDHOST, value); }
         }
 
         /// <summary>
@@ -129,6 +149,7 @@ namespace Packaging.Targets.Rpm
         public int Size
         {
             get { return this.GetInt(IndexTag.RPMTAG_SIZE); }
+            set { this.SetInt(IndexTag.RPMTAG_SIZE, value); }
         }
 
         /// <summary>
@@ -137,6 +158,7 @@ namespace Packaging.Targets.Rpm
         public string Distribution
         {
             get { return this.GetString(IndexTag.RPMTAG_DISTRIBUTION); }
+            set { this.SetString(IndexTag.RPMTAG_DISTRIBUTION, value); }
         }
 
         /// <summary>
@@ -145,6 +167,7 @@ namespace Packaging.Targets.Rpm
         public string Vendor
         {
             get { return this.GetString(IndexTag.RPMTAG_VENDOR); }
+            set { this.SetString(IndexTag.RPMTAG_VENDOR, value); }
         }
 
         /// <summary>
@@ -153,6 +176,7 @@ namespace Packaging.Targets.Rpm
         public string License
         {
             get { return this.GetString(IndexTag.RPMTAG_LICENSE); }
+            set { this.SetString(IndexTag.RPMTAG_LICENSE, value); }
         }
 
         /// <summary>
@@ -161,6 +185,7 @@ namespace Packaging.Targets.Rpm
         public string Group
         {
             get { return this.GetLocalizedString(IndexTag.RPMTAG_GROUP); }
+            set { this.SetLocalizedString(IndexTag.RPMTAG_GROUP, value); }
         }
 
         /// <summary>
@@ -169,6 +194,7 @@ namespace Packaging.Targets.Rpm
         public string Url
         {
             get { return this.GetString(IndexTag.RPMTAG_URL); }
+            set { this.SetString(IndexTag.RPMTAG_URL, value); }
         }
 
         /// <summary>
@@ -177,6 +203,7 @@ namespace Packaging.Targets.Rpm
         public string Os
         {
             get { return this.GetString(IndexTag.RPMTAG_OS); }
+            set { this.SetString(IndexTag.RPMTAG_OS, value); }
         }
 
         /// <summary>
@@ -195,6 +222,7 @@ namespace Packaging.Targets.Rpm
         public string SourceRpm
         {
             get { return this.GetString(IndexTag.RPMTAG_SOURCERPM); }
+            set { this.SetString(IndexTag.RPMTAG_SOURCERPM, value); }
         }
 
         /// <summary>
@@ -203,6 +231,7 @@ namespace Packaging.Targets.Rpm
         public string RpmVersion
         {
             get { return this.GetString(IndexTag.RPMTAG_RPMVERSION); }
+            set { this.SetString(IndexTag.RPMTAG_RPMVERSION, value); }
         }
 
         /// <summary>
@@ -211,6 +240,7 @@ namespace Packaging.Targets.Rpm
         public string PostInProg
         {
             get { return this.GetString(IndexTag.RPMTAG_POSTINPROG); }
+            set { this.SetString(IndexTag.RPMTAG_POSTINPROG, value); }
         }
 
         /// <summary>
@@ -219,6 +249,7 @@ namespace Packaging.Targets.Rpm
         public string PostUnProg
         {
             get { return this.GetString(IndexTag.RPMTAG_POSTUNPROG); }
+            set { this.SetString(IndexTag.RPMTAG_POSTUNPROG, value); }
         }
 
         /// <summary>
@@ -227,6 +258,7 @@ namespace Packaging.Targets.Rpm
         public string Cookie
         {
             get { return this.GetString(IndexTag.RPMTAG_COOKIE); }
+            set { this.SetString(IndexTag.RPMTAG_COOKIE, value); }
         }
 
         /// <summary>
@@ -235,6 +267,7 @@ namespace Packaging.Targets.Rpm
         public string OptFlags
         {
             get { return this.GetString(IndexTag.RPMTAG_OPTFLAGS); }
+            set { this.SetString(IndexTag.RPMTAG_OPTFLAGS, value); }
         }
 
         /// <summary>
@@ -243,6 +276,7 @@ namespace Packaging.Targets.Rpm
         public string DistUrl
         {
             get { return this.GetString(IndexTag.RPMTAG_DISTURL); }
+            set { this.SetString(IndexTag.RPMTAG_DISTURL, value); }
         }
 
         /// <summary>
@@ -251,6 +285,7 @@ namespace Packaging.Targets.Rpm
         public string PayloadFormat
         {
             get { return this.GetString(IndexTag.RPMTAG_PAYLOADFORMAT); }
+            set { this.SetString(IndexTag.RPMTAG_PAYLOADFORMAT, value); }
         }
 
         /// <summary>
@@ -259,6 +294,7 @@ namespace Packaging.Targets.Rpm
         public string PayloadCompressor
         {
             get { return this.GetString(IndexTag.RPMTAG_PAYLOADCOMPRESSOR); }
+            set { this.SetString(IndexTag.RPMTAG_PAYLOADCOMPRESSOR, value); }
         }
 
         /// <summary>
@@ -267,6 +303,7 @@ namespace Packaging.Targets.Rpm
         public string PayloadFlags
         {
             get { return this.GetString(IndexTag.RPMTAG_PAYLOADFLAGS); }
+            set { this.SetString(IndexTag.RPMTAG_PAYLOADFLAGS, value); }
         }
 
         /// <summary>
@@ -275,11 +312,13 @@ namespace Packaging.Targets.Rpm
         public string Platform
         {
             get { return this.GetString(IndexTag.RPMTAG_PLATFORM); }
+            set { this.SetString(IndexTag.RPMTAG_PLATFORM, value); }
         }
 
         public byte[] SourcePkgId
         {
             get { return this.GetByteArray(IndexTag.RPMTAG_SOURCEPKGID); }
+            set { this.SetByteArray(IndexTag.RPMTAG_SOURCEPKGID, value); }
         }
 
         /// <summary>
@@ -289,6 +328,7 @@ namespace Packaging.Targets.Rpm
         public PgpHashAlgo FileDigetsAlgo
         {
             get { return (PgpHashAlgo)this.GetInt(IndexTag.RPMTAG_FILEDIGESTALGO); }
+            set { this.SetInt(IndexTag.RPMTAG_FILEDIGESTALGO, (int)value); }
         }
 
         /// <summary>
@@ -313,6 +353,26 @@ namespace Packaging.Targets.Rpm
                         Text = text[i]
                     };
                 }
+            }
+
+            set
+            {
+                var entries = value.ToArray();
+
+                var times = new int[entries.Length];
+                var names = new string[entries.Length];
+                var text = new string[entries.Length];
+
+                for (int i = 0; i < entries.Length; i++)
+                {
+                    times[i] = (int)entries[i].Date.ToUnixTimeSeconds();
+                    names[i] = entries[i].Name;
+                    text[i] = entries[i].Text;
+                }
+
+                this.SetIntArray(IndexTag.RPMTAG_CHANGELOGTIME, times);
+                this.SetStringArray(IndexTag.RPMTAG_CHANGELOGNAME, names);
+                this.SetStringArray(IndexTag.RPMTAG_CHANGELOGTEXT, text);
             }
         }
 
@@ -740,6 +800,23 @@ namespace Packaging.Targets.Rpm
             return localizedValues.First();
         }
 
+        protected void SetLocalizedString(IndexTag tag, string value)
+        {
+            if (this.Locales.Count == 0)
+            {
+                throw new InvalidOperationException();
+            }
+
+            var values = new string[this.Locales.Count];
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                values[i] = value;
+            }
+
+            this.SetValue<string>(tag, IndexType.RPM_I18NSTRING_TYPE, values);
+        }
+
         protected string GetString(IndexTag tag)
         {
             return this.GetValue<string>(tag, IndexType.RPM_STRING_TYPE);
@@ -747,12 +824,17 @@ namespace Packaging.Targets.Rpm
 
         protected void SetString(IndexTag tag, string value)
         {
-            this.SetSingleValue<string>(tag, IndexType.RPM_STRING_TYPE, value);
+            this.SetSingleValue(tag, IndexType.RPM_STRING_TYPE, value);
         }
 
         protected int GetInt(IndexTag tag)
         {
             return this.GetValue<int>(tag, IndexType.RPM_INT32_TYPE);
+        }
+
+        protected void SetInt(IndexTag tag, int value)
+        {
+            this.SetSingleValue(tag, IndexType.RPM_INT32_TYPE, value);
         }
 
         protected Collection<int> GetIntArray(IndexTag tag)
@@ -787,6 +869,11 @@ namespace Packaging.Targets.Rpm
         protected byte[] GetByteArray(IndexTag tag)
         {
             return this.GetValue<byte[]>(tag, IndexType.RPM_BIN_TYPE);
+        }
+
+        protected void SetByteArray(IndexTag tag, byte[] value)
+        {
+            this.SetValue(tag, IndexType.RPM_BIN_TYPE, value);
         }
 
         protected T GetValue<T>(IndexTag tag, IndexType type)
