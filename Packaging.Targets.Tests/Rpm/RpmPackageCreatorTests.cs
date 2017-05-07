@@ -61,5 +61,65 @@ namespace Packaging.Targets.Tests.Rpm
                 }
             }
         }
+
+        /// <summary>
+        /// Tests the <see cref="RpmPackageCreator.CalculateHeaderOffsets(RpmPackage)"/> method.
+        /// </summary>
+        [Fact]
+        public void CalculateOffsetTest()
+        {
+            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            {
+                var originalPackage = RpmPackageReader.Read(stream);
+
+                using (var payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
+                using (var cpio = new CpioFile(payloadStream, false))
+                {
+                    RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
+                    var files = creator.CreateFiles(cpio);
+
+                    // Core routine to populate files and dependencies
+                    RpmPackage package = new RpmPackage();
+                    var metadata = new PublicRpmMetadata(package);
+                    metadata.Name = "libplist";
+                    metadata.Version = "2.0.1.151";
+                    metadata.Arch = "x86_64";
+                    metadata.Release = "1.1";
+
+                    creator.AddPackageProvides(metadata);
+                    creator.AddLdDependencies(metadata);
+
+                    metadata.Files = files;
+                    creator.AddRpmDependencies(metadata);
+
+                    PlistMetadata.ApplyDefaultMetadata(metadata);
+
+                    metadata.Size = 0x26e6d;
+                    metadata.ImmutableRegionSize = -976;
+
+                    creator.CalculateHeaderOffsets(package);
+
+                    foreach (var record in originalPackage.Header.Records)
+                    {
+                        if (record.Key == IndexTag.RPMTAG_HEADERIMMUTABLE)
+                        {
+                            continue;
+                        }
+
+                        AssertTagOffsetEqual(record.Key, originalPackage, package);
+                    }
+
+                    AssertTagOffsetEqual(IndexTag.RPMTAG_HEADERIMMUTABLE, originalPackage, package);
+                }
+            }
+        }
+
+        private void AssertTagOffsetEqual(IndexTag tag, RpmPackage originalPackage, RpmPackage package)
+        {
+            var originalRecord = originalPackage.Header.Records[tag];
+            var record = package.Header.Records[tag];
+
+            Assert.Equal(originalRecord.Header.Offset, record.Header.Offset);
+        }
     }
 }

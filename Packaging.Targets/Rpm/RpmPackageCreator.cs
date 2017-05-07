@@ -1,7 +1,9 @@
 ﻿using Packaging.Targets.IO;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -263,6 +265,100 @@ namespace Packaging.Targets.Rpm
 
             // Refresh
             metadata.Files = files;
+        }
+
+        /// <summary>
+        /// Determines the offsets for all records in the header of a package.
+        /// </summary>
+        /// <param name="package">
+        /// The package for which to generate the offsets.
+        /// </param>
+        public void CalculateHeaderOffsets(RpmPackage package)
+        {
+            CalculateSectionSizeAndOffsets(package.Header, k => (int)k);
+        }
+
+        protected void CalculateSectionOffsets<T>(Section<T> section, Func<T, int> getSortOrder)
+        {
+            var records = section.Records;
+            int offset = 0;
+
+            T immutableKey = default(T);
+
+            var sortedRecords = records.OrderBy(r => getSortOrder(r.Key)).ToArray();
+
+            foreach (var record in sortedRecords)
+            {
+                var indexTag = record.Key as IndexTag?;
+
+                if (indexTag == IndexTag.RPMTAG_HEADERIMMUTABLE)
+                {
+                    immutableKey = record.Key;
+                    continue;
+                }
+
+                var header = record.Value.Header;
+
+                // Determine the size
+                int size = 0;
+                int align = 0;
+
+                switch (header.Type)
+                {
+                    case IndexType.RPM_BIN_TYPE:
+                    case IndexType.RPM_CHAR_TYPE:
+                    case IndexType.RPM_INT8_TYPE:
+                        // These are all single-byte types
+                        size = header.Count;
+                        break;
+
+                    case IndexType.RPM_I18NSTRING_TYPE:
+                    case IndexType.RPM_STRING_ARRAY_TYPE:
+                        foreach (var value in (IEnumerable<string>)record.Value.Value)
+                        {
+                            size += Encoding.UTF8.GetByteCount(value) + 1;
+                        }
+                        break;
+
+                    case IndexType.RPM_STRING_TYPE:
+                        size = Encoding.UTF8.GetByteCount((string)record.Value.Value) + 1;
+                        break;
+
+                    case IndexType.RPM_INT16_TYPE:
+                        size = 2 * header.Count;
+                        break;
+
+                    case IndexType.RPM_INT32_TYPE:
+                        size = 4 * header.Count;
+                        align = 4;
+                        break;
+
+                    case IndexType.RPM_INT64_TYPE:
+                        size = 8 * header.Count;
+                        break;
+
+                    case IndexType.RPM_NULL_TYPE:
+                        size = 0;
+                        break;
+                }
+
+                if (align != 0 && offset % align != 0)
+                {
+                    offset += align - (offset % align);
+                }
+
+                header.Offset = offset;
+                offset += size;
+
+                record.Value.Header = header;
+            }
+
+            if (!object.Equals(immutableKey, default(T)))
+            {
+                var header = records[immutableKey].Header;
+                header.Offset = offset;
+                records[immutableKey].Header = header;
+            }
         }
     }
 }
