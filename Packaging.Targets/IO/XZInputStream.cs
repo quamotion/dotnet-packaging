@@ -46,6 +46,7 @@ namespace Packaging.Targets.IO
         private LzmaStream lzmaStream;
         private long length;
         private long position;
+        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XZInputStream"/> class.
@@ -92,19 +93,31 @@ namespace Packaging.Targets.IO
         /// <inheritdoc/>
         public override bool CanRead
         {
-            get { return true; }
+            get
+            {
+                this.EnsureNotDisposed();
+                return true;
+            }
         }
 
         /// <inheritdoc/>
         public override bool CanSeek
         {
-            get { return false; }
+            get
+            {
+                this.EnsureNotDisposed();
+                return false;
+            }
         }
 
         /// <inheritdoc/>
         public override bool CanWrite
         {
-            get { return false; }
+            get
+            {
+                this.EnsureNotDisposed();
+                return false;
+            }
         }
 
         /// <inheritdoc/>
@@ -112,6 +125,8 @@ namespace Packaging.Targets.IO
         {
             get
             {
+                this.EnsureNotDisposed();
+
                 const int streamFooterSize = 12;
 
                 if (this.length == 0)
@@ -157,19 +172,31 @@ namespace Packaging.Targets.IO
         /// <inheritdoc/>
         public override long Position
         {
-            get { return this.position; }
-            set { throw new NotSupportedException("XZ Stream does not support setting position"); }
+            get
+            {
+                this.EnsureNotDisposed();
+                return this.position;
+            }
+            set
+            {
+                this.EnsureNotDisposed();
+                throw new NotSupportedException("XZ Stream does not support setting position");
+            }
         }
 
         /// <inheritdoc/>
         public override void Flush()
         {
+            this.EnsureNotDisposed();
+
             throw new NotSupportedException("XZ Stream does not support flush");
         }
 
         /// <inheritdoc/>
         public override long Seek(long offset, SeekOrigin origin)
         {
+            this.EnsureNotDisposed();
+
             throw new NotSupportedException("XZ Stream does not support seek");
         }
 
@@ -185,6 +212,8 @@ namespace Packaging.Targets.IO
         /// <returns>byte read or -1 on end of stream</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
+            this.EnsureNotDisposed();
+
             var action = LzmaAction.Run;
 
             var readBuf = new byte[BufSize];
@@ -277,12 +306,27 @@ namespace Packaging.Targets.IO
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
+            if (this.disposed)
+            {
+                return;
+            }
+
             NativeMethods.lzma_end(ref this.lzmaStream);
 
             Marshal.FreeHGlobal(this.inbuf);
             Marshal.FreeHGlobal(this.outbuf);
 
             base.Dispose(disposing);
+
+            this.disposed = true;
+        }
+
+        private void EnsureNotDisposed()
+        {
+            if (this.disposed)
+            {
+                throw new ObjectDisposedException(nameof(XZInputStream));
+            }
         }
     }
 }
