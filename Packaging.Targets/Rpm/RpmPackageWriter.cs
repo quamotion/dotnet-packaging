@@ -35,11 +35,11 @@ namespace Packaging.Targets.Rpm
 
             stream.WriteStruct(package.Lead);
 
-            WriteSection<SignatureTag>(stream, package.Signature);
-            WriteSection<IndexTag>(stream, package.Header);
+            WriteSection<SignatureTag>(stream, package.Signature, DefaultOrder.Signature);
+            WriteSection<IndexTag>(stream, package.Header, DefaultOrder.Header);
         }
 
-        private static void WriteSection<K>(Stream stream, Section<K> section)
+        public static void WriteSection<K>(Stream stream, Section<K> section, List<K> order)
         {
             while (stream.Position % 8 != 0)
             {
@@ -48,9 +48,22 @@ namespace Packaging.Targets.Rpm
 
             stream.WriteStruct(section.Header);
 
-            foreach (var record in section.Records.Values)
+            // First write out all records in the pre-defined order
+            foreach (var record in order)
             {
-                stream.WriteStruct(record.Header);
+                if (section.Records.ContainsKey(record))
+                {
+                    stream.WriteStruct(section.Records[record].Header);
+                }
+            }
+
+            // Then write out any record which may be new.
+            foreach (var record in section.Records)
+            {
+                if (!section.Records.ContainsKey(record.Key))
+                {
+                    stream.WriteStruct(record.Value.Header);
+                }
             }
 
             // Write the data for all records
@@ -90,7 +103,7 @@ namespace Packaging.Targets.Rpm
                         {
                             var shortValues = (IEnumerable<short>)record.Value;
 
-                            foreach(var shortValue in shortValues)
+                            foreach (var shortValue in shortValues)
                             {
                                 stream.WriteBE(shortValue);
                             }
@@ -148,8 +161,9 @@ namespace Packaging.Targets.Rpm
                         break;
 
                     case IndexType.RPM_BIN_TYPE:
-                        byte[] value = (byte[])record.Value;
-                        stream.Write(value, 0, value.Length);
+                        var value = (IEnumerable<byte>)record.Value;
+                        var array = value.ToArray();
+                        stream.Write(array, 0, array.Length);
                         break;
 
                     case IndexType.RPM_NULL_TYPE:

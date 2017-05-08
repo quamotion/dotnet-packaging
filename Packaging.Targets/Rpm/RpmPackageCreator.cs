@@ -1,7 +1,10 @@
-﻿using Packaging.Targets.IO;
+﻿using DiscUtils.Internal;
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using Packaging.Targets.IO;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -275,7 +278,103 @@ namespace Packaging.Targets.Rpm
         /// </param>
         public void CalculateHeaderOffsets(RpmPackage package)
         {
-            CalculateSectionSizeAndOffsets(package.Header, k => (int)k);
+            var metadata = new RpmMetadata(package);
+            metadata.ImmutableRegionSize = -1 * Marshal.SizeOf<IndexHeader>() * (package.Header.Records.Count + 1);
+
+            CalculateSectionOffsets(package.Header, k => (int)k);
+        }
+
+        /// <summary>
+        /// Determines the offsets for all records in the signature of a package.
+        /// </summary>
+        /// <param name="package">
+        /// The package for which to generate the offsets.
+        /// </param>
+        public void CalculateSignatureOffsets(RpmPackage package)
+        {
+            var signature = new RpmSignature(package);
+            signature.ImmutableRegionSize = -1 * Marshal.SizeOf<IndexHeader>() * (package.Signature.Records.Count + 1);
+
+            CalculateSectionOffsets(package.Signature, k => (int)k);
+        }
+
+        /// <summary>
+        /// Gets a <see cref="MemoryStream"/> wich represents the entire header.
+        /// </summary>
+        /// <param name="package">
+        /// The package for which to get the header stream.
+        /// </param>
+        /// <returns>
+        /// A <see cref="MemoryStream"/> wich represents the entire header.
+        /// </returns>
+        public MemoryStream GetHeaderStream(RpmPackage package)
+        {
+            MemoryStream stream = new MemoryStream();
+            RpmPackageWriter.WriteSection(stream, package.Header, DefaultOrder.Header);
+            stream.Position = 0;
+            return stream;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="MemoryStream"/> wich represents the entire signature.
+        /// </summary>
+        /// <param name="package">
+        /// The package for which to get the header stream.
+        /// </param>
+        /// <returns>
+        /// A <see cref="MemoryStream"/> wich represents the entire signature.
+        /// </returns>
+        public MemoryStream GetSignatureStream(RpmPackage package)
+        {
+            MemoryStream stream = new MemoryStream();
+            RpmPackageWriter.WriteSection(stream, package.Signature, DefaultOrder.Signature);
+            stream.Position = 0;
+            return stream;
+        }
+
+        /// <summary>
+        /// Calculates the signature for this package.
+        /// </summary>
+        /// <param name="package">
+        /// The package for whcih to calculate the signature.
+        /// </param>
+        /// <param name="privateKey">
+        /// The private key to use.
+        /// </param>
+        /// <param name="compressedPayloadStream">
+        /// The compressed payload.
+        /// </param>
+        public void CalculateSignature(RpmPackage package, PgpPrivateKey privateKey, Stream compressedPayloadStream)
+        {
+            RpmSignature signature = new RpmSignature(package);
+
+            using (MemoryStream headerStream = this.GetHeaderStream(package))
+            using (ConcatStream headerAndPayloadStream = new ConcatStream(headerStream, compressedPayloadStream))
+            {
+                SHA1 sha = SHA1.Create();
+                signature.Sha1Hash = sha.ComputeHash(headerStream);
+
+                MD5 md5 = MD5.Create();
+                signature.MD5Hash = md5.ComputeHash(headerAndPayloadStream);
+
+                // Verify the PGP signatures
+                // 3 for the header
+                headerStream.Position = 0;
+                signature.HeaderPgpSignature = PgpSigner.Sign(privateKey, headerStream);
+
+                headerAndPayloadStream.Position = 0;
+                signature.HeaderAndPayloadPgpSignature = PgpSigner.Sign(privateKey, headerAndPayloadStream);
+
+                // Verify the signature size (header + compressed payload)
+                signature.HeaderAndPayloadSize = (int)headerAndPayloadStream.Length;
+            }
+
+            // Verify the payload size (header + uncompressed payload)
+
+            using (Stream payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(package, compressedPayloadStream))
+            {
+                signature.UncompressedPayloadSize = (int)payloadStream.Length;
+            }
         }
 
         protected void CalculateSectionOffsets<T>(Section<T> section, Func<T, int> getSortOrder)
@@ -290,8 +389,10 @@ namespace Packaging.Targets.Rpm
             foreach (var record in sortedRecords)
             {
                 var indexTag = record.Key as IndexTag?;
+                var signatureTag = record.Key as SignatureTag?;
 
-                if (indexTag == IndexTag.RPMTAG_HEADERIMMUTABLE)
+                if (indexTag == IndexTag.RPMTAG_HEADERIMMUTABLE
+                    || signatureTag == SignatureTag.RPMTAG_HEADERSIGNATURES)
                 {
                     immutableKey = record.Key;
                     continue;
@@ -355,10 +456,22 @@ namespace Packaging.Targets.Rpm
 
             if (!object.Equals(immutableKey, default(T)))
             {
-                var header = records[immutableKey].Header;
+                var record = records[immutableKey];
+                var header = record.Header;
                 header.Offset = offset;
-                records[immutableKey].Header = header;
+                record.Header = header;
+
+                offset += Marshal.SizeOf<IndexHeader>();
             }
+
+            // This is also a good time to refresh the header
+            section.Header = new RpmHeader()
+            {
+                HeaderSize = (uint)offset,
+                IndexCount = (uint)section.Records.Count,
+                Magic = 0x8eade801,
+                Reserved = 0
+            };
         }
     }
 }

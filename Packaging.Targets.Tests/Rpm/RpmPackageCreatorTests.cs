@@ -1,7 +1,9 @@
 ﻿using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Packaging.Targets.Tests.Rpm
@@ -112,6 +114,116 @@ namespace Packaging.Targets.Tests.Rpm
                     AssertTagOffsetEqual(IndexTag.RPMTAG_HEADERIMMUTABLE, originalPackage, package);
                 }
             }
+        }
+
+        [Fact]
+        public void CalculateSignatureTest()
+        {
+            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            {
+                var originalPackage = RpmPackageReader.Read(stream);
+
+                RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
+                Collection<RpmFile> files;
+
+                using (var payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
+                using (var cpio = new CpioFile(payloadStream, false))
+                {
+                    files = creator.CreateFiles(cpio);
+                }
+
+                // Core routine to populate files and dependencies
+                RpmPackage package = new RpmPackage();
+                var metadata = new PublicRpmMetadata(package);
+                metadata.Name = "libplist";
+                metadata.Version = "2.0.1.151";
+                metadata.Arch = "x86_64";
+                metadata.Release = "1.1";
+
+                creator.AddPackageProvides(metadata);
+                creator.AddLdDependencies(metadata);
+
+                metadata.Files = files;
+                creator.AddRpmDependencies(metadata);
+
+                PlistMetadata.ApplyDefaultMetadata(metadata);
+
+                creator.CalculateHeaderOffsets(package);
+
+                // Make sure the header is really correct
+
+                using (Stream originalHeaderStream = new SubStream(
+                    originalPackage.Stream,
+                    originalPackage.HeaderOffset,
+                    originalPackage.PayloadOffset - originalPackage.HeaderOffset,
+                    leaveParentOpen: true, readOnly: true))
+                using (Stream headerStream = creator.GetHeaderStream(package))
+                {
+                    byte[] originalData = new byte[originalHeaderStream.Length];
+                    originalHeaderStream.Read(originalData, 0, originalData.Length);
+
+                    byte[] data = new byte[headerStream.Length];
+                    headerStream.Read(data, 0, data.Length);
+
+                    int delta = 0;
+                    int dataDelta = 0;
+                    IndexTag tag;
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        if (originalData[i] != data[i])
+                        {
+                            delta = i;
+                            dataDelta = delta - package.Header.Records.Count * Marshal.SizeOf<IndexHeader>();
+                            tag = package.Header.Records.OrderBy(r => r.Value.Header.Offset).Last(r => r.Value.Header.Offset <= dataDelta).Key;
+
+                            break;
+                        }
+                    }
+
+                    Assert.Equal(originalData, data);
+                }
+
+                var krgen = PgpSigner.GenerateKeyRingGenerator("dotnet", "dotnet");
+                var secretKeyRing = krgen.GenerateSecretKeyRing();
+                var privateKey = secretKeyRing.GetSecretKey().ExtractPrivateKey("dotnet".ToCharArray());
+
+                using (var payload = RpmPayloadReader.GetCompressedPayloadStream(originalPackage))
+                {
+                    // Header should be OK now (see previous test), so now get the signature block and the
+                    // trailer
+                    creator.CalculateSignature(package, privateKey, payload);
+                    creator.CalculateSignatureOffsets(package);
+
+                    foreach (var record in originalPackage.Signature.Records)
+                    {
+                        if (record.Key == SignatureTag.RPMTAG_HEADERSIGNATURES)
+                        {
+                            continue;
+                        }
+
+                        AssertTagEqual(record.Key, originalPackage, package);
+                    }
+
+                    AssertTagEqual(SignatureTag.RPMTAG_HEADERSIGNATURES, originalPackage, package);
+                }
+            }
+        }
+
+        private void AssertTagEqual(SignatureTag tag, RpmPackage originalPackage, RpmPackage package)
+        {
+            var originalRecord = originalPackage.Signature.Records[tag];
+            var record = package.Signature.Records[tag];
+
+            // Don't have the private key
+            if (tag != SignatureTag.RPMSIGTAG_PGP && tag != SignatureTag.RPMSIGTAG_RSA)
+            {
+                Assert.Equal(originalRecord.Value, record.Value);
+            }
+
+            Assert.Equal(originalRecord.Header.Count, record.Header.Count);
+            Assert.Equal(originalRecord.Header.Tag, record.Header.Tag);
+            Assert.Equal(originalRecord.Header.Type, record.Header.Type);
+            Assert.Equal(originalRecord.Header.Offset, record.Header.Offset);
         }
 
         private void AssertTagOffsetEqual(IndexTag tag, RpmPackage originalPackage, RpmPackage package)

@@ -16,11 +16,5 @@ namespace Packaging.Targets.Rpm
             get;
             set;
         } = new Dictionary<K, IndexRecord>();
-
-        public byte[] Data
-        {
-            get;
-            set;
-        }
     }
 }

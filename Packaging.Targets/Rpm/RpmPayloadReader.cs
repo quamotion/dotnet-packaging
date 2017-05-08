@@ -33,6 +33,32 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
+        /// Gets the compressed payload for a package.
+        /// </summary>
+        /// <param name="package">
+        /// The package for which to get the compressed payload.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Stream"/> which contains the compressed payload.
+        /// </returns>
+        public static Stream GetCompressedPayloadStream(RpmPackage package)
+        {
+            if (package == null)
+            {
+                throw new ArgumentNullException(nameof(package));
+            }
+
+            SubStream compressedPayloadStream = new SubStream(
+                stream: package.Stream,
+                offset: package.PayloadOffset,
+                length: package.Stream.Length - package.PayloadOffset,
+                leaveParentOpen: true,
+                readOnly: true);
+
+            return compressedPayloadStream;
+        }
+
+        /// <summary>
         /// Gets a <see cref="Stream"/> which allows reading the decompressed payload data.
         /// </summary>
         /// <param name="package">
@@ -48,15 +74,28 @@ namespace Packaging.Targets.Rpm
                 throw new ArgumentNullException(nameof(package));
             }
 
-            var compressor = (string)package.Header.Records[IndexTag.RPMTAG_PAYLOADCOMPRESSOR].Value;
+            var compressedPayloadStream = GetCompressedPayloadStream(package);
 
-            SubStream payloadStream = new SubStream(
-                stream: package.Stream,
-                offset: package.PayloadOffset,
-                length: package.Stream.Length - package.PayloadOffset,
-                leaveParentOpen: true,
-                readOnly: true);
-            var payloadDecompressedStream = GetPayloadDecompressor(payloadStream, compressor);
+            return GetDecompressedPayloadStream(package, compressedPayloadStream);
+        }
+
+
+        /// <summary>
+        /// Gets a <see cref="Stream"/> which allows reading the decompressed payload data.
+        /// </summary>
+        /// <param name="package">
+        /// The package for which to read the decompressed payload data.
+        /// </param>
+        /// <param name="compressedPayloadStream">
+        /// The compressed payload stream.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Stream"/> which allows reading the decompressed payload data.
+        /// </returns>
+        public static Stream GetDecompressedPayloadStream(RpmPackage package, Stream compressedPayloadStream)
+        {
+            var compressor = (string)package.Header.Records[IndexTag.RPMTAG_PAYLOADCOMPRESSOR].Value;
+            var payloadDecompressedStream = GetPayloadDecompressor(compressedPayloadStream, compressor);
 
             return payloadDecompressedStream;
         }

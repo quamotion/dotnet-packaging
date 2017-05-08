@@ -1,6 +1,7 @@
 ﻿using Org.BouncyCastle.Bcpg.OpenPgp;
 using Packaging.Targets.IO;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -61,6 +62,25 @@ namespace Packaging.Targets.Rpm
                     return h.Offset;
                 }
             }
+
+            set
+            {
+                IndexHeader header = default(IndexHeader);
+                header.Offset = value;
+                header.Count = 0x10;
+                header.Type = IndexType.RPM_BIN_TYPE;
+                header.Tag = (uint)(SignatureTag.RPMTAG_HEADERSIGNATURES);
+
+                byte[] data;
+
+                using (MemoryStream s = new MemoryStream())
+                {
+                    s.WriteStruct(header);
+                    data = s.ToArray();
+                }
+
+                this.SetByteArray(SignatureTag.RPMTAG_HEADERSIGNATURES, data);
+            }
         }
 
         /// <summary>
@@ -68,10 +88,8 @@ namespace Packaging.Targets.Rpm
         /// </summary>
         public byte[] Sha1Hash
         {
-            get
-            {
-                return StringToByteArray((string)this.Package.Signature.Records[SignatureTag.RPMSIGTAG_SHA1].Value);
-            }
+            get { return StringToByteArray((string)this.Package.Signature.Records[SignatureTag.RPMSIGTAG_SHA1].Value); }
+            set { this.SetString(SignatureTag.RPMSIGTAG_SHA1, BitConverter.ToString(value).Replace("-", string.Empty).ToLower()); }
         }
 
         /// <summary>
@@ -79,10 +97,8 @@ namespace Packaging.Targets.Rpm
         /// </summary>
         public byte[] MD5Hash
         {
-            get
-            {
-                return (byte[])this.Package.Signature.Records[SignatureTag.RPMSIGTAG_MD5].Value;
-            }
+            get { return (byte[])this.Package.Signature.Records[SignatureTag.RPMSIGTAG_MD5].Value; }
+            set { this.SetByteArray(SignatureTag.RPMSIGTAG_MD5, value); }
         }
 
         /// <summary>
@@ -90,10 +106,8 @@ namespace Packaging.Targets.Rpm
         /// </summary>
         public PgpSignature HeaderPgpSignature
         {
-            get
-            {
-                return this.GetPgpSignature(SignatureTag.RPMSIGTAG_RSA);
-            }
+            get { return this.GetPgpSignature(SignatureTag.RPMSIGTAG_RSA); }
+            set { this.SetPgpSignature(SignatureTag.RPMSIGTAG_RSA, value); }
         }
 
         /// <summary>
@@ -101,10 +115,8 @@ namespace Packaging.Targets.Rpm
         /// </summary>
         public PgpSignature HeaderAndPayloadPgpSignature
         {
-            get
-            {
-                return this.GetPgpSignature(SignatureTag.RPMSIGTAG_PGP);
-            }
+            get { return this.GetPgpSignature(SignatureTag.RPMSIGTAG_PGP); }
+            set { this.SetPgpSignature(SignatureTag.RPMSIGTAG_PGP, value); }
         }
 
         /// <summary>
@@ -112,10 +124,8 @@ namespace Packaging.Targets.Rpm
         /// </summary>
         public int HeaderAndPayloadSize
         {
-            get
-            {
-                return (int)this.Package.Signature.Records[SignatureTag.RPMSIGTAG_SIZE].Value;
-            }
+            get { return (int)this.Package.Signature.Records[SignatureTag.RPMSIGTAG_SIZE].Value; }
+            set { this.SetInt(SignatureTag.RPMSIGTAG_SIZE, value); }
         }
 
         /// <summary>
@@ -123,10 +133,8 @@ namespace Packaging.Targets.Rpm
         /// </summary>
         public int UncompressedPayloadSize
         {
-            get
-            {
-                return (int)this.Package.Signature.Records[SignatureTag.RPMSIGTAG_PAYLOADSIZE].Value;
-            }
+            get { return (int)this.Package.Signature.Records[SignatureTag.RPMSIGTAG_PAYLOADSIZE].Value; }
+            set { this.SetInt(SignatureTag.RPMSIGTAG_PAYLOADSIZE, value); }
         }
 
         /// <summary>
@@ -150,6 +158,14 @@ namespace Packaging.Targets.Rpm
                 PgpSignature signature = signatureList[0];
                 return signature;
             }
+        }
+
+        private void SetPgpSignature(SignatureTag tag, PgpSignature signature)
+        {
+            PgpSignatureList signatureList = new PgpSignatureList(signature);
+            byte[] value = signature.GetEncoded();
+
+            this.SetByteArray(tag, value);
         }
 
         /// <summary>
@@ -274,6 +290,76 @@ namespace Packaging.Targets.Rpm
             }
 
             return true;
+        }
+
+        protected void SetInt(SignatureTag tag, int value)
+        {
+            this.SetSingleValue(tag, IndexType.RPM_INT32_TYPE, value);
+        }
+
+        protected void SetString(SignatureTag tag, string value)
+        {
+            this.SetSingleValue(tag, IndexType.RPM_STRING_TYPE, value);
+        }
+
+        protected void SetByteArray(SignatureTag tag, byte[] value)
+        {
+            this.SetValue(tag, IndexType.RPM_BIN_TYPE, value);
+        }
+
+        protected void SetValue<T>(SignatureTag tag, IndexType type, T[] value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            var collection = new Collection<T>(value);
+
+            IndexRecord record = new IndexRecord()
+            {
+                Header = new IndexHeader()
+                {
+                    Count = collection.Count,
+                    Offset = 0,
+                    Tag = (uint)tag,
+                    Type = type
+                },
+                Value = collection
+            };
+
+            if (!this.Package.Signature.Records.ContainsKey(tag))
+            {
+                this.Package.Signature.Records.Add(tag, record);
+            }
+            else
+            {
+                this.Package.Signature.Records[tag] = record;
+            }
+        }
+
+        protected void SetSingleValue<T>(SignatureTag tag, IndexType type, T value)
+        {
+            IndexRecord record = new IndexRecord()
+            {
+                Header = new IndexHeader()
+                {
+                    Count = 1,
+                    Offset = 0,
+                    Tag = (uint)tag,
+                    Type = type
+                },
+                Value = value
+            };
+
+            if (!this.Package.Signature.Records.ContainsKey(tag))
+            {
+                this.Package.Signature.Records.Add(tag, record);
+            }
+            else
+            {
+                this.Package.Signature.Records[tag] = record;
+            }
         }
     }
 }

@@ -640,6 +640,8 @@ namespace Packaging.Targets.Rpm
 
                 this.SetStringArray(IndexTag.RPMTAG_CLASSDICT, classDict.ToArray());
                 this.SetIntArray(IndexTag.RPMTAG_DEPENDSDICT, dependsDict.ToArray());
+
+                this.Size = files.Where(f => f.Mode.HasFlag(LinuxFileMode.S_IFREG)).Sum(f => f.Size) - 0x24;
             }
         }
 

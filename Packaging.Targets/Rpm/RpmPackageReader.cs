@@ -57,8 +57,8 @@ namespace Packaging.Targets.Rpm
                     });
             }
 
-            section.Data = new byte[section.Header.HeaderSize];
-            stream.Read(section.Data, 0, (int)section.Header.HeaderSize);
+            var data = new byte[section.Header.HeaderSize];
+            stream.Read(data, 0, (int)section.Header.HeaderSize);
 
             var headerSize = Marshal.SizeOf<IndexHeader>() * section.Records.Count;
 
@@ -74,11 +74,11 @@ namespace Packaging.Targets.Rpm
                 switch (record.Header.Type)
                 {
                     case IndexType.RPM_CHAR_TYPE:
-                        record.Value = (char)section.Data[offset];
+                        record.Value = (char)data[offset];
                         break;
 
                     case IndexType.RPM_INT8_TYPE:
-                        record.Value = (byte)section.Data[offset];
+                        record.Value = (byte)data[offset];
                         break;
 
                     case IndexType.RPM_INT16_TYPE:
@@ -86,7 +86,7 @@ namespace Packaging.Targets.Rpm
 
                         for (int i = 0; i < record.Header.Count; i++)
                         {
-                            Array.Copy(section.Data, offset + i * sizeof(short), int16Buffer, 0, sizeof(short));
+                            Array.Copy(data, offset + i * sizeof(short), int16Buffer, 0, sizeof(short));
                             Array.Reverse(int16Buffer);
                             shortValues.Add(BitConverter.ToInt16(int16Buffer, 0));
                         }
@@ -107,7 +107,7 @@ namespace Packaging.Targets.Rpm
 
                         for (int i = 0; i < record.Header.Count; i++)
                         {
-                            Array.Copy(section.Data, offset + i * sizeof(int), int32Buffer, 0, sizeof(int));
+                            Array.Copy(data, offset + i * sizeof(int), int32Buffer, 0, sizeof(int));
                             Array.Reverse(int32Buffer);
                             intValues.Add(BitConverter.ToInt32(int32Buffer, 0));
                         }
@@ -128,7 +128,7 @@ namespace Packaging.Targets.Rpm
 
                         for (int i = 0; i < record.Header.Count; i++)
                         {
-                            Array.Copy(section.Data, offset + i * sizeof(long), int64Buffer, 0, sizeof(long));
+                            Array.Copy(data, offset + i * sizeof(long), int64Buffer, 0, sizeof(long));
                             Array.Reverse(int64Buffer);
                             longValues.Add(BitConverter.ToInt64(int64Buffer, 0));
                         }
@@ -145,7 +145,7 @@ namespace Packaging.Targets.Rpm
                         break;
 
                     case IndexType.RPM_STRING_TYPE:
-                        record.Value = ReadNullTerminatedString(ref offset, section.Data);
+                        record.Value = ReadNullTerminatedString(ref offset, data);
                         break;
 
                     case IndexType.RPM_I18NSTRING_TYPE:
@@ -154,7 +154,7 @@ namespace Packaging.Targets.Rpm
 
                         for (int i = 0; i < record.Header.Count; i++)
                         {
-                            strings.Add(ReadNullTerminatedString(ref offset, section.Data));
+                            strings.Add(ReadNullTerminatedString(ref offset, data));
                         }
 
                         record.Value = strings;
@@ -162,7 +162,7 @@ namespace Packaging.Targets.Rpm
 
                     case IndexType.RPM_BIN_TYPE:
                         byte[] value = new byte[record.Header.Count];
-                        Array.Copy(section.Data, offset, value, 0, (int)record.Header.Count);
+                        Array.Copy(data, offset, value, 0, (int)record.Header.Count);
                         record.Value = value;
                         break;
 
