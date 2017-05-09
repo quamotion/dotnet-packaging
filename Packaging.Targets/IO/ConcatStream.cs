@@ -33,13 +33,20 @@ namespace DiscUtils.Internal
     internal class ConcatStream : Stream
     {
         private readonly bool _canWrite;
+        private readonly bool leaveOpen;
 
         private long _position;
         private Stream[] _streams;
 
         public ConcatStream(params Stream[] streams)
+            : this(false, streams)
+        {
+        }
+
+        public ConcatStream(bool leaveOpen, params Stream[] streams)
         {
             _streams = streams;
+            this.leaveOpen = leaveOpen;
 
             // Only allow writes if all streams can be written
             _canWrite = true;
@@ -218,9 +225,12 @@ namespace DiscUtils.Internal
             {
                 if (disposing && _streams != null)
                 {
-                    foreach (Stream stream in _streams)
+                    if (!this.leaveOpen)
                     {
-                        stream.Dispose();
+                        foreach (Stream stream in _streams)
+                        {
+                            stream.Dispose();
+                        }
                     }
 
                     _streams = null;

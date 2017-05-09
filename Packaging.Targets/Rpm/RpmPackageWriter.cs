@@ -60,7 +60,7 @@ namespace Packaging.Targets.Rpm
             // Then write out any record which may be new.
             foreach (var record in section.Records)
             {
-                if (!section.Records.ContainsKey(record.Key))
+                if (!order.Contains(record.Key))
                 {
                     stream.WriteStruct(record.Value.Header);
                 }

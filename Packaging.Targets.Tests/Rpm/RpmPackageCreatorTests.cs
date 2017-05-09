@@ -209,6 +209,48 @@ namespace Packaging.Targets.Tests.Rpm
             }
         }
 
+        /// <summary>
+        /// Tests the <see cref="RpmPackageCreator.CreatePackage(Stream, string, string, string, string, Action{RpmMetadata}, PgpPrivateKey, Stream)"/>
+        /// </summary>
+        [Fact]
+        public void CreatePackageTest()
+        {
+            var krgen = PgpSigner.GenerateKeyRingGenerator("dotnet", "dotnet");
+            var secretKeyRing = krgen.GenerateSecretKeyRing();
+            var privateKey = secretKeyRing.GetSecretKey().ExtractPrivateKey("dotnet".ToCharArray());
+            var publicKey = secretKeyRing.GetPublicKey();
+
+            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (var targetStream = File.Open(@"RpmPackageCreatorTests_CreateTest.rpm", FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+            {
+                var originalPackage = RpmPackageReader.Read(stream);
+
+                using (var payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
+                {
+                    RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
+                    creator.CreatePackage(
+                        payloadStream,
+                        "libplist",
+                        "2.0.1.151",
+                        "x86_64",
+                        "1.1",
+                        (metadata) => PlistMetadata.ApplyDefaultMetadata(metadata),
+                        privateKey,
+                        targetStream);
+                }
+            }
+
+            using (var targetStream = File.Open(@"RpmPackageCreatorTests_CreateTest.rpm", FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                var package = RpmPackageReader.Read(targetStream);
+
+                var metadata = new RpmMetadata(package);
+                var signature = new RpmSignature(package);
+
+                Assert.True(signature.Verify(publicKey));
+            }
+        }
+
         private void AssertTagEqual(SignatureTag tag, RpmPackage originalPackage, RpmPackage package)
         {
             var originalRecord = originalPackage.Signature.Records[tag];

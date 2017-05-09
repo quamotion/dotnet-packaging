@@ -61,6 +61,7 @@ namespace Packaging.Targets.IO
         {
         }
 
+        /// <inheritdoc/>
         public XZOutputStream(Stream s, int threads, uint preset, bool leaveOpen)
         {
             _mInnerStream = s;
@@ -96,6 +97,7 @@ namespace Packaging.Targets.IO
             throw GetError(ret);
         }
 
+        /// <inheritdoc/>
         public override bool CanRead
         {
             get
@@ -105,6 +107,7 @@ namespace Packaging.Targets.IO
             }
         }
 
+        /// <inheritdoc/>
         public override bool CanSeek
         {
             get
@@ -114,6 +117,7 @@ namespace Packaging.Targets.IO
             }
         }
 
+        /// <inheritdoc/>
         public override bool CanWrite
         {
             get
@@ -123,6 +127,7 @@ namespace Packaging.Targets.IO
             }
         }
 
+        /// <inheritdoc/>
         public override long Length
         {
             get
@@ -132,6 +137,7 @@ namespace Packaging.Targets.IO
             }
         }
 
+        /// <inheritdoc/>
         public override long Position
         {
             get
@@ -147,29 +153,34 @@ namespace Packaging.Targets.IO
             }
         }
 
+        /// <inheritdoc/>
         public override void Flush()
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public override long Seek(long offset, SeekOrigin origin)
         {
             this.EnsureNotDisposed();
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public override void SetLength(long value)
         {
             this.EnsureNotDisposed();
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public override int Read(byte[] buffer, int offset, int count)
         {
             this.EnsureNotDisposed();
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public override void Write(byte[] buffer, int offset, int count)
         {
             this.EnsureNotDisposed();
@@ -206,6 +217,7 @@ namespace Packaging.Targets.IO
             } while (_lzmaStream.AvailIn != 0);
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             // finish encoding only if all input has been successfully processed
@@ -268,11 +280,14 @@ namespace Packaging.Targets.IO
             }
         }
 
+        /// <summary>
+        /// Throws an exception if this stream is disposed of.
+        /// </summary>
         private void EnsureNotDisposed()
         {
             if (this.disposed)
             {
-                throw new ObjectDisposedException(nameof(XZInputStream));
+                throw new ObjectDisposedException(nameof(XZOutputStream));
             }
         }
 

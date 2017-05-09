@@ -200,7 +200,12 @@ namespace Packaging.Targets.Rpm
         /// <returns>
         /// <see langword="true"/> if the verification was successful; otherwise, <see langword="false"/>.
         /// </returns>
-        public bool Verify(Stream pgpPublicKey)
+        public bool Verify(Stream pgpPublicKeyStream)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Verify(PgpPublicKey pgpPublicKey)
         {
             // 1 Verify the header signature immutable block: make sure all records are marked as immutable
             var immutableRegionSize = this.ImmutableRegionSize;
@@ -249,7 +254,6 @@ namespace Packaging.Targets.Rpm
                 // 3 for the header
                 var headerPgpSignature = this.HeaderPgpSignature;
                 headerStream.Position = 0;
-                pgpPublicKey.Position = 0;
 
                 if (!PgpSigner.VerifySignature(headerPgpSignature, pgpPublicKey, headerStream))
                 {
@@ -258,7 +262,6 @@ namespace Packaging.Targets.Rpm
 
                 var headerAndPayloadPgpSignature = this.HeaderAndPayloadPgpSignature;
                 headerAndPayloadStream.Position = 0;
-                pgpPublicKey.Position = 0;
 
                 if (!PgpSigner.VerifySignature(headerAndPayloadPgpSignature, pgpPublicKey, headerAndPayloadStream))
                 {

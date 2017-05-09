@@ -49,6 +49,144 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
+        /// Creates a RPM Package.
+        /// </summary>
+        /// <param name="payloadStream">
+        /// A <see cref="Stream"/> which contains the CPIO archive for the RPM package.
+        /// </param>
+        /// <param name="name">
+        /// The name of the package.
+        /// </param>
+        /// <param name="version">
+        /// The version of the software.
+        /// </param>
+        /// <param name="arch">
+        /// The architecture targetted by the package.
+        /// </param>
+        /// <param name="release">
+        /// The release version.
+        /// </param>
+        /// <param name="additionalMetadata">
+        /// Any additional metadata.
+        /// </param>
+        /// <param name="privateKey">
+        /// The private key to use when signing the package.
+        /// </param>
+        /// <param name="targetStream">
+        /// The <see cref="Stream"/> to which to write the package.
+        /// </param>
+        public void CreatePackage(
+            Stream payloadStream,
+            string name,
+            string version,
+            string arch,
+            string release,
+            Action<RpmMetadata> additionalMetadata,
+            PgpPrivateKey privateKey,
+            Stream targetStream)
+        {
+            // This routine goes roughly like:
+            // 1. Calculate all the metadata, including a signature,
+            //    but use an empty compressed payload to calculate
+            //    the signature
+            // 2. Write out the rpm file, and compress the payload
+            // 3. Update the signature
+            //
+            // This way, we avoid having to compress the payload into a temporary
+            // file.
+
+            // Core routine to populate files and dependencies (part of the metadata
+            // in the header)
+            RpmPackage package = new RpmPackage();
+            var metadata = new RpmMetadata(package)
+            {
+                Name = name,
+                Version = version,
+                Arch = arch,
+                Release = release,
+            };
+
+            this.AddPackageProvides(metadata);
+            this.AddLdDependencies(metadata);
+
+            using (CpioFile payload = new CpioFile(payloadStream, leaveOpen: true))
+            {
+                var files = this.CreateFiles(payload);
+                metadata.Files = files;
+            }
+
+            this.AddRpmDependencies(metadata);
+
+            // User-set metadata
+            additionalMetadata(metadata);
+
+            this.CalculateHeaderOffsets(package);
+
+            using (MemoryStream dummyCompressedPayload = new MemoryStream())
+            {
+                using (XZOutputStream dummyPayloadCompressor = new XZOutputStream(dummyCompressedPayload, 1, XZOutputStream.DefaultPreset, leaveOpen: true))
+                {
+                    dummyPayloadCompressor.Write(new byte[] { 0 }, 0, 1);
+                }
+
+                this.CalculateSignature(package, privateKey, dummyCompressedPayload);
+            }
+
+            this.CalculateSignatureOffsets(package);
+
+            // Write out all the data - includes the lead
+            byte[] nameBytes = new byte[66];
+
+            Encoding.UTF8.GetBytes(name, 0, name.Length, nameBytes, 0);
+
+            var lead = new RpmLead()
+            {
+                ArchNum = 1,
+                Magic = 0xedabeedb,
+                Major = 0x03,
+                Minor = 0x00,
+                NameBytes = nameBytes,
+                OsNum = 0x0001,
+                Reserved = new byte[16],
+                SignatureType = 0x0005,
+                Type = 0x0000,
+            };
+
+            // Write out the lead, signature and header
+            targetStream.Position = 0;
+            targetStream.SetLength(0);
+
+            targetStream.WriteStruct(lead);
+            this.WriteSignature(package, targetStream);
+            this.WriteHeader(package, targetStream);
+
+            // Write out the compressed payload
+            int compressedPayloadOffset = (int)targetStream.Position;
+
+            using (XZOutputStream compressor = new XZOutputStream(targetStream, 1, XZOutputStream.DefaultPreset, leaveOpen: true))
+            {
+                payloadStream.CopyTo(compressor);
+            }
+
+            using (SubStream compressedPayloadStream = new SubStream(
+                targetStream,
+                compressedPayloadOffset,
+                targetStream.Length - compressedPayloadOffset,
+                leaveParentOpen: true,
+                readOnly: true))
+            {
+                this.CalculateSignature(package, privateKey, compressedPayloadStream);
+                this.CalculateSignatureOffsets(package);
+            }
+
+            // Update the lead and signature
+            targetStream.Position = 0;
+
+            targetStream.WriteStruct(lead);
+            this.WriteSignature(package, targetStream);
+        }
+
+        /// <summary>
         /// Creates the metadata for all files in the <see cref="CpioFile"/>.
         /// </summary>
         /// <param name="payload">
@@ -293,7 +431,7 @@ namespace Packaging.Targets.Rpm
         public void CalculateSignatureOffsets(RpmPackage package)
         {
             var signature = new RpmSignature(package);
-            signature.ImmutableRegionSize = -1 * Marshal.SizeOf<IndexHeader>() * (package.Signature.Records.Count + 1);
+            signature.ImmutableRegionSize = -1 * Marshal.SizeOf<IndexHeader>() * (package.Signature.Records.Count);
 
             CalculateSectionOffsets(package.Signature, k => (int)k);
         }
@@ -310,9 +448,23 @@ namespace Packaging.Targets.Rpm
         public MemoryStream GetHeaderStream(RpmPackage package)
         {
             MemoryStream stream = new MemoryStream();
-            RpmPackageWriter.WriteSection(stream, package.Header, DefaultOrder.Header);
+            WriteHeader(package, stream);
             stream.Position = 0;
             return stream;
+        }
+
+        /// <summary>
+        /// Writes the header to a <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="package">
+        /// The package for which to write the header.
+        /// </param>
+        /// <param name="targetStream">
+        /// The <see cref="Stream"/> to which to write the header.
+        /// </param>
+        public void WriteHeader(RpmPackage package, Stream targetStream)
+        {
+            RpmPackageWriter.WriteSection(targetStream, package.Header, DefaultOrder.Header);
         }
 
         /// <summary>
@@ -327,9 +479,23 @@ namespace Packaging.Targets.Rpm
         public MemoryStream GetSignatureStream(RpmPackage package)
         {
             MemoryStream stream = new MemoryStream();
-            RpmPackageWriter.WriteSection(stream, package.Signature, DefaultOrder.Signature);
+            WriteSignature(package, stream);
             stream.Position = 0;
             return stream;
+        }
+
+        /// <summary>
+        /// Writes the signature to a <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="package">
+        /// The package for which to write the signature.
+        /// </param>
+        /// <param name="targetStream">
+        /// The <see cref="Stream"/> tow chih to write the package.
+        /// </param>
+        public void WriteSignature(RpmPackage package, Stream targetStream)
+        {
+            RpmPackageWriter.WriteSection(targetStream, package.Signature, DefaultOrder.Signature);
         }
 
         /// <summary>
@@ -349,7 +515,7 @@ namespace Packaging.Targets.Rpm
             RpmSignature signature = new RpmSignature(package);
 
             using (MemoryStream headerStream = this.GetHeaderStream(package))
-            using (ConcatStream headerAndPayloadStream = new ConcatStream(headerStream, compressedPayloadStream))
+            using (ConcatStream headerAndPayloadStream = new ConcatStream(leaveOpen: true, streams: new Stream[] { headerStream, compressedPayloadStream }))
             {
                 SHA1 sha = SHA1.Create();
                 signature.Sha1Hash = sha.ComputeHash(headerStream);
