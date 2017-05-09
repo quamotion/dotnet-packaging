@@ -167,7 +167,7 @@ namespace Packaging.Targets.IO
         /// Pointer to lzma_stream that is at least initialized with LZMA_STREAM_INIT.
         /// </param>
         /// <remarks>
-        /// After <see cref="lzma_end(ref LzmaStream)"/>, <see cref="LzmaStream.internalState"/> is guaranteed to be <see cref="IntPtr.Zero"/>.
+        /// After <see cref="lzma_end(ref LzmaStream)"/>, <see cref="LzmaStream.InternalState"/> is guaranteed to be <see cref="IntPtr.Zero"/>.
         /// No other members of the <see cref="LzmaStream"/> structure are touched.
         /// zlib indicates an error if application end()s unfinished stream structure.
         /// liblzma doesn't do this, and assumes that
@@ -176,5 +176,146 @@ namespace Packaging.Targets.IO
         /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/base.h"/>
         [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void lzma_end(ref LzmaStream stream);
+
+        /// <summary>
+        /// <para>
+        /// Initialize .xz Stream encoder using a preset number.
+        /// </para>
+        /// <para>
+        /// This function is intended for those who just want to use the basic features if liblzma(that is, most developers out there).
+        /// </para>
+        /// <para>
+        /// If initialization fails(return value is not LZMA_OK), all the memory allocated for *strm by liblzma is always freed.Thus, there is no need to call lzma_end() after failed initialization.
+        /// </para>
+        /// <para>If initialization succeeds, use lzma_code() to do the actual encoding.Valid values for `action' (the second argument of lzma_code()) are LZMA_RUN, LZMA_SYNC_FLUSH, LZMA_FULL_FLUSH, and LZMA_FINISH. In future, there may be compression levels or flags that don't support LZMA_SYNC_FLUSH.
+        /// </para>
+        /// </summary>
+        /// <param name="stream">
+        /// Pointer to lzma_stream that is at least initialized with LZMA_STREAM_INIT.
+        /// </param>
+        /// <param name="preset">
+        /// Compression preset to use. A preset consist of level number and zero or more flags. Usually flags aren't used, so preset is simply a number [0, 9] which match the options -0 ... -9 of the xz command line tool. Additional flags can be be set using bitwise-or with the preset level number, e.g. 6 | LZMA_PRESET_EXTREME.
+        /// </param>
+        /// <param name="check">
+        /// Integrity check type to use. See check.h for available checks. The xz command line tool defaults to LZMA_CHECK_CRC64, which is a good choice if you are unsure. LZMA_CHECK_CRC32 is good too as long as the uncompressed file is not many gigabytes.
+        /// </param>
+        /// <returns>
+        /// <para>
+        /// - LZMA_OK: Initialization succeeded. Use lzma_code() to encode your data.
+        /// </para>
+        /// <para>- LZMA_MEM_ERROR: Memory allocation failed.
+        /// </para>
+        /// <para>
+        /// - LZMA_OPTIONS_ERROR: The given compression preset is not supported by this build of liblzma.
+        /// </para>
+        /// <para>
+        /// - LZMA_UNSUPPORTED_CHECK: The given check type is not supported by this liblzma build.
+        /// </para>
+        /// <para>
+        /// - LZMA_PROG_ERROR: One or more of the parameters have values that will never be valid. For example, strm == NULL.
+        /// </para>
+        /// </returns>
+        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern LzmaResult lzma_easy_encoder(ref LzmaStream stream, uint preset, LzmaCheck check);
+
+        /// <summary>
+        /// <para>
+        /// Initialize multithreaded .xz Stream encoder
+        /// </para>
+        /// <para>
+        /// This provides the functionality of lzma_easy_encoder() and
+        /// lzma_stream_encoder() as a single function for multithreaded use.
+        /// </para>
+        /// <para>
+        /// The supported actions for lzma_code() are LZMA_RUN, LZMA_FULL_FLUSH,
+        /// LZMA_FULL_BARRIER, and LZMA_FINISH. Support for LZMA_SYNC_FLUSH might be
+        /// added in the future.
+        /// </para>
+        /// </summary>
+        /// <param name="stream">
+        /// Pointer to properly prepared lzma_stream
+        /// </param>
+        /// <param name="mt">
+        /// Pointer to multithreaded compression options
+        /// </param>
+        /// <returns></returns>
+        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern LzmaResult lzma_stream_encoder_mt(ref LzmaStream stream, ref LzmaMT mt);
+
+        /// <summary>
+        /// <para>
+        /// Calculate output buffer size for single-call Stream encoder
+        /// </para>
+        /// <para>
+        /// When trying to compress uncompressible data, the encoded size will be slightly bigger than the input data.This function calculates how much output buffer space is required to be sure that lzma_stream_buffer_encode() doesn't return LZMA_BUF_ERROR.
+        /// </para>
+        /// <para>
+        /// The calculated value is not exact, but it is guaranteed to be big enough.The actual maximum output space required may be slightly smaller (up to about 100 bytes). This should not be a problem in practice.
+        /// </para>
+        /// <para>
+        /// If the calculated maximum size doesn't fit into size_t or would make the Stream grow past LZMA_VLI_MAX (which should never happen in practice), zero is returned to indicate the error.
+        /// </para>
+        /// </summary>
+        /// <param name="uncompressed_size"></param>
+        /// <returns>
+        /// </returns>
+        /// <remarks>
+        /// The limit calculated by this function applies only to single-call encoding. Multi-call encoding may (and probably will) have larger maximum expansion when encoding uncompressible data. Currently there is no function to calculate the maximum expansion of multi-call encoding.
+        /// </remarks>
+        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern UIntPtr lzma_stream_buffer_bound(UIntPtr uncompressed_size);
+
+        /// <summary>
+        /// Single-call .xz Stream encoding using a preset number.
+        /// </summary>
+        /// <param name="preset">
+        /// Compression preset to use. See the description in lzma_easy_encoder().
+        /// </param>
+        /// <param name="check">
+        /// Type of the integrity check to calculate from uncompressed data.
+        /// </param>
+        /// <param name="allocator">
+        /// lzma_allocator for custom allocator functions. Set to NULL to use malloc() and free().
+        /// </param>
+        /// <param name="in">
+        /// Beginning of the input buffer
+        /// </param>
+        /// <param name="in_size">
+        /// Size of the input buffer
+        /// </param>
+        /// <param name="out">
+        /// Beginning of the output buffer
+        /// </param>
+        /// <param name="out_pos">
+        /// The next byte will be written to out[*out_pos]. *out_pos is updated only if encoding succeeds.
+        /// </param>
+        /// <param name="out_size">
+        /// Size of the out buffer; the first byte into which no data is written to is out[out_size].
+        /// </param>
+        /// <returns>
+        /// <para>
+        /// - LZMA_OK: Encoding was successful.
+        /// </para>
+        /// <para>
+        /// - LZMA_BUF_ERROR: Not enough output buffer space.
+        /// </para>
+        /// <para>
+        /// - LZMA_OPTIONS_ERROR
+        /// </para>
+        /// <para>
+        /// - LZMA_MEM_ERROR
+        /// </para>
+        /// <para>
+        /// - LZMA_DATA_ERROR
+        /// </para>
+        /// <para>
+        /// - LZMA_PROG_ERROR
+        /// </para>
+        /// </returns>
+        /// <remarks>
+        /// The maximum required output buffer size can be calculated with lzma_stream_buffer_bound()
+        /// </remarks>
+        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        internal unsafe static extern LzmaResult lzma_easy_buffer_encode(UInt32 preset, LzmaCheck check, void* allocator, byte[] @in, UIntPtr in_size, byte[] @out, UIntPtr* out_pos, UIntPtr out_size);
     }
 }

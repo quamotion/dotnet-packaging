@@ -97,7 +97,7 @@ namespace Packaging.Targets.IO
         /// <summary>
         /// Internal state is not visible to applications.
         /// </summary>
-        private readonly IntPtr internalState;
+        public readonly IntPtr InternalState;
 
         /// <summary>
         /// Reserved space to allow possible future extensions without
