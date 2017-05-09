@@ -117,8 +117,45 @@ namespace Packaging.Targets.Rpm
 
             this.AddRpmDependencies(metadata);
 
+            // Try to define valid defaults for most metadata
+            metadata.Locales = new Collection<string> { "C" }; // Should come before any localizable data.
+            metadata.BuildHost = "dotnet-rpm";
+            metadata.BuildTime = DateTimeOffset.Now;
+            metadata.Cookie = "dotnet-rpm";
+            metadata.FileDigetsAlgo = PgpHashAlgo.PGPHASHALGO_SHA256;
+            metadata.Group = "System Environment/Libraries";
+            metadata.OptFlags = string.Empty;
+            metadata.Os = "linux";
+            metadata.PayloadCompressor = "xz";
+            metadata.PayloadFlags = "2";
+            metadata.PayloadFormat = "cpio";
+            metadata.Platform = "x86_64-redhat-linux-gnu";
+            metadata.RpmVersion = "4.11.3";
+            metadata.SourcePkgId = new byte[0x10];
+            metadata.SourceRpm = $"{name}-{version}-{release}.src.rpm";
+            metadata.PostInProg = "/sbin/ldconfig";
+            metadata.PostUnProg = "/sbin/ldconfig";
+
+            // Not providing these (or setting empty values) would cause rpmlint errors
+            metadata.Description = $"{name} version {version}-{release}";
+            metadata.Summary = $"{name} version {version}-{release}";
+            metadata.License = $"{name} License";
+
+            metadata.Distribution = string.Empty;
+            metadata.DistUrl = string.Empty;
+            metadata.Url = string.Empty;
+            metadata.Vendor = string.Empty;
+
+            metadata.ChangelogEntries = new Collection<ChangelogEntry>()
+            {
+                new ChangelogEntry(DateTimeOffset.Now, "dotnet-rpm", "Created a RPM package using dotnet-rpm")
+            };
+
             // User-set metadata
-            additionalMetadata(metadata);
+            if (additionalMetadata != null)
+            {
+                additionalMetadata(metadata);
+            }
 
             this.CalculateHeaderOffsets(package);
 
@@ -165,6 +202,7 @@ namespace Packaging.Targets.Rpm
 
             using (XZOutputStream compressor = new XZOutputStream(targetStream, 1, XZOutputStream.DefaultPreset, leaveOpen: true))
             {
+                payloadStream.Position = 0;
                 payloadStream.CopyTo(compressor);
             }
 
