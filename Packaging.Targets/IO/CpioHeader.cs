@@ -130,6 +130,9 @@ namespace Packaging.Targets.IO
 
         /// <summary>
         /// Gets or sets the value of the <see cref="signature"/> field as a <see cref="string"/>.
+        /// The integer value octal 070701.  This value can be used to determine
+        /// whether this archive is written with little-endian or big-endian integers,
+        /// or ASCII.
         /// </summary>
         public string Signature
         {
@@ -166,6 +169,7 @@ namespace Packaging.Targets.IO
 
         /// <summary>
         /// Gets or sets the value of the <see cref="gid"/> field as a <see cref="uint"/>.
+        /// The numeric group id of the owner.
         /// </summary>
         public uint Gid
         {
@@ -247,6 +251,7 @@ namespace Packaging.Targets.IO
 
         /// <summary>
         /// Gets or sets the value of the <see cref="check"/> field as a <see cref="uint"/>.
+        /// This field is always set to zero by writers and ignored by readers.
         /// </summary>
         public uint Check
         {

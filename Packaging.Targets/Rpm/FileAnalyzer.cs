@@ -77,6 +77,18 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <inheritdoc/>
+        public virtual bool IsExecutable(byte[] header)
+        {
+            if (ElfFile.IsElfFile(header))
+            {
+                ElfHeader elfHeader = ElfFile.ReadHeader(header);
+                return elfHeader.type.HasFlag(ElfType.Executable);
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc/>
         public virtual string DetermineClass(string filename, CpioHeader fileHeader, byte[] header)
         {
             // Very simplistic implementation - non-executable files are considered to be tet files.

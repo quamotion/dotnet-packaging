@@ -92,5 +92,7 @@ namespace Packaging.Targets.Rpm
         /// The class of this file.
         /// </returns>
         string DetermineClass(string fileName, CpioHeader fileHeader, byte[] header);
+
+        bool IsExecutable(byte[] header);
     }
 }

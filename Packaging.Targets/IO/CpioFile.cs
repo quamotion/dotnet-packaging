@@ -139,10 +139,11 @@ namespace Packaging.Targets.IO
 
             this.stream.WriteStruct(header);
             this.stream.Write(nameBytes, 0, nameBytes.Length);
+            this.stream.WriteByte(0); //Trailing 0
 
             // The pathname is followed by NUL bytes so that the total size of the fixed
             // header plus pathname is a multiple of four.
-            var headerSize = Marshal.SizeOf<CpioHeader>() + nameBytes.Length;
+            var headerSize = Marshal.SizeOf<CpioHeader>() + (int)header.NameSize;
             var paddingSize = PaddingSize(headerSize);
 
             for (int i = 0; i < paddingSize; i++)
@@ -264,7 +265,7 @@ namespace Packaging.Targets.IO
             }
         }
 
-        private static int PaddingSize(int value)
+        public static int PaddingSize(int value)
         {
             if (value % 4 == 0)
             {
