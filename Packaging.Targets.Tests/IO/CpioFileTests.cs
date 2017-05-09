@@ -95,5 +95,16 @@ namespace Packaging.Targets.Tests.IO
                 target.WriteTrailer();
             }
         }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(1, 3)]
+        [InlineData(2, 2)]
+        [InlineData(3, 1)]
+        [InlineData(4, 0)]
+        public void PaddingSizeTest(int value, int padded)
+        {
+            Assert.Equal(padded, CpioFile.PaddingSize(value));
+        }
     }
 }
