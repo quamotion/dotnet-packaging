@@ -17,17 +17,32 @@ namespace Packaging.Targets.Tests.Rpm
         /// Tests the <see cref="RpmPackageCreator.CreateFiles(CpioFile)"/> method, making sure the list of files which is returned
         /// for a given CPIO archive is correct. Uses the libplist RPM package as a test payload.
         /// </summary>
-        [Fact]
-        public void CreateFiles()
+        [InlineData(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm", "plist")]
+        [InlineData(@"Rpm\dotnet_test-1.0-0.noarch.rpm", "dotnet")]
+        [Theory]
+        public void CreateFiles(string rpm, string analyzerName)
         {
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead(rpm))
             {
                 var originalPackage = RpmPackageReader.Read(stream);
 
                 using (var payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
                 using (var cpio = new CpioFile(payloadStream, false))
                 {
-                    RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
+                    IFileAnalyzer analyzer = new FileAnalyzer();
+
+                    switch (analyzerName)
+                    {
+                        case "plist":
+                            analyzer = new PlistFileAnalyzer();
+                            break;
+
+                        case "dotnet":
+                            analyzer = new DotnetFileAnalyzer();
+                            break;
+                    }
+
+                    RpmPackageCreator creator = new RpmPackageCreator(analyzer);
                     var files = creator.CreateFiles(cpio);
 
                     var originalMetadata = new RpmMetadata(originalPackage);
@@ -241,6 +256,52 @@ namespace Packaging.Targets.Tests.Rpm
             }
 
             using (var targetStream = File.Open(@"RpmPackageCreatorTests_CreateTest.rpm", FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                var package = RpmPackageReader.Read(targetStream);
+
+                var metadata = new RpmMetadata(package);
+                var signature = new RpmSignature(package);
+
+                Assert.True(signature.Verify(publicKey));
+            }
+        }
+
+        [Fact]
+        public void CreateDemoPackageTest()
+        {
+            // To install:
+            //  sudo rpm -i dotnet-demo.rpm
+            // To uninstall:
+            //  sudo rpm -e dotnet-demo-0.1-0.1.x86_64
+            var krgen = PgpSigner.GenerateKeyRingGenerator("dotnet", "dotnet");
+            var secretKeyRing = krgen.GenerateSecretKeyRing();
+            var privateKey = secretKeyRing.GetSecretKey().ExtractPrivateKey("dotnet".ToCharArray());
+            var publicKey = secretKeyRing.GetPublicKey();
+
+            using (var targetStream = File.Open(@"dotnet-demo.rpm", FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+            using (var cpioStream = File.Open("dotnet-demo.cpio", FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+            {
+                // Create the CPIO file which will (hopefully) contain all the required files
+                CpioFileCreator cpioCreator = new CpioFileCreator();
+                cpioCreator.FromDirectory(
+                    @"C:\Users\frede\Source\Repos\dotnet-packaging\demo\bin\Debug\netcoreapp1.0\rhel.7-x64\publish\",
+                    "./usr/share/quamotion",
+                    cpioStream);
+                cpioStream.Position = 0;
+
+                RpmPackageCreator rpmCreator = new RpmPackageCreator();
+                rpmCreator.CreatePackage(
+                    cpioStream,
+                    "dotnet-demo",
+                    "0.1",
+                    "x86_64",
+                    "0.1",
+                    null,
+                    privateKey,
+                    targetStream);
+            }
+
+            using (var targetStream = File.Open(@"dotnet-demo.rpm", FileMode.Open, FileAccess.Read, FileShare.None))
             {
                 var package = RpmPackageReader.Read(targetStream);
 
