@@ -102,6 +102,27 @@ namespace Packaging.Targets.Rpm
                 return string.Empty;
             }
 
+            if (filename.EndsWith(".svg"))
+            {
+                return "SVG Scalable Vector Graphics image";
+            }
+            else if (filename.EndsWith(".ttf"))
+            {
+                return "TrueType font data";
+            }
+            else if (filename.EndsWith(".woff"))
+            {
+                return string.Empty;
+            }
+            else if (filename.EndsWith(".woff2"))
+            {
+                return string.Empty;
+            }
+            else if (filename.EndsWith(".eot"))
+            {
+                return string.Empty;
+            }
+
             if (!fileHeader.Mode.HasFlag(LinuxFileMode.S_IXGRP)
                 && !fileHeader.Mode.HasFlag(LinuxFileMode.S_IXOTH)
                 && !fileHeader.Mode.HasFlag(LinuxFileMode.S_IXUSR))
