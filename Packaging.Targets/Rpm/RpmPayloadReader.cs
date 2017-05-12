@@ -1,5 +1,6 @@
 ﻿using Packaging.Targets.IO;
 using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -11,18 +12,22 @@ namespace Packaging.Targets.Rpm
     /// </summary>
     internal class RpmPayloadReader
     {
-        public static void Read(RpmPackage package)
+        public static Collection<string> Read(RpmPackage package)
         {
             if (package == null)
             {
                 throw new ArgumentNullException(nameof(package));
             }
-            
+
+            Collection<string> names = new Collection<string>();
+
             using (var payloadDecompressedStream = GetDecompressedPayloadStream(package))
             using (CpioFile file = new CpioFile(payloadDecompressedStream, leaveOpen: true))
             {
                 while (file.Read())
                 {
+                    names.Add(file.EntryName);
+
                     using (Stream stream = file.Open())
                     {
                         byte[] data = new byte[stream.Length];
@@ -30,6 +35,8 @@ namespace Packaging.Targets.Rpm
                     }
                 }
             }
+
+            return names;
         }
 
         /// <summary>
