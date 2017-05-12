@@ -1,7 +1,26 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="Packaging.Targets.TarballTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard1.4\Packaging.Targets.dll" />
-  <UsingTask TaskName="Packaging.Targets.ZipTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard1.4\Packaging.Targets.dll" />
+  <UsingTask TaskName="Packaging.Targets.TarballTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard1.5\Packaging.Targets.dll" />
+  <UsingTask TaskName="Packaging.Targets.ZipTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard1.5\Packaging.Targets.dll" />
+  <UsingTask TaskName="Packaging.Targets.RpmTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard1.5\Packaging.Targets.dll" />
 
+  <Target Name="CreateRpm" DependsOnTargets="Publish">
+    <PropertyGroup>
+      <RpmPath>$(TargetDir)$(TargetName).$(AssemblyFileVersion)-$(RuntimeIdentifier).rpm</RpmPath>
+      <CpioPath>$(IntermediateOutputPath)$(TargetName).$(AssemblyFileVersion)-$(RuntimeIdentifier).cpio</CpioPath>
+      <Prefix>./usr/share/$(TargetName)</Prefix>
+      <Release>0</Release>
+      <PackageName>$(TargetName)</PackageName>
+    </PropertyGroup>
+    
+    <RpmTask PublishDir="$(PublishDir)"
+             RpmPath="$(RpmPath)"
+             CpioPath="$(CpioPath)"
+             Prefix="$(Prefix)"
+             Version="$(AssemblyFileVersion)"
+             Release="$(Release)"
+             PackageName="$(PackageName)"/>
+  </Target>
+  
   <Target Name="CreateTarball" DependsOnTargets="Publish">
     <PropertyGroup>
       <TarballPath>$(TargetDir)$(TargetName).$(AssemblyFileVersion)-$(RuntimeIdentifier).tar.gz</TarballPath>
