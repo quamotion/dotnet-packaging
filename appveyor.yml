@@ -11,6 +11,7 @@ build_script:
 on_success:
   - ps: Push-AppVeyorArtifact dotnet-tarball\bin\Release\dotnet-tarball.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
   - ps: Push-AppVeyorArtifact dotnet-zip\bin\Release\dotnet-zip.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
+  - ps: Push-AppVeyorArtifact dotnet-zip\bin\Release\dotnet-rpm.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
   - ps: Push-AppVeyorArtifact Packaging.Targets\bin\Release\Packaging.Targets.0.1.1-r$($env:APPVEYOR_BUILD_NUMBER).nupkg
   
 test_script:
@@ -19,3 +20,4 @@ test_script:
   - cmd: dotnet build
   - cmd: dotnet vstest bin\Debug\netcoreapp1.1\Packaging.Targets.Tests.dll /logger:trx;LogFileName=testresults.trx
   - ps: '& (Join-Path $env:APPVEYOR_BUILD_FOLDER "appveyor-testresults.ps1")'
+  - cmd: cd ..
