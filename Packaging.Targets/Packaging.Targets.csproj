@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFramework>netstandard1.4</TargetFramework>
+    <TargetFramework>netstandard1.5</TargetFramework>
     <VersionPrefix>0.1.1</VersionPrefix>
     <NugetPackageFolder Condition="$(NugetPackageFolder) == ''">$(USERPROFILE)\.nuget\packages</NugetPackageFolder>
     <Authors>Frederik Carlier</Authors>
@@ -13,19 +13,41 @@
     <RepositoryUrl>https://github.com/qmfrederik/dotnet-packaging/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.2" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
+    <PackageReference Include="System.Globalization.Extensions" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="build\*.*">
       <Pack>true</Pack>
       <PackagePath>build\</PackagePath>
     </Content>
-    <Content Include="$(NugetPackageFolder)\sharpziplib.netstandard\0.86.0.1\lib\netstandard1.3\SharpZipLib.NETStandard.dll" Link="false">
+    <Content Include="$(NugetPackageFolder)\sharpziplib.netstandard\0.86.0.1\lib\netstandard1.3\SharpZipLib.NETStandard.dll" Link="SharpZipLib.NETStandard.dll">
       <Pack>true</Pack>
-      <PackagePath>lib\netstandard1.4\</PackagePath>
+      <PackagePath>lib\$(TargetFramework)\</PackagePath>
     </Content>
+    <Content Include="$(NugetPackageFolder)\portable.bouncycastle\1.8.1.2\lib\netstandard1.3\BouncyCastle.Crypto.dll" Link="BouncyCastle.Crypto.dll">
+      <Pack>true</Pack>
+      <PackagePath>lib\$(TargetFramework)\</PackagePath>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="runtimes\win7-x64\native\lzma.dll">
+      <Pack>true</Pack>
+      <PackagePath>runtimes\win7-x64\native\</PackagePath>
+    </None>
+    <None Include="runtimes\win7-x64\native\lzma.dll" Link="lzma.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
