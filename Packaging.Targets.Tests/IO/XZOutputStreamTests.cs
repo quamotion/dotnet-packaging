@@ -32,7 +32,7 @@ namespace Packaging.Targets.Tests.IO
             }
 
             using (FileStream stream = File.Open(@"XZOutputStreamTests_CompressTextTest.txt.xz", FileMode.Open, FileAccess.Read, FileShare.None))
-            using (XZOutputStream decompressedStream = new XZOutputStream(stream))
+            using (XZInputStream decompressedStream = new XZInputStream(stream))
             {
                 byte[] data = new byte[1024];
                 int read = decompressedStream.Read(data, 0, data.Length);

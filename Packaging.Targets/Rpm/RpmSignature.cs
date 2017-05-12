@@ -202,7 +202,12 @@ namespace Packaging.Targets.Rpm
         /// </returns>
         public bool Verify(Stream pgpPublicKeyStream)
         {
-            throw new NotImplementedException();
+            var bundle = new PgpPublicKeyRingBundle(PgpUtilities.GetDecoderStream(pgpPublicKeyStream));
+            var publicKeyRings = bundle.GetKeyRings().OfType<PgpPublicKeyRing>();
+            var publicKeys = publicKeyRings.SelectMany(x => x.GetPublicKeys().OfType<PgpPublicKey>());
+            var publicKey = publicKeys.FirstOrDefault();
+
+            return Verify(publicKey);
         }
 
         public bool Verify(PgpPublicKey pgpPublicKey)
