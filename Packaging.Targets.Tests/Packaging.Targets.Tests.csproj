@@ -22,6 +22,9 @@
     <None Update="IO\test.cpio">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Rpm\dotnet_test-1.0-0.noarch.rpm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Rpm\libplist-2.0.1.151-1.1.x86_64.rpm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
