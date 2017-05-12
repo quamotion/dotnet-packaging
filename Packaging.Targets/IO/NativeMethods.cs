@@ -1,4 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Packaging.Targets.IO
@@ -13,6 +16,46 @@ namespace Packaging.Targets.IO
     /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/index.h"/>
     public class NativeMethods
     {
+        static NativeMethods()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var libraryPath = Path.GetDirectoryName(typeof(NativeMethods).GetTypeInfo().Assembly.Location);
+                var lzmaPath = Path.Combine(libraryPath, "../../runtimes/win7-x64/native/lzma.dll");
+
+                if (RuntimeInformation.OSArchitecture != Architecture.X64)
+                {
+                    throw new InvalidOperationException(".NET packaging only supports 64-bit Windows processes");
+                }
+
+                if (File.Exists(lzmaPath))
+                {
+                    IntPtr result = SystemMethods.LoadLibrary(lzmaPath);
+                    if (result == IntPtr.Zero)
+                    {
+                        var lastError = Marshal.GetLastWin32Error();
+                        throw new Win32Exception(lastError, $"Could not load the lzma.dll library at '{lzmaPath}'. The error code was {lastError}");
+                    }
+                }
+            }
+            else
+            {
+                // Clear any value from dlerror
+                SystemMethods.dlerror();
+
+                // Attempt to load the libraries. If they are not found, throw an error.
+                IntPtr result = SystemMethods.dlopen($"lzma.so", DlOpenFlags.RTLD_NOW);
+
+                if (result == IntPtr.Zero)
+                {
+                    var lastError = SystemMethods.dlerror();
+                    var errorMessage = Marshal.PtrToStringAnsi(lastError);
+
+                    throw new FileLoadException($"Could not load the lzma.so library. The error code was {errorMessage}. Make sure you've installed liblzma-dev or an equivalent package");
+                }
+            }
+        }
+
         /// <summary>
         /// The name of the lzma library.
         /// </summary>
