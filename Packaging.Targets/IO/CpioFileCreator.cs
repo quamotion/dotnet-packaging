@@ -49,10 +49,6 @@ namespace Packaging.Targets.IO
             // The other in which the files appear in the cpio archive is important; if this is not respected xzdio
             // will report errors like:
             // error: unpacking of archive failed on file ./usr/share/quamotion/mscorlib.dll: cpio: Archive file not in header
-            var files = Directory
-                .GetFiles(directory)
-                .OrderBy(e => e, new FileNameComparer()).ToArray();
-
             var entries = Directory.GetFileSystemEntries(directory).OrderBy(e => Directory.Exists(e) ? e + "/" : e, StringComparer.Ordinal).ToArray();
 
             foreach (var entry in entries)
