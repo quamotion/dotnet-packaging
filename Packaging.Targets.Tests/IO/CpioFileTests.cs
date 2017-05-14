@@ -32,7 +32,7 @@ namespace Packaging.Targets.Tests.IO
             {
                 while (file.Read())
                 {
-                    entryNames.Add(file.EntryName);
+                    entryNames.Add(file.FileName);
                     entryHeaders.Add(file.EntryHeader);
 
                     using (Stream entry = file.Open())
@@ -53,8 +53,8 @@ namespace Packaging.Targets.Tests.IO
             Assert.Equal(0u, entryHeaders[0].FileSize);
             Assert.Equal(0u, entryHeaders[0].Gid);
             Assert.Equal(0x24fafu, entryHeaders[0].Ino);
-            Assert.Equal((LinuxFileMode)0x41edu, entryHeaders[0].Mode);
-            Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(0x471c8630u), entryHeaders[0].Mtime);
+            Assert.Equal((LinuxFileMode)0x41edu, entryHeaders[0].FileMode);
+            Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(0x471c8630u), entryHeaders[0].LastModified);
             Assert.Equal(0x02u, entryHeaders[0].NameSize);
             Assert.Equal(0x8u, entryHeaders[0].Nlink);
             Assert.Equal(0u, entryHeaders[0].RDevMajor);
@@ -87,7 +87,7 @@ namespace Packaging.Targets.Tests.IO
                 {
                     using (Stream file = source.Open())
                     {
-                        target.Write(source.EntryHeader, source.EntryName, file);
+                        target.Write(source.EntryHeader, source.FileName, file);
                         index++;
                     }
                 }
@@ -104,7 +104,7 @@ namespace Packaging.Targets.Tests.IO
         [InlineData(4, 0)]
         public void PaddingSizeTest(int value, int padded)
         {
-            Assert.Equal(padded, CpioFile.PaddingSize(value));
+            Assert.Equal(padded, CpioFile.PaddingSize(4, value));
         }
     }
 }

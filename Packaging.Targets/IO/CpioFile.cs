@@ -22,27 +22,12 @@ namespace Packaging.Targets.IO
     /// pathname <c>TRAILER!!!</c>.
     /// </remarks>
     /// <seealso href="https://people.freebsd.org/~kientzle/libarchive/man/cpio.5.txt"/>
-    public class CpioFile : IDisposable
+    public class CpioFile : ArchiveFile, IDisposable
     {
-        /// <summary>
-        /// The <see cref="Stream"/> around which this <see cref="CpioFile"/> wraps.
-        /// </summary>
-        private readonly Stream stream;
-
-        /// <summary>
-        /// Indicates whether <see cref="stream"/> should be disposed of when this <see cref="CpioFile"/> is disposed of.
-        /// </summary>
-        private readonly bool leaveOpen;
-
         /// <summary>
         /// The entry which is currently available.
         /// </summary>
         private CpioHeader entryHeader;
-
-        /// <summary>
-        /// The name of the current entry.
-        /// </summary>
-        private string entryName;
 
         /// <summary>
         /// The position at which the data for the current entry starts.
@@ -55,11 +40,6 @@ namespace Packaging.Targets.IO
         private long entryDataLength;
 
         /// <summary>
-        /// A <see cref="Stream"/> which represents the current entry.
-        /// </summary>
-        private SubStream entryStream;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="CpioFile"/> class.
         /// </summary>
         /// <param name="stream">
@@ -70,22 +50,8 @@ namespace Packaging.Targets.IO
         /// is disposed of; otherwise, <see langword="false"/>.
         /// </param>
         public CpioFile(Stream stream, bool leaveOpen)
+            : base(stream, leaveOpen)
         {
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
-
-            this.stream = stream;
-            this.leaveOpen = leaveOpen;
-        }
-
-        /// <summary>
-        /// Gets the name of the current entry.
-        /// </summary>
-        public string EntryName
-        {
-            get { return this.entryName; }
         }
 
         /// <summary>
@@ -137,29 +103,29 @@ namespace Packaging.Targets.IO
             header.NameSize = (uint)(nameBytes.Length + 1);
             header.FileSize = (uint)data.Length;
 
-            this.stream.WriteStruct(header);
-            this.stream.Write(nameBytes, 0, nameBytes.Length);
-            this.stream.WriteByte(0); //Trailing 0
+            this.Stream.WriteStruct(header);
+            this.Stream.Write(nameBytes, 0, nameBytes.Length);
+            this.Stream.WriteByte(0); //Trailing 0
 
             // The pathname is followed by NUL bytes so that the total size of the fixed
             // header plus pathname is a multiple of four.
             var headerSize = Marshal.SizeOf<CpioHeader>() + (int)header.NameSize;
-            var paddingSize = PaddingSize(headerSize);
+            var paddingSize = PaddingSize(4, headerSize);
 
             for (int i = 0; i < paddingSize; i++)
             {
-                this.stream.WriteByte(0);
+                this.Stream.WriteByte(0);
             }
 
             data.Position = 0;
-            data.CopyTo(this.stream);
+            data.CopyTo(this.Stream);
 
             // The file data is padded to a multiple of four bytes.
-            paddingSize = PaddingSize((int)data.Length);
+            paddingSize = PaddingSize(4, (int)data.Length);
 
             for (int i = 0; i < paddingSize; i++)
             {
-                this.stream.WriteByte(0);
+                this.Stream.WriteByte(0);
             }
         }
 
@@ -177,27 +143,17 @@ namespace Packaging.Targets.IO
         /// <returns>
         /// <see langword="true"/> if more data is available; otherwise, <see langword="false"/>.
         /// </returns>
-        public bool Read()
+        public override bool Read()
         {
-            if (this.entryStream != null)
+            if (this.EntryStream != null)
             {
-                this.entryStream.Dispose();
+                this.EntryStream.Dispose();
             }
 
-            if (this.stream.CanSeek)
-            {
-                // The file data is padded to a multiple of four bytes.
-                var nextIndex = this.entryDataOffset + this.entryDataLength;
-                nextIndex += PaddingSize((int)this.entryDataLength);
-                this.stream.Seek(nextIndex, SeekOrigin.Begin);
-            }
-            else
-            {
-                byte[] buffer = new byte[PaddingSize((int)this.entryDataLength)];
-                this.stream.Read(buffer, 0, buffer.Length);
-            }
+            this.Align(4);
 
-            this.entryHeader = this.stream.ReadStruct<CpioHeader>();
+            this.entryHeader = this.Stream.ReadStruct<CpioHeader>();
+            this.FileHeader = this.entryHeader;
 
             if (this.entryHeader.Signature != "070701")
             {
@@ -205,76 +161,27 @@ namespace Packaging.Targets.IO
             }
 
             byte[] nameBytes = new byte[this.entryHeader.NameSize];
-            this.stream.Read(nameBytes, 0, nameBytes.Length);
+            this.Stream.Read(nameBytes, 0, nameBytes.Length);
 
-            this.entryName = Encoding.UTF8.GetString(nameBytes, 0, (int)this.entryHeader.NameSize - 1);
+            this.FileName = Encoding.UTF8.GetString(nameBytes, 0, (int)this.entryHeader.NameSize - 1);
 
             // The pathname is followed by NUL bytes so that the total size of the fixed
             // header plus pathname is a multiple of four.
             var headerSize = Marshal.SizeOf<CpioHeader>() + nameBytes.Length;
-            var paddingSize = PaddingSize(headerSize);
+            var paddingSize = PaddingSize(4, headerSize);
 
             if (nameBytes.Length < paddingSize)
             {
                 nameBytes = new byte[paddingSize];
             }
 
-            this.stream.Read(nameBytes, 0, paddingSize);
+            this.Stream.Read(nameBytes, 0, paddingSize);
 
-            this.entryDataOffset = this.stream.Position;
+            this.entryDataOffset = this.Stream.Position;
             this.entryDataLength = this.entryHeader.FileSize;
-            this.entryStream = new SubStream(this.stream, this.entryDataOffset, this.entryDataLength, leaveParentOpen: true);
+            this.EntryStream = new SubStream(this.Stream, this.entryDataOffset, this.entryDataLength, leaveParentOpen: true);
 
-            return this.entryName != "TRAILER!!!";
-        }
-
-        /// <summary>
-        /// Skips the current entry, without reading the entry data.
-        /// </summary>
-        public void Skip()
-        {
-            byte[] buffer = new byte[60 * 1024];
-
-            int left = (int)this.entryDataLength;
-
-            while (left > 0)
-            {
-                int canRead = Math.Min(left, buffer.Length);
-                this.stream.Read(buffer, 0, canRead);
-                left -= canRead;
-            }
-        }
-
-        /// <summary>
-        /// Returns a <see cref="Stream"/> which represents the content of the current entry in the <see cref="CpioFile"/>.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="Stream"/> which represents the content of the current entry in the <see cref="CpioFile"/>.
-        /// </returns>
-        public Stream Open()
-        {
-            return this.entryStream;
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            if (!this.leaveOpen)
-            {
-                this.stream.Dispose();
-            }
-        }
-
-        public static int PaddingSize(int value)
-        {
-            if (value % 4 == 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return 4 - value % 4;
-            }
+            return this.FileName != "TRAILER!!!";
         }
     }
 }
