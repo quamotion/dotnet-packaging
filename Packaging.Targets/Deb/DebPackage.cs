@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Packaging.Targets.Deb
 {
@@ -11,6 +12,15 @@ namespace Packaging.Targets.Deb
         /// Gets or sets the Debian installer file format used.
         /// </summary>
         public Version PackageFormatVersion
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the value of the control file.
+        /// </summary>
+        public Dictionary<string, string> ControlFile
         {
             get;
             set;

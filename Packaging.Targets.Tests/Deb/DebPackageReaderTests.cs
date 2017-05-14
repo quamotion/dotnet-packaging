@@ -21,6 +21,14 @@ namespace Packaging.Targets.Tests.Deb
                 var package = DebPackageReader.Read(stream);
 
                 Assert.Equal(new Version(2, 0), package.PackageFormatVersion);
+
+                Assert.NotNull(package.ControlFile);
+                Assert.Equal(13, package.ControlFile.Count);
+
+                Assert.Equal("libplist3", package.ControlFile["Package"]);
+                Assert.Equal("libplist", package.ControlFile["Source"]);
+                Assert.Equal("1.12-3.1", package.ControlFile["Version"]);
+                Assert.Equal("amd64", package.ControlFile["Architecture"]);
             }
         }
     }
