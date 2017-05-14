@@ -27,7 +27,7 @@ namespace Packaging.Targets.IO
         /// Initializes a new instance of the <see cref="ArchiveFile"/> class.
         /// </summary>
         /// <param name="stream">
-        /// A <see cref="Stream"/> which represents the CPIO data.
+        /// A <see cref="Stream"/> which represents the archive data.
         /// </param>
         /// <param name="leaveOpen">
         /// <see langword="true"/> to leave the underlying <paramref name="stream"/> open when this <see cref="ArchiveFile"/>
@@ -138,7 +138,7 @@ namespace Packaging.Targets.IO
             }
             else
             {
-                byte[] buffer = new byte[PaddingSize(alignmentBase, (int)this.EntryStream.Length)];
+                byte[] buffer = new byte[PaddingSize(alignmentBase, (int)this.Stream.Position)];
                 this.Stream.Read(buffer, 0, buffer.Length);
             }
         }
