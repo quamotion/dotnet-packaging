@@ -75,10 +75,25 @@ namespace Packaging.Targets.Deb
             }
 
             using (Stream stream = archive.Open())
-            using (GZipStream decompressedStream = new GZipStream(stream, CompressionMode.Decompress))
+            using (GZipDecompressor decompressedStream = new GZipDecompressor(stream, leaveOpen: true))
+            using (TarFile tarFile = new TarFile(decompressedStream, leaveOpen: true))
             {
-                byte[] buffer = new byte[1024];
-                decompressedStream.Read(buffer, 0, 1024);
+                while (tarFile.Read())
+                {
+                    switch (tarFile.FileName)
+                    {
+                        case "./control":
+                            using (Stream controlFile = tarFile.Open())
+                            {
+                                package.ControlFile = ControlFileParser.Read(controlFile);
+                            }
+                            break;
+
+                        default:
+                            tarFile.Skip();
+                            break;
+                    }
+                }
             }
         }
     }
