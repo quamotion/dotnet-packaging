@@ -8,7 +8,7 @@ namespace Packaging.Targets.IO
     /// </summary>
     /// <seealso href="https://people.freebsd.org/~kientzle/libarchive/man/cpio.5.txt"/>
     [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
-    public struct CpioHeader
+    public struct CpioHeader : IArchiveHeader
     {
         /// <summary>
         /// The integer value octal 070701.  This value can be used to determine
@@ -116,8 +116,8 @@ namespace Packaging.Targets.IO
                     FileSize = 0,
                     Gid = 0,
                     Ino = 0,
-                    Mode = 0,
-                    Mtime = DateTimeOffset.FromUnixTimeSeconds(0),
+                    FileMode = 0,
+                    LastModified = DateTimeOffset.FromUnixTimeSeconds(0),
                     NameSize = 0,
                     Nlink = 1,
                     RDevMajor = 0,
@@ -152,7 +152,7 @@ namespace Packaging.Targets.IO
         /// <summary>
         /// Gets or sets the value of the <see cref="mode"/> field as a <see cref="uint"/>.
         /// </summary>
-        public LinuxFileMode Mode
+        public LinuxFileMode FileMode
         {
             get { return (LinuxFileMode)Convert.ToUInt32(new string(this.mode), 16); }
             set { this.mode = ((uint)value).ToString("x8").ToCharArray(); }
@@ -189,7 +189,7 @@ namespace Packaging.Targets.IO
         /// <summary>
         /// Gets or sets the value of the <see cref="mtime"/> field as a <see cref="uint"/>.
         /// </summary>
-        public DateTimeOffset Mtime
+        public DateTimeOffset LastModified
         {
             get { return DateTimeOffset.FromUnixTimeSeconds((long)Convert.ToUInt32(new string(this.mtime), 16)); }
             set { this.mtime = value.ToUnixTimeSeconds().ToString("x8").ToCharArray(); }

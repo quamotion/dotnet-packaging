@@ -268,7 +268,7 @@ namespace Packaging.Targets.Rpm
                     hash = hasher.GetHashAndReset();
                 }
 
-                string fileName = payload.EntryName;
+                string fileName = payload.FileName;
                 int fileSize = (int)payload.EntryHeader.FileSize;
 
                 if (fileName.StartsWith("."))
@@ -278,7 +278,7 @@ namespace Packaging.Targets.Rpm
 
                 string linkTo = string.Empty;
 
-                if (payload.EntryHeader.Mode.HasFlag(LinuxFileMode.S_IFLNK))
+                if (payload.EntryHeader.FileMode.HasFlag(LinuxFileMode.S_IFLNK))
                 {
                     // Find the link text
                     int stringEnd = 0;
@@ -291,7 +291,7 @@ namespace Packaging.Targets.Rpm
                     linkTo = Encoding.UTF8.GetString(header, 0, stringEnd + 1);
                     hash = new byte[] { };
                 }
-                else if (payload.EntryHeader.Mode.HasFlag(LinuxFileMode.S_IFDIR))
+                else if (payload.EntryHeader.FileMode.HasFlag(LinuxFileMode.S_IFDIR))
                 {
                     fileSize = 0x00001000;
                     hash = new byte[] { };
@@ -300,9 +300,9 @@ namespace Packaging.Targets.Rpm
                 RpmFile file = new RpmFile()
                 {
                     Size = fileSize,
-                    Mode = payload.EntryHeader.Mode,
+                    Mode = payload.EntryHeader.FileMode,
                     Rdev = (short)payload.EntryHeader.RDevMajor,
-                    ModifiedTime = payload.EntryHeader.Mtime,
+                    ModifiedTime = payload.EntryHeader.LastModified,
                     MD5Hash = hash,
                     LinkTo = linkTo,
                     Flags = this.analyzer.DetermineFlags(fileName, payload.EntryHeader, header),

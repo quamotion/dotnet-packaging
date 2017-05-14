@@ -33,17 +33,17 @@ namespace Packaging.Targets.Rpm
         {
             // The only custom flags which are supported for now are the RPMFILE_DOC flags for non-executable
             // files.
-            if (fileHeader.Mode.HasFlag(LinuxFileMode.S_IFDIR))
+            if (fileHeader.FileMode.HasFlag(LinuxFileMode.S_IFDIR))
             {
                 return RpmFileFlags.None;
             }
-            else if (fileHeader.Mode.HasFlag(LinuxFileMode.S_IFLNK))
+            else if (fileHeader.FileMode.HasFlag(LinuxFileMode.S_IFLNK))
             {
                 return RpmFileFlags.None;
             }
-            else if (!fileHeader.Mode.HasFlag(LinuxFileMode.S_IXGRP)
-                    && !fileHeader.Mode.HasFlag(LinuxFileMode.S_IXOTH)
-                    && !fileHeader.Mode.HasFlag(LinuxFileMode.S_IXUSR))
+            else if (!fileHeader.FileMode.HasFlag(LinuxFileMode.S_IXGRP)
+                    && !fileHeader.FileMode.HasFlag(LinuxFileMode.S_IXOTH)
+                    && !fileHeader.FileMode.HasFlag(LinuxFileMode.S_IXUSR))
             {
                 return RpmFileFlags.RPMFILE_DOC;
             }
@@ -92,12 +92,12 @@ namespace Packaging.Targets.Rpm
         public virtual string DetermineClass(string filename, CpioHeader fileHeader, byte[] header)
         {
             // Very simplistic implementation - non-executable files are considered to be tet files.
-            if (fileHeader.Mode.HasFlag(LinuxFileMode.S_IFDIR))
+            if (fileHeader.FileMode.HasFlag(LinuxFileMode.S_IFDIR))
             {
                 return "directory";
             }
 
-            if (fileHeader.Mode.HasFlag(LinuxFileMode.S_IFLNK))
+            if (fileHeader.FileMode.HasFlag(LinuxFileMode.S_IFLNK))
             {
                 return string.Empty;
             }
@@ -123,9 +123,9 @@ namespace Packaging.Targets.Rpm
                 return string.Empty;
             }
 
-            if (!fileHeader.Mode.HasFlag(LinuxFileMode.S_IXGRP)
-                && !fileHeader.Mode.HasFlag(LinuxFileMode.S_IXOTH)
-                && !fileHeader.Mode.HasFlag(LinuxFileMode.S_IXUSR))
+            if (!fileHeader.FileMode.HasFlag(LinuxFileMode.S_IXGRP)
+                && !fileHeader.FileMode.HasFlag(LinuxFileMode.S_IXOTH)
+                && !fileHeader.FileMode.HasFlag(LinuxFileMode.S_IXUSR))
             {
                 for (int i = 0; i < header.Length; i++)
                 {

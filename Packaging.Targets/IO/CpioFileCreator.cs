@@ -36,8 +36,8 @@ namespace Packaging.Targets.IO
                 FileSize = 0,
                 Gid = 0,
                 Ino = inode,
-                Mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
-                Mtime = Directory.GetLastWriteTime(directory),
+                FileMode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
+                LastModified = Directory.GetLastWriteTime(directory),
                 Nlink = 1,
                 RDevMajor = 0,
                 RDevMinor = 0,
@@ -104,8 +104,8 @@ namespace Packaging.Targets.IO
                     Gid = 0, // root
                     Uid = 0, // root
                     Ino = inode,
-                    Mode = mode,
-                    Mtime = File.GetLastWriteTimeUtc(entry),
+                    FileMode = mode,
+                    LastModified = File.GetLastWriteTimeUtc(entry),
                     NameSize = (uint)name.Length + 1,
                     Nlink = 1,
                     RDevMajor = 0,
