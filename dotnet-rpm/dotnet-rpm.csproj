@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.1</TargetFramework>
-    <VersionPrefix>0.1.1</VersionPrefix>
+    <VersionPrefix>0.1.2</VersionPrefix>
     <Authors>Frederik Carlier</Authors>
     <Company>Quamotion</Company>
     <Copyright>Copyright (c) Frederik Carlier and Contributors</Copyright>
@@ -12,13 +11,11 @@
     <RepositoryUrl>https://github.com/qmfrederik/dotnet-packaging/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>dotnet cli packaging rpm package installer</PackageTags>
-    <Description>
-      Create RPM packages (.rpm files) of your .NET Core projects straight from the command line.
+    <Description>Create RPM packages (.rpm files) of your .NET Core projects straight from the command line.
 
-      Once you've installed this package as a .NET CLI tool, run dotnet rpm to generate a .rpm package which contains the publish output of your .NET Project.
+Once you've installed this package as a .NET CLI tool, run dotnet rpm to generate a .rpm package which contains the publish output of your .NET Project.
 
-      See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet rpm.
-    </Description>
+See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet rpm.</Description>
     <Product>Packaging Tools for .NET CLI</Product>
     <NugetPackageFolder Condition="$(NugetPackageFolder) == ''">$(USERPROFILE)\.nuget\packages</NugetPackageFolder>
   </PropertyGroup>

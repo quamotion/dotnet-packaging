@@ -1,24 +1,13 @@
 using System.Diagnostics;
 
-class Program
+namespace Dotnet.Packaging
 {
-    static void Main(string[] args)
+    class Program
     {
-        var msbArguments = $"msbuild /t:CreateTarball";
-
-        var psi = new ProcessStartInfo
+        static int Main(string[] args)
         {
-            FileName = "dotnet",
-            Arguments = msbArguments
-        };
-
-        var process = new Process
-        {
-            StartInfo = psi,
-
-        };
-
-        process.Start();
-        process.WaitForExit();
+            PackagingRunner runner = new PackagingRunner("tarball", "CreateTarball");
+            return runner.Run(args);
+        }
     }
 }

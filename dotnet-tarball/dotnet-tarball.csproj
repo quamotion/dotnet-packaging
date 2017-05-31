@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
-    <VersionPrefix>0.1.1</VersionPrefix>
+    <VersionPrefix>0.1.2</VersionPrefix>
     <Authors>Frederik Carlier</Authors>
     <Company>Quamotion</Company>
     <Copyright>Copyright (c) Frederik Carlier and Contributors</Copyright>
@@ -17,13 +17,21 @@ Once you've installed this package as a .NET CLI tool, run dotnet tar to generat
 
 See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet tarball.</Description>
     <Product>Packaging Tools for .NET CLI</Product>
+    <NugetPackageFolder Condition="$(NugetPackageFolder) == ''">$(USERPROFILE)\.nuget\packages</NugetPackageFolder>
   </PropertyGroup>
+
   <ItemGroup>
-    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
-      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
-    </BuiltProjectOutputGroupOutput>
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="Program.cs" />
+    <Content Include="$(NugetPackageFolder)\microsoft.extensions.commandlineutils\1.1.1\lib\netstandard1.3\Microsoft.Extensions.CommandLineUtils.dll" Link="Microsoft.Extensions.CommandLineUtils.dll">
+      <Pack>true</Pack>
+      <PackagePath>lib\$(TargetFramework)\</PackagePath>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Include="..\dotnet-rpm\PackagingRunner.cs" Link="PackagingRunner.cs" />
   </ItemGroup>
 </Project>
