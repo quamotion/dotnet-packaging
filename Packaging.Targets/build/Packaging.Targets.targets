@@ -3,14 +3,25 @@
   <UsingTask TaskName="Packaging.Targets.ZipTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard1.5\Packaging.Targets.dll" />
   <UsingTask TaskName="Packaging.Targets.RpmTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard1.5\Packaging.Targets.dll" />
 
-  <Target Name="CreateRpm" DependsOnTargets="Publish">
+  <Target Name="CreatePackageProperties" DependsOnTargets="Publish">
     <PropertyGroup>
-      <RpmPath>$(TargetDir)$(TargetName).$(AssemblyFileVersion)-$(RuntimeIdentifier).rpm</RpmPath>
-      <CpioPath>$(IntermediateOutputPath)$(TargetName).$(AssemblyFileVersion)-$(RuntimeIdentifier).cpio</CpioPath>
+      <PackagePrefix Condition="'$(PackagePrefix)' == ''">$(TargetName)</PackagePrefix>
+      <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(AssemblyFileVersion).$(RuntimeIdentifier)</PackageName>
+      <IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
+      <PackagePath>$(TargetDir)$(PackageName)</PackagePath>
+    </PropertyGroup>
+  </Target>
+  
+  <Target Name="CreateRpm" DependsOnTargets="CreatePackageProperties">
+    <PropertyGroup>
+      <RpmPath>$(PackagePath).rpm</RpmPath>
+      <CpioPath>$(IntermediatePackagePath).cpio</CpioPath>
       <Prefix>./usr/share/$(TargetName)</Prefix>
       <Release>0</Release>
       <PackageName>$(TargetName)</PackageName>
     </PropertyGroup>
+
+    <Message Text="Creating $(RpmPath)" Importance="normal"/>
     
     <RpmTask PublishDir="$(PublishDir)"
              RpmPath="$(RpmPath)"
@@ -20,20 +31,24 @@
              Release="$(Release)"
              PackageName="$(PackageName)"/>
   </Target>
-  
-  <Target Name="CreateTarball" DependsOnTargets="Publish">
+
+  <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">
     <PropertyGroup>
-      <TarballPath>$(TargetDir)$(TargetName).$(AssemblyFileVersion)-$(RuntimeIdentifier).tar.gz</TarballPath>
+      <TarballPath>$(PackagePath).tar.gz</TarballPath>
     </PropertyGroup>
+
+    <Message Text="Creating $(TarballPath)" Importance="normal"/>
 
     <TarballTask PublishDir="$(PublishDir)"
              TarballPath="$(TarballPath)"/>
   </Target>
 
-  <Target Name="CreateZip" DependsOnTargets="Publish">
+  <Target Name="CreateZip" DependsOnTargets="CreatePackageProperties">
     <PropertyGroup>
-      <ZipPath>$(TargetDir)$(TargetName).$(AssemblyFileVersion)-$(RuntimeIdentifier).zip</ZipPath>
+      <ZipPath>$(PackagePath).zip</ZipPath>
     </PropertyGroup>
+
+    <Message Text="Creating $(ZipPath)" Importance="normal"/>
 
     <ZipTask PublishDir="$(PublishDir)"
              ZipPath="$(ZipPath)"/>
