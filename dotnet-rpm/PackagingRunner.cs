@@ -57,7 +57,7 @@ namespace Dotnet.Packaging
                 }
 
                 StringBuilder msbuildArguments = new StringBuilder();
-                msbuildArguments.Append($"msbuild /t:{msbuildTarget}");
+                msbuildArguments.Append($"msbuild /t:{msbuildTarget} ");
                 msbuildArguments.Append($"/p:RuntimeIdentifier={runtime.Value()} ");
                 msbuildArguments.Append($"/p:TargetFramework={framework.Value()} ");
 
