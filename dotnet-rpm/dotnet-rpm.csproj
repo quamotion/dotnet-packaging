@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.1</TargetFramework>
-    <VersionPrefix>0.1.2</VersionPrefix>
+    <VersionPrefix>0.1.1</VersionPrefix>
     <Authors>Frederik Carlier</Authors>
     <Company>Quamotion</Company>
     <Copyright>Copyright (c) Frederik Carlier and Contributors</Copyright>
