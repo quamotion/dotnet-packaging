@@ -45,3 +45,12 @@ All commands take the following command line arguments:
 * `-f`, `--framework`: Required. The target framework has to be specified in the project file. For example, `netcoreapp1.1` or `net462`.
 * `-c`, `--configuration`: Target configuration. The default for most projects is 'Debug'.
 *  `---version-suffix`: Defines the value for the `$(VersionSuffix)` property in the project.
+
+
+### Note
+If you have multiple `.csproj` files in a signle directory, [.NET Core CLI tools don't work](https://github.com/dotnet/cli/issues/4808).
+If that's the case, you can still invoke the packaging tools manually:
+
+```
+dotnet msbuild [your-project].csproj /t:CreateZip /p:TargetFramework=netcoreapp1.1 /p:RuntimeIdentifier=win7-x64 /p:Configuration=Release
+```
