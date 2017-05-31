@@ -44,7 +44,7 @@ namespace Packaging.Targets.IO
                 SystemMethods.dlerror();
 
                 // Attempt to load the libraries. If they are not found, throw an error.
-                IntPtr result = SystemMethods.dlopen($"lzma.so", DlOpenFlags.RTLD_NOW);
+                IntPtr result = SystemMethods.dlopen($"liblzma.so", DlOpenFlags.RTLD_NOW);
 
                 if (result == IntPtr.Zero)
                 {
