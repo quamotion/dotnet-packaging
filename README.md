@@ -5,29 +5,43 @@
 This repository contains command-line extensions for the .NET Core CLI which make it easy to create
 deployment packages (such as `.zip` files, tarballs or installers) for .NET Core applications.
 
-The goal is to implement the following commands:
+The following commands are already available:
+* `dotnet tarball` - Create a `.tar.gz` file for Linux and OS X
+* `dotnet rpm` - Create a CentOS/RedHat Linux installer
+* `dotnet zip` - Create a Chocolatey package
 
-* `dotnet tarball` - Create a `.zip` file (for Windows) and a `.tar.gz` file for Linux and OS X
+These commands are currently in development:
+* `dotnet deb` - Create a Ubuntu/Debian Linux installer
+
+And finally these are up next:
+
 * `dotnet choco` - Create a Chocolatey package
 * `dotnet msi` - Create a Windows Installer (msi) package
-* `dotnet deb` - Create a Ubuntu/Debian installer
 * `dotnet pkg` - Create a macOS installer
+
+Did we miss anything? Feel free to file a feature request, or send a PR!
 
 ## Installation
 
-
-Add the following entry to your `.csproj` file:
+Add the following entry to your `.csproj` file, under the `Project` node. You do not need to add all `dotnet-*` entries;
+only add those you are going to use.
 
 ```xml
-
-<DotNetCliToolReference Include="dotnet-tarball">
-
-    <Version>0.1-*</Version>
-
-</DotNetCliToolReference>
-
+  <ItemGroup>
+    <PackageReference Include="Packaging.Targets" Version="0.1.1-*" />
+    <DotNetCliToolReference Include="dotnet-tarball" Version="0.1.1-*" />
+    <DotNetCliToolReference Include="dotnet-zip" Version="0.1.1-*" />
+    <DotNetCliToolReference Include="dotnet-rpm" Version="0.1.1-*" />
+  <ItemGroup>
 ```
 
 ## Usage
 
-Run `dotnet tarball`
+From the command line, run `dotnet rpm`, `dotnet zip` or `dotnet tarball` to create a `.rpm`, `.zip` or `.tar.gz` archive of the publish output of your project.
+
+All commands take the following command line arguments:
+
+* `-r`, `--runtime`: Required. The target runtime has to be specified in the project file. For example, `win7-x64` or `ubuntu.16.10-x64`.
+* `-f`, `--framework`: Required. The target framework has to be specified in the project file. For example, `netcoreapp1.1` or `net462`.
+* `-c`, `--configuration`: Target configuration. The default for most projects is 'Debug'.
+*  `---version-suffix`: Defines the value for the `$(VersionSuffix)` property in the project.
