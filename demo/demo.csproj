@@ -4,10 +4,23 @@
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <RuntimeIdentifiers>win7-x64;rhel.7-x64</RuntimeIdentifiers>
     <PreserveCompilationContext>true</PreserveCompilationContext>
+    <CreateUser>true</CreateUser>
+    <InstallService>true</InstallService>
   </PropertyGroup>
   <PropertyGroup>
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Update="appsettings.json">
+        <LinuxPath>/etc/demo/appsettings.json</LinuxPath>
+    </Content>
+    <Content Include="demo.service" CopyToPublishDirectory="PreserveNewest">
+        <LinuxPath>/etc/systemd/system/demo.service</LinuxPath>
+    </Content>
+    <LinuxFolder Include="/var/log/demo" Group="demo" Owner="demo" RemoveOnUninstall="true" />
+    <LinuxFolder Include="/var/run/demo" Group="demo" Owner="demo" RemoveOnUninstall="true" />
+    <LinuxFolder Include="/var/lib/demo" Group="demo" Owner="demo" RemoveOnUninstall="true" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="1.6.30" PrivateAssets="all" />
     <PackageReference Include="Packaging.Targets" Version="0.1.1-*" />

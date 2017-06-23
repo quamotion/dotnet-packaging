@@ -9,9 +9,11 @@
       <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(AssemblyFileVersion).$(RuntimeIdentifier)</PackageName>
       <IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
       <PackagePath>$(TargetDir)$(PackageName)</PackagePath>
+      <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
+      <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
     </PropertyGroup>
   </Target>
-  
+
   <Target Name="CreateRpm" DependsOnTargets="CreatePackageProperties">
     <PropertyGroup>
       <RpmPath>$(PackagePath).rpm</RpmPath>
@@ -22,7 +24,7 @@
     </PropertyGroup>
 
     <Message Text="Creating $(RpmPath)" Importance="normal"/>
-    
+
     <RpmTask PublishDir="$(PublishDir)"
              RpmPath="$(RpmPath)"
              CpioPath="$(CpioPath)"
@@ -31,7 +33,9 @@
              Release="$(Release)"
              PackageName="$(PackageName)"
              Content="@(Content)"
-             LinuxFolders="@(LinuxFolder)"/>
+             LinuxFolders="@(LinuxFolder)"
+             CreateUser="$(CreateUser)"
+             InstallService="$(InstallService)"/>
   </Target>
 
   <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">

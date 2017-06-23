@@ -158,7 +158,8 @@ namespace Packaging.Targets
                     Owner = folder.GetOwner(),
                     Inode = this.inode++,
                     TargetPath = path,
-                    LinkTo = string.Empty
+                    LinkTo = string.Empty,
+                    RemoveOnUninstall = folder.GetRemoveOnUninstall()
                 };
 
                 value.Add(directoryEntry);

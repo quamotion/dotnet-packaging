@@ -1,0 +1,8 @@
+[Unit]
+Description=A sample service
+    
+[Service]
+ExecStart=/bin/sh -c 'while true; do echo "Running"; sleep 5; done'
+    
+[Install]
+WantedBy=multi-user.target

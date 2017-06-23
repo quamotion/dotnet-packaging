@@ -93,7 +93,6 @@ namespace Packaging.Targets
             return TryGetValue(item, "Owner", "root");
         }
 
-
         /// <summary>
         /// Gets the Linux group of the file.
         /// </summary>
@@ -106,6 +105,30 @@ namespace Packaging.Targets
         public static string GetGroup(this ITaskItem item)
         {
             return TryGetValue(item, "Group", "root");
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the item should be removed when the
+        /// program is removed.
+        /// </summary>
+        /// <param name="item">
+        /// The item to inspect.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the file should be removed; otherwise,
+        /// <see langword="false"/>.
+        /// </returns>
+        public static bool GetRemoveOnUninstall(this ITaskItem item)
+        {
+            var valueString = TryGetValue(item, "RemoveOnUninstall", "false");
+            bool value;
+
+            if (!bool.TryParse(valueString, out value))
+            {
+                return false;
+            }
+
+            return value;
         }
 
         private static string TryGetValue(ITaskItem item, string name, string @default = null)

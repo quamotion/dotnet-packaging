@@ -72,6 +72,26 @@ namespace Packaging.Targets
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to create a Linux
+        /// user and group when installing the package.
+        /// </summary>
+        public bool CreateUser
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to install
+        /// and launch as systemd service when installing the package.
+        /// </summary>
+        public bool InstallService
+        {
+            get;
+            set;
+        }
+
         public override bool Execute()
         {
             this.Log.LogMessage(MessageImportance.Normal, "Creating RPM package '{0}' from folder '{1}'", this.RpmPath, this.PublishDir);
@@ -109,6 +129,8 @@ namespace Packaging.Targets
                     this.Version,
                     "x86_64",
                     this.Release,
+                    this.CreateUser,
+                    this.InstallService,
                     null,
                     privateKey,
                     targetStream);

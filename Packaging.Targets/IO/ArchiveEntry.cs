@@ -78,6 +78,13 @@ namespace Packaging.Targets.IO
         /// </summary>
         public bool IsAscii
         { get; set; }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether this entry (and any child entries) is forcefully
+        /// removed when the application is uninstalled.
+        /// </summary>
+        public bool RemoveOnUninstall
+        { get; set; }
 
         /// <summary>
         /// Gets the file name, including a final slash if the file is a directory.

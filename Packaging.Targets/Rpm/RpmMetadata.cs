@@ -235,12 +235,66 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
+        /// Gets the scipt to run before installation of this package.
+        /// </summary>
+        public string PreIn
+        {
+            get { return this.GetString(IndexTag.RPMTAG_PREIN); }
+            set { this.SetString(IndexTag.RPMTAG_PREIN, value); }
+        }
+
+        /// <summary>
+        /// Gets the scipt to run after installation of this package.
+        /// </summary>
+        public string PostIn
+        {
+            get { return this.GetString(IndexTag.RPMTAG_POSTIN); }
+            set { this.SetString(IndexTag.RPMTAG_POSTIN, value); }
+        }
+
+        /// <summary>
+        /// Gets the scipt to run before removal of this package.
+        /// </summary>
+        public string PreUn
+        {
+            get { return this.GetString(IndexTag.RPMTAG_PREUN); }
+            set { this.SetString(IndexTag.RPMTAG_PREUN, value); }
+        }
+
+        /// <summary>
+        /// Gets the scipt to run after removal of this package.
+        /// </summary>
+        public string PostUn
+        {
+            get { return this.GetString(IndexTag.RPMTAG_POSTUN); }
+            set { this.SetString(IndexTag.RPMTAG_POSTUN, value); }
+        }
+
+        /// <summary>
+        /// Gets the name of the program to run before installation of this package.
+        /// </summary>
+        public string PreInProg
+        {
+            get { return this.GetString(IndexTag.RPMTAG_PREINPROG); }
+            set { this.SetString(IndexTag.RPMTAG_PREINPROG, value); }
+        }
+
+        /// <summary>
         /// Gets the name of the program to run after installation of this package.
         /// </summary>
         public string PostInProg
         {
             get { return this.GetString(IndexTag.RPMTAG_POSTINPROG); }
             set { this.SetString(IndexTag.RPMTAG_POSTINPROG, value); }
+        }
+
+        /// <summary>
+        /// Gets the name of the program to run before removal of this package.
+        /// </summary>
+        public string PreUnProg
+        {
+            get { return this.GetString(IndexTag.RPMTAG_PREUNPROG); }
+            set { this.SetString(IndexTag.RPMTAG_PREUNPROG, value); }
         }
 
         /// <summary>

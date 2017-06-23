@@ -85,6 +85,8 @@ namespace Packaging.Targets.Rpm
             string version,
             string arch,
             string release,
+            bool createUser,
+            bool installService,
             Action<RpmMetadata> additionalMetadata,
             PgpPrivateKey privateKey,
             Stream targetStream)
@@ -134,8 +136,54 @@ namespace Packaging.Targets.Rpm
             metadata.RpmVersion = "4.11.3";
             metadata.SourcePkgId = new byte[0x10];
             metadata.SourceRpm = $"{name}-{version}-{release}.src.rpm";
-            metadata.PostInProg = "/sbin/ldconfig";
-            metadata.PostUnProg = "/sbin/ldconfig";
+
+            // Scripts which run before & after installation and removal.
+
+            metadata.PreIn = string.Empty;
+            metadata.PostIn = string.Empty;
+            metadata.PreUn = string.Empty;
+            metadata.PostUn = string.Empty;
+
+            if (createUser)
+            {
+                // Add the user and group, under which the service runs.
+                // These users are never removed because UIDs are re-used on Linux.
+                metadata.PreIn += $"/usr/sbin/groupadd -r {name} 2>/dev/null || :\n" +
+                    $"/usr/sbin/useradd -g {name} -s /sbin/nologin -r -d /usr/share/{name} {name} 2>/dev/null || :\n";
+            }
+
+            if (installService)
+            {
+                // Install and activate the service.
+                metadata.PostIn +=
+                    $"if [ $1 -eq 1 ] ; then \n" +
+                    $"    systemctl enable --now {name}.service >/dev/null 2>&1 || : \n" +
+                    $"fi\n";
+
+                metadata.PreUn +=
+                    $"if [ $1 -eq 0 ] ; then \n" +
+                    $"    # Package removal, not upgrade \n" +
+                    $"    systemctl --no-reload disable --now {name}.service > /dev/null 2>&1 || : \n" +
+                    $"fi\n";
+
+                metadata.PostUn +=
+                    $"if [ $1 -ge 1 ] ; then \n" +
+                    $"    # Package upgrade, not uninstall \n" +
+                    $"    systemctl try-restart {name}.service >/dev/null 2>&1 || : \n" +
+                    $"fi\n";
+            }
+
+            // Remove all directories marked as such (these are usually directories which contain temporary files)
+            foreach (var entryToRemove in archiveEntries.Where(e => e.RemoveOnUninstall))
+            {
+                metadata.PreUn += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
+            }
+
+            // All these actions are shell scripts.
+            metadata.PreInProg = "/bin/sh";
+            metadata.PostInProg = "/bin/sh";
+            metadata.PreUnProg = "/bin/sh";
+            metadata.PostUnProg = "/bin/sh";
 
             // Not providing these (or setting empty values) would cause rpmlint errors
             metadata.Description = $"{name} version {version}-{release}";
