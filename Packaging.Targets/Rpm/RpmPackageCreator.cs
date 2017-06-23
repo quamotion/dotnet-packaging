@@ -51,6 +51,9 @@ namespace Packaging.Targets.Rpm
         /// <summary>
         /// Creates a RPM Package.
         /// </summary>
+        /// <param name="archiveEntries">
+        /// The archive entries which make up the RPM package.
+        /// </param>
         /// <param name="payloadStream">
         /// A <see cref="Stream"/> which contains the CPIO archive for the RPM package.
         /// </param>
@@ -76,6 +79,7 @@ namespace Packaging.Targets.Rpm
         /// The <see cref="Stream"/> to which to write the package.
         /// </param>
         public void CreatePackage(
+            Collection<ArchiveEntry> archiveEntries,
             Stream payloadStream,
             string name,
             string version,
@@ -109,11 +113,8 @@ namespace Packaging.Targets.Rpm
             this.AddPackageProvides(metadata);
             this.AddLdDependencies(metadata);
 
-            using (CpioFile payload = new CpioFile(payloadStream, leaveOpen: true))
-            {
-                var files = this.CreateFiles(payload);
-                metadata.Files = files;
-            }
+            var files = this.CreateFiles(archiveEntries);
+            metadata.Files = files;
 
             this.AddRpmDependencies(metadata);
 
@@ -227,96 +228,38 @@ namespace Packaging.Targets.Rpm
         /// <summary>
         /// Creates the metadata for all files in the <see cref="CpioFile"/>.
         /// </summary>
-        /// <param name="payload">
-        /// The payload for which to generate the metadata.
+        /// <param name="archiveEntries">
+        /// The archive entries for which to generate the metadata.
         /// </param>
         /// <returns>
         /// A <see cref="Collection{RpmFile}"/> which contains all the metadata.
         /// </returns>
-        public Collection<RpmFile> CreateFiles(CpioFile payload)
+        public Collection<RpmFile> CreateFiles(Collection<ArchiveEntry> archiveEntries)
         {
             Collection<RpmFile> files = new Collection<RpmFile>();
 
-            while (payload.Read())
+            foreach(var entry in archiveEntries)
             {
-                byte[] hash;
-                byte[] buffer = new byte[1024];
-                byte[] header = null;
-                int read = 0;
-
-                using (var stream = payload.Open())
-                using (var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
-                {
-                    while (true)
-                    {
-                        read = stream.Read(buffer, 0, buffer.Length);
-
-                        if (header == null)
-                        {
-                            header = new byte[read];
-                            Buffer.BlockCopy(buffer, 0, header, 0, read);
-                        }
-
-                        hasher.AppendData(buffer, 0, read);
-
-                        if (read < buffer.Length)
-                        {
-                            break;
-                        }
-                    }
-
-                    hash = hasher.GetHashAndReset();
-                }
-
-                string fileName = payload.EntryName;
-                int fileSize = (int)payload.EntryHeader.FileSize;
-
-                if (fileName.StartsWith("."))
-                {
-                    fileName = fileName.Substring(1);
-                }
-
-                string linkTo = string.Empty;
-
-                if (payload.EntryHeader.Mode.HasFlag(LinuxFileMode.S_IFLNK))
-                {
-                    // Find the link text
-                    int stringEnd = 0;
-
-                    while (stringEnd < header.Length - 1 && header[stringEnd] != 0)
-                    {
-                        stringEnd++;
-                    }
-
-                    linkTo = Encoding.UTF8.GetString(header, 0, stringEnd + 1);
-                    hash = new byte[] { };
-                }
-                else if (payload.EntryHeader.Mode.HasFlag(LinuxFileMode.S_IFDIR))
-                {
-                    fileSize = 0x00001000;
-                    hash = new byte[] { };
-                }
-
                 RpmFile file = new RpmFile()
                 {
-                    Size = fileSize,
-                    Mode = payload.EntryHeader.Mode,
-                    Rdev = (short)payload.EntryHeader.RDevMajor,
-                    ModifiedTime = payload.EntryHeader.Mtime,
-                    MD5Hash = hash,
-                    LinkTo = linkTo,
-                    Flags = this.analyzer.DetermineFlags(fileName, payload.EntryHeader, header),
-                    UserName = "root",
-                    GroupName = "root",
+                    Size = (int)entry.FileSize,
+                    Mode = entry.Mode,
+                    Rdev = 0,
+                    ModifiedTime = entry.Modified,
+                    MD5Hash = entry.Sha256, // Yes, the MD5 hash does not actually contain a MD5 hash
+                    LinkTo = entry.LinkTo,
+                    Flags = this.analyzer.DetermineFlags(entry),
+                    UserName = entry.Owner,
+                    GroupName = entry.Group,
                     VerifyFlags = RpmVerifyFlags.RPMVERIFY_ALL,
                     Device = 1,
-                    Inode = (int)payload.EntryHeader.Ino,
+                    Inode = (int)entry.Inode,
                     Lang = "",
-                    Color = this.analyzer.DetermineColor(fileName, payload.EntryHeader, header),
-                    Class = this.analyzer.DetermineClass(fileName, payload.EntryHeader, header),
-                    Requires = this.analyzer.DetermineRequires(fileName, payload.EntryHeader, header),
-                    Provides = this.analyzer.DetermineProvides(fileName, payload.EntryHeader, header),
-                    Name = fileName
+                    Color = this.analyzer.DetermineColor(entry),
+                    Class = this.analyzer.DetermineClass(entry),
+                    Requires = this.analyzer.DetermineRequires(entry),
+                    Provides = this.analyzer.DetermineProvides(entry),
+                    Name = entry.TargetPath
                 };
 
                 files.Add(file);

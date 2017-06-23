@@ -72,15 +72,20 @@ namespace Packaging.Targets
             using (var targetStream = File.Open(this.RpmPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             using (var cpioStream = File.Open(this.CpioPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
-                CpioFileCreator cpioCreator = new CpioFileCreator();
-                cpioCreator.FromDirectory(
+                ArchiveBuilder archiveBuilder = new ArchiveBuilder();
+                var archiveEntries = archiveBuilder.FromDirectory(
                     this.PublishDir,
-                    this.Prefix,
+                    this.Prefix);
+
+                CpioFileCreator cpioCreator = new CpioFileCreator();
+                cpioCreator.FromArchiveEntries(
+                    archiveEntries,
                     cpioStream);
                 cpioStream.Position = 0;
 
                 RpmPackageCreator rpmCreator = new RpmPackageCreator();
                 rpmCreator.CreatePackage(
+                    archiveEntries,
                     cpioStream,
                     this.PackageName,
                     this.Version,

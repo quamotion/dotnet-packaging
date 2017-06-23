@@ -1,31 +1,67 @@
 ﻿using Packaging.Targets.Rpm;
-using System;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 
 namespace Packaging.Targets.IO
 {
+    /// <summary>
+    /// Supports generating CPIO files.
+    /// </summary>
     public class CpioFileCreator
     {
+        /// <summary>
+        /// The <see cref="IFileAnalyzer"/> used to fetch file metadata.
+        /// </summary>
         private IFileAnalyzer fileAnayzer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CpioFileCreator"/> class.
+        /// </summary>
         public CpioFileCreator()
         {
             fileAnayzer = new FileAnalyzer();
         }
 
-        public void FromDirectory(string directory, string prefix, Stream targetStream)
+        /// <summary>
+        /// Generates a <see cref="CpioFile"/> based on a list of <see cref="ArchiveEntry"/>
+        /// values.
+        /// </summary>
+        /// <param name="archiveEntries">
+        /// The values based on which to generate the <see cref="CpioFile"/>.
+        /// </param>
+        /// <param name="targetStream">
+        /// The <see cref="Stream"/> which will hold the <see cref="CpioFile"/>.
+        /// </param>
+        public void FromArchiveEntries(Collection<ArchiveEntry> archiveEntries, Stream targetStream)
         {
             using (CpioFile cpioFile = new CpioFile(targetStream, leaveOpen: true))
             {
-                uint inode = 0;
+                foreach (var entry in archiveEntries)
+                {
+                    if (entry.Mode.HasFlag(LinuxFileMode.S_IFDIR))
+                    {
+                        this.AddDirectory(entry, cpioFile);
+                    }
+                    else
+                    {
+                        this.AddFile(entry, cpioFile);
+                    }
+                }
 
-                AddDirectory(directory, prefix, cpioFile, ref inode);
                 cpioFile.WriteTrailer();
             }
         }
 
-        public void AddDirectory(string directory, string prefix, CpioFile cpioFile, ref uint inode)
+        /// <summary>
+        /// Adds a directory entry to the <see cref="CpioFile"/>.
+        /// </summary>
+        /// <param name="entry">
+        /// The <see cref="ArchiveEntry"/> which represents the directory.
+        /// </param>
+        /// <param name="cpioFile">
+        /// The <see cref="CpioFile"/> to which to add the directory entry.
+        /// </param>
+        public void AddDirectory(ArchiveEntry entry, CpioFile cpioFile)
         {
             // Write out an entry for the current directory
             CpioHeader directoryHeader = new CpioHeader()
@@ -35,9 +71,9 @@ namespace Packaging.Targets.IO
                 DevMinor = 0,
                 FileSize = 0,
                 Gid = 0,
-                Ino = inode,
-                Mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
-                Mtime = Directory.GetLastWriteTime(directory),
+                Ino = entry.Inode,
+                Mode = entry.Mode,
+                Mtime = entry.Modified,
                 Nlink = 1,
                 RDevMajor = 0,
                 RDevMinor = 0,
@@ -46,74 +82,41 @@ namespace Packaging.Targets.IO
                 NameSize = 0
             };
 
-            // The other in which the files appear in the cpio archive is important; if this is not respected xzdio
-            // will report errors like:
-            // error: unpacking of archive failed on file ./usr/share/quamotion/mscorlib.dll: cpio: Archive file not in header
-            var entries = Directory.GetFileSystemEntries(directory).OrderBy(e => Directory.Exists(e) ? e + "/" : e, StringComparer.Ordinal).ToArray();
-
-            foreach (var entry in entries)
-            {
-                if (File.Exists(entry))
-                {
-                    AddFile(entry, prefix, cpioFile, ref inode);
-                }
-                else
-                {
-
-                    AddDirectory(entry, prefix + "/" + Path.GetFileName(entry), cpioFile, ref inode);
-                }
-            }
+            cpioFile.Write(directoryHeader, entry.TargetPath, null);
         }
 
-        public void AddFile(string entry, string prefix, CpioFile cpioFile, ref uint inode)
+        /// <summary>
+        /// Adds a file entry to a <see cref="CpioFile"/>.
+        /// </summary>
+        /// <param name="entry">
+        /// The file entry to add.
+        /// </param>
+        /// <param name="cpioFile">
+        /// The <see cref="CpioFile"/> to which to add the entry.
+        /// </param>
+        public void AddFile(ArchiveEntry entry, CpioFile cpioFile)
         {
-            byte[] fileHeader = new byte[1024];
-
-            using (Stream fileStream = File.OpenRead(entry))
+            using (Stream fileStream = File.OpenRead(entry.SourceFilename))
             {
-                var fileName = Path.GetFileName(entry);
-
-                if (fileName.StartsWith(".") || fileStream.Length == 0)
-                {
-                    // Skip hidden and empty files - this would case rmplint errors.
-                    return;
-                }
-
-                inode++;
-
-                var read = fileStream.Read(fileHeader, 0, fileHeader.Length);
-
-                bool isExecutable = this.fileAnayzer.IsExecutable(fileHeader);
-
-                var mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG;
-
-                if (isExecutable)
-                {
-                    mode |= LinuxFileMode.S_IXOTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IXUSR;
-                }
-
-                fileStream.Position = 0;
-                string name = prefix + "/" + fileName;
-
                 CpioHeader cpioHeader = new CpioHeader()
                 {
                     Check = 0,
                     DevMajor = 1,
                     DevMinor = 0,
-                    FileSize = (uint)fileStream.Length,
+                    FileSize = entry.FileSize,
                     Gid = 0, // root
                     Uid = 0, // root
-                    Ino = inode,
-                    Mode = mode,
-                    Mtime = File.GetLastWriteTimeUtc(entry),
-                    NameSize = (uint)name.Length + 1,
+                    Ino = entry.Inode,
+                    Mode = entry.Mode,
+                    Mtime = entry.Modified,
+                    NameSize = (uint)entry.TargetPath.Length + 1,
                     Nlink = 1,
                     RDevMajor = 0,
                     RDevMinor = 0,
                     Signature = "070701",
                 };
 
-                cpioFile.Write(cpioHeader, name, fileStream);
+                cpioFile.Write(cpioHeader, entry.TargetPath, fileStream);
             }
         }
     }
