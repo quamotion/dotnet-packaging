@@ -78,5 +78,31 @@ namespace Packaging.Targets.IO
         /// </summary>
         public bool IsAscii
         { get; set; }
+
+        /// <summary>
+        /// Gets the file name, including a final slash if the file is a directory.
+        /// Used when sorting entries to make sure a directory entry immediately preceeds
+        /// all of its children.
+        /// </summary>
+        public string TargetPathWithFinalSlash
+        {
+            get
+            {
+                if (this.Mode.HasFlag(LinuxFileMode.S_IFDIR) && !this.TargetPath.EndsWith("/"))
+                {
+                    return this.TargetPath + "/";
+                }
+                else
+                {
+                    return this.TargetPath;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.TargetPath;
+        }
     }
 }

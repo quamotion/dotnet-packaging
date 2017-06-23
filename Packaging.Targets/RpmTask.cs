@@ -3,9 +3,8 @@ using Microsoft.Build.Utilities;
 using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 
 namespace Packaging.Targets
 {
@@ -60,6 +59,19 @@ namespace Packaging.Targets
             set;
         }
 
+        [Required]
+        public ITaskItem[] Content
+        {
+            get;
+            set;
+        }
+
+        public ITaskItem[] LinuxFolders
+        {
+            get;
+            set;
+        }
+
         public override bool Execute()
         {
             this.Log.LogMessage(MessageImportance.Normal, "Creating RPM package '{0}' from folder '{1}'", this.RpmPath, this.PublishDir);
@@ -75,7 +87,13 @@ namespace Packaging.Targets
                 ArchiveBuilder archiveBuilder = new ArchiveBuilder();
                 var archiveEntries = archiveBuilder.FromDirectory(
                     this.PublishDir,
-                    this.Prefix);
+                    this.Prefix,
+                    this.Content);
+
+                archiveEntries.AddRange(archiveBuilder.FromLinuxFolders(this.LinuxFolders));
+                archiveEntries = archiveEntries
+                    .OrderBy(e => e.TargetPathWithFinalSlash, StringComparer.Ordinal)
+                    .ToList();
 
                 CpioFileCreator cpioCreator = new CpioFileCreator();
                 cpioCreator.FromArchiveEntries(

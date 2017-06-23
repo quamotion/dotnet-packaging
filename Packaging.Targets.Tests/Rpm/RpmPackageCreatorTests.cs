@@ -1,5 +1,6 @@
 ﻿using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -245,7 +246,7 @@ namespace Packaging.Targets.Tests.Rpm
             using (var targetStream = File.Open(@"RpmPackageCreatorTests_CreateTest.rpm", FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
                 var originalPackage = RpmPackageReader.Read(stream);
-                Collection<ArchiveEntry> archive = null;
+                List<ArchiveEntry> archive = null;
 
                 using (var decompressedPayloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
                 using (CpioFile cpio = new CpioFile(decompressedPayloadStream, leaveOpen: false))

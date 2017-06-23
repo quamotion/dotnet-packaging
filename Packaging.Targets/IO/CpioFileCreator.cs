@@ -1,5 +1,6 @@
 ﻿using Packaging.Targets.Rpm;
-using System.Collections.ObjectModel;
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Packaging.Targets.IO
@@ -32,7 +33,7 @@ namespace Packaging.Targets.IO
         /// <param name="targetStream">
         /// The <see cref="Stream"/> which will hold the <see cref="CpioFile"/>.
         /// </param>
-        public void FromArchiveEntries(Collection<ArchiveEntry> archiveEntries, Stream targetStream)
+        public void FromArchiveEntries(List<ArchiveEntry> archiveEntries, Stream targetStream)
         {
             using (CpioFile cpioFile = new CpioFile(targetStream, leaveOpen: true))
             {
@@ -82,7 +83,13 @@ namespace Packaging.Targets.IO
                 NameSize = 0
             };
 
-            cpioFile.Write(directoryHeader, entry.TargetPath, null);
+            var targetPath = entry.TargetPath;
+            if (!targetPath.StartsWith("."))
+            {
+                targetPath = "." + targetPath;
+            }
+
+            cpioFile.Write(directoryHeader, targetPath, new MemoryStream(Array.Empty<byte>()));
         }
 
         /// <summary>
@@ -96,6 +103,13 @@ namespace Packaging.Targets.IO
         /// </param>
         public void AddFile(ArchiveEntry entry, CpioFile cpioFile)
         {
+            var targetPath = entry.TargetPath;
+
+            if (!targetPath.StartsWith("."))
+            {
+                targetPath = "." + targetPath;
+            }
+
             using (Stream fileStream = File.OpenRead(entry.SourceFilename))
             {
                 CpioHeader cpioHeader = new CpioHeader()
@@ -116,7 +130,7 @@ namespace Packaging.Targets.IO
                     Signature = "070701",
                 };
 
-                cpioFile.Write(cpioHeader, entry.TargetPath, fileStream);
+                cpioFile.Write(cpioHeader, targetPath, fileStream);
             }
         }
     }

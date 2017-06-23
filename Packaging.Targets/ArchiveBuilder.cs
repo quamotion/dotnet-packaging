@@ -1,6 +1,8 @@
-﻿using Packaging.Targets.IO;
+﻿using Microsoft.Build.Framework;
+using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -50,9 +52,9 @@ namespace Packaging.Targets
         /// <returns>
         /// A list of <see cref="ArchiveEntry"/> objects representing the data in the CPIO file.
         /// </returns>
-        public Collection<ArchiveEntry> FromCpio(CpioFile file)
+        public List<ArchiveEntry> FromCpio(CpioFile file)
         {
-            Collection<ArchiveEntry> value = new Collection<ArchiveEntry>();
+            List<ArchiveEntry> value = new List<ArchiveEntry>();
             byte[] buffer = new byte[1024];
             byte[] fileHeader = null;
 
@@ -136,6 +138,35 @@ namespace Packaging.Targets
             return value;
         }
 
+        public Collection<ArchiveEntry> FromLinuxFolders(ITaskItem[] metadata)
+        {
+            Collection<ArchiveEntry> value = new Collection<ArchiveEntry>();
+
+            foreach (var folder in metadata)
+            {
+                var path = folder.ItemSpec.Replace("\\", "/");
+
+                // Write out an entry for the current directory
+                // (actually, this is _not_ done)
+                ArchiveEntry directoryEntry = new ArchiveEntry()
+                {
+                    FileSize = 0x00001000,
+                    Sha256 = Array.Empty<byte>(),
+                    Mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
+                    Modified = DateTime.Now,
+                    Group = folder.GetGroup(),
+                    Owner = folder.GetOwner(),
+                    Inode = this.inode++,
+                    TargetPath = path,
+                    LinkTo = string.Empty
+                };
+
+                value.Add(directoryEntry);
+            }
+
+            return value;
+        }
+
         /// <summary>
         /// Extracts the <see cref="ArchiveEntry"/> objects from a directory.
         /// </summary>
@@ -145,14 +176,14 @@ namespace Packaging.Targets
         /// <returns>
         /// A list of <see cref="ArchiveEntry"/> objects representing the data in the directory.
         /// </returns>
-        public Collection<ArchiveEntry> FromDirectory(string directory, string prefix)
+        public List<ArchiveEntry> FromDirectory(string directory, string prefix, ITaskItem[] metadata)
         {
-            Collection<ArchiveEntry> value = new Collection<ArchiveEntry>();
-            AddDirectory(directory, prefix, value);
+            List<ArchiveEntry> value = new List<ArchiveEntry>();
+            AddDirectory(directory, string.Empty, prefix, value, metadata);
             return value;
         }
 
-        protected void AddDirectory(string directory, string prefix, Collection<ArchiveEntry> value)
+        protected void AddDirectory(string directory, string relativePath, string prefix, List<ArchiveEntry> value, ITaskItem[] metadata)
         {
             // Write out an entry for the current directory
             // (actually, this is _not_ done)
@@ -176,16 +207,16 @@ namespace Packaging.Targets
             {
                 if (File.Exists(entry))
                 {
-                    AddFile(entry, prefix, value);
+                    AddFile(entry, relativePath + Path.GetFileName(entry), prefix, value, metadata);
                 }
                 else
                 {
-                    AddDirectory(entry, prefix + "/" + Path.GetFileName(entry), value);
+                    AddDirectory(entry, relativePath + Path.GetFileName(entry) + "/", prefix + "/" + Path.GetFileName(entry), value, metadata);
                 }
             }
         }
 
-        protected void AddFile(string entry, string prefix, Collection<ArchiveEntry> value)
+        protected void AddFile(string entry, string relativePath, string prefix, List<ArchiveEntry> value, ITaskItem[] metadata)
         {
             var fileName = Path.GetFileName(entry);
 
@@ -193,6 +224,8 @@ namespace Packaging.Targets
             byte[] hash = null;
             byte[] buffer = new byte[1024];
             bool isAscii = true;
+
+            var fileMetadata = metadata.SingleOrDefault(m => m.IsPublished() && string.Equals(relativePath, m.GetPublishedPath()));
 
             using (Stream fileStream = File.OpenRead(entry))
             {
@@ -238,7 +271,15 @@ namespace Packaging.Targets
                     mode |= LinuxFileMode.S_IXOTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IXUSR;
                 }
 
-                string name = prefix + "/" + fileName;
+                // If a Linux path has been specified, use that one, else, use the default one based on the prefix
+                // + current file name.
+                string name = fileMetadata?.GetLinuxPath();
+
+                if (name == null)
+                {
+                    name = prefix + "/" + fileName;
+                }
+
                 string linkTo = string.Empty;
 
                 if (mode.HasFlag(LinuxFileMode.S_IFLNK))
@@ -258,8 +299,8 @@ namespace Packaging.Targets
                 ArchiveEntry archiveEntry = new ArchiveEntry()
                 {
                     FileSize = (uint)fileStream.Length,
-                    Group = "root",
-                    Owner = "root",
+                    Group = fileMetadata.GetGroup(),
+                    Owner = fileMetadata.GetOwner(),
                     Modified = File.GetLastAccessTimeUtc(entry),
                     SourceFilename = entry,
                     TargetPath = name,
@@ -267,7 +308,8 @@ namespace Packaging.Targets
                     Type = entryType,
                     LinkTo = linkTo,
                     Inode = this.inode++,
-                    IsAscii = isAscii
+                    IsAscii = isAscii,
+                    Mode = mode
                 };
 
                 value.Add(archiveEntry);

@@ -16,7 +16,7 @@
     <PropertyGroup>
       <RpmPath>$(PackagePath).rpm</RpmPath>
       <CpioPath>$(IntermediatePackagePath).cpio</CpioPath>
-      <Prefix>./usr/share/$(TargetName)</Prefix>
+      <Prefix>/usr/share/$(TargetName)</Prefix>
       <Release>0</Release>
       <PackageName>$(TargetName)</PackageName>
     </PropertyGroup>
@@ -29,7 +29,9 @@
              Prefix="$(Prefix)"
              Version="$(AssemblyFileVersion)"
              Release="$(Release)"
-             PackageName="$(PackageName)"/>
+             PackageName="$(PackageName)"
+             Content="@(Content)"
+             LinuxFolders="@(LinuxFolder)"/>
   </Target>
 
   <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">

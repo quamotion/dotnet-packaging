@@ -79,7 +79,7 @@ namespace Packaging.Targets.Rpm
         /// The <see cref="Stream"/> to which to write the package.
         /// </param>
         public void CreatePackage(
-            Collection<ArchiveEntry> archiveEntries,
+            List<ArchiveEntry> archiveEntries,
             Stream payloadStream,
             string name,
             string version,
@@ -234,15 +234,22 @@ namespace Packaging.Targets.Rpm
         /// <returns>
         /// A <see cref="Collection{RpmFile}"/> which contains all the metadata.
         /// </returns>
-        public Collection<RpmFile> CreateFiles(Collection<ArchiveEntry> archiveEntries)
+        public Collection<RpmFile> CreateFiles(List<ArchiveEntry> archiveEntries)
         {
             Collection<RpmFile> files = new Collection<RpmFile>();
 
-            foreach(var entry in archiveEntries)
+            foreach (var entry in archiveEntries)
             {
+                var size = entry.FileSize;
+
+                if (entry.Mode.HasFlag(LinuxFileMode.S_IFDIR))
+                {
+                    size = 0x1000;
+                }
+
                 RpmFile file = new RpmFile()
                 {
-                    Size = (int)entry.FileSize,
+                    Size = (int)size,
                     Mode = entry.Mode,
                     Rdev = 0,
                     ModifiedTime = entry.Modified,
