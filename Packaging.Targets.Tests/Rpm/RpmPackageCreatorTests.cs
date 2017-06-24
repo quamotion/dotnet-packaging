@@ -1,5 +1,6 @@
 ﻿using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -43,7 +44,9 @@ namespace Packaging.Targets.Tests.Rpm
                     }
 
                     RpmPackageCreator creator = new RpmPackageCreator(analyzer);
-                    var files = creator.CreateFiles(cpio);
+                    ArchiveBuilder builder = new ArchiveBuilder(analyzer);
+                    var entries = builder.FromCpio(cpio);
+                    var files = creator.CreateFiles(entries);
 
                     var originalMetadata = new RpmMetadata(originalPackage);
 
@@ -92,8 +95,10 @@ namespace Packaging.Targets.Tests.Rpm
                 using (var payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
                 using (var cpio = new CpioFile(payloadStream, false))
                 {
+                    ArchiveBuilder builder = new ArchiveBuilder(new PlistFileAnalyzer());
                     RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
-                    var files = creator.CreateFiles(cpio);
+                    var entries = builder.FromCpio(cpio);
+                    var files = creator.CreateFiles(entries);
 
                     // Core routine to populate files and dependencies
                     RpmPackage package = new RpmPackage();
@@ -107,7 +112,7 @@ namespace Packaging.Targets.Tests.Rpm
                     creator.AddLdDependencies(metadata);
 
                     metadata.Files = files;
-                    creator.AddRpmDependencies(metadata);
+                    creator.AddRpmDependencies(metadata, null);
 
                     PlistMetadata.ApplyDefaultMetadata(metadata);
 
@@ -144,7 +149,9 @@ namespace Packaging.Targets.Tests.Rpm
                 using (var payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
                 using (var cpio = new CpioFile(payloadStream, false))
                 {
-                    files = creator.CreateFiles(cpio);
+                    ArchiveBuilder builder = new ArchiveBuilder(new PlistFileAnalyzer());
+                    var entries = builder.FromCpio(cpio);
+                    files = creator.CreateFiles(entries);
                 }
 
                 // Core routine to populate files and dependencies
@@ -159,7 +166,7 @@ namespace Packaging.Targets.Tests.Rpm
                 creator.AddLdDependencies(metadata);
 
                 metadata.Files = files;
-                creator.AddRpmDependencies(metadata);
+                creator.AddRpmDependencies(metadata, null);
 
                 PlistMetadata.ApplyDefaultMetadata(metadata);
 
@@ -239,20 +246,32 @@ namespace Packaging.Targets.Tests.Rpm
             using (var targetStream = File.Open(@"RpmPackageCreatorTests_CreateTest.rpm", FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
                 var originalPackage = RpmPackageReader.Read(stream);
+                List<ArchiveEntry> archive = null;
 
-                using (var compressedPayloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
+                using (var decompressedPayloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
+                using (CpioFile cpio = new CpioFile(decompressedPayloadStream, leaveOpen: false))
+                {
+                    ArchiveBuilder builder = new ArchiveBuilder();
+                    archive = builder.FromCpio(cpio);
+                }
+
+                using (var decompressedPayloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
                 using (var payloadStream = new MemoryStream())
                 {
-                    compressedPayloadStream.CopyTo(payloadStream);
-                    payloadStream.Position = 0; 
+                    decompressedPayloadStream.CopyTo(payloadStream);
+                    payloadStream.Position = 0;
 
                     RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
                     creator.CreatePackage(
+                        archive,
                         payloadStream,
                         "libplist",
                         "2.0.1.151",
                         "x86_64",
                         "1.1",
+                        false,
+                        false,
+                        null,
                         (metadata) => PlistMetadata.ApplyDefaultMetadata(metadata),
                         privateKey,
                         targetStream);

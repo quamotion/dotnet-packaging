@@ -1,8 +1,5 @@
 ﻿using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Collections.ObjectModel;
 
 namespace Packaging.Targets.Tests.Rpm
@@ -14,9 +11,9 @@ namespace Packaging.Targets.Tests.Rpm
     internal class PlistFileAnalyzer : FileAnalyzer
     {
         /// <inheritdoc/>
-        public override Collection<PackageDependency> DetermineProvides(string filename, CpioHeader fileHeader, byte[] header)
+        public override Collection<PackageDependency> DetermineProvides(ArchiveEntry entry)
         {
-            switch (filename)
+            switch (entry.TargetPath)
             {
                 case "/usr/bin/plistutil":
                     return new Collection<PackageDependency>()
@@ -34,13 +31,13 @@ namespace Packaging.Targets.Tests.Rpm
                     };
             }
 
-            return base.DetermineProvides(filename, fileHeader, header);
+            return base.DetermineProvides(entry);
         }
 
         /// <inheritdoc/>
-        public override Collection<PackageDependency> DetermineRequires(string filename, CpioHeader fileHeader, byte[] header)
+        public override Collection<PackageDependency> DetermineRequires(ArchiveEntry entry)
         {
-            switch (filename)
+            switch (entry.TargetPath)
             {
                 case "/usr/bin/plistutil":
                     return new Collection<PackageDependency>()
@@ -81,25 +78,25 @@ namespace Packaging.Targets.Tests.Rpm
                     };
             }
 
-            return base.DetermineRequires(filename, fileHeader, header);
+            return base.DetermineRequires(entry);
         }
 
         /// <inheritdoc/>
-        public override RpmFileColor DetermineColor(string filename, CpioHeader fileHeader, byte[] header)
+        public override RpmFileColor DetermineColor(ArchiveEntry entry)
         {
-            switch (filename)
+            switch (entry.TargetPath)
             {
                 case "/usr/share/doc/libplist-2.0.1.151/AUTHORS":
                     return RpmFileColor.RPMFC_BLACK;
             }
 
-            return base.DetermineColor(filename, fileHeader, header);
+            return base.DetermineColor(entry);
         }
 
         /// <inheritdoc/>
-        public override string DetermineClass(string filename, CpioHeader fileHeader, byte[] header)
+        public override string DetermineClass(ArchiveEntry entry)
         {
-            switch (filename)
+            switch (entry.TargetPath)
             {
                 case "/usr/bin/plistutil":
                     return "ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, BuildID[sha1]=44864a4aec49ec94f3dc1486068ff0d308e3ae37, stripped";
@@ -117,7 +114,7 @@ namespace Packaging.Targets.Tests.Rpm
                     return "ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, BuildID[sha1]=cc5c79145ee69889a9fe95abaa70cf91b0d64d50, stripped";
             }
 
-            return base.DetermineClass(filename, fileHeader, header);
+            return base.DetermineClass(entry);
         }
     }
 }

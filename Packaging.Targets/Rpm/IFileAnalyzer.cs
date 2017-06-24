@@ -11,88 +11,58 @@ namespace Packaging.Targets.Rpm
         /// <summary>
         /// Gets the <see cref="RpmFileFlags"/> which apply to this file.
         /// </summary>
-        /// <param name="fileName">
-        /// The name of the file to analyze.
-        /// </param>
-        /// <param name="fileHeader">
-        /// The <see cref="CpioHeader"/> of the file to analyze.
-        /// </param>
-        /// <param name="header">
-        /// The first bytes of the file to analyze.
-        /// </param>
+        /// <param name="entry">
+        /// The entry to analyze.
         /// <returns>
         /// The <see cref="RpmFileFlags"/> for the file.
         /// </returns>
-        RpmFileFlags DetermineFlags(string fileName, CpioHeader fileHeader, byte[] header);
+        RpmFileFlags DetermineFlags(ArchiveEntry entry);
 
         /// <summary>
         /// Gets the dependencies for this file.
         /// </summary>
-        /// <param name="fileName">
-        /// The name of the file to analyze.
-        /// </param>
-        /// <param name="fileHeader">
-        /// The <see cref="CpioHeader"/> of the file to analyze.
-        /// </param>
-        /// <param name="header">
-        /// The first bytes of the file to analyze.
-        /// </param>
+        /// <param name="entry">
+        /// The entry to analyze.
+        /// <returns>
         /// <returns>
         /// The dependencies for the file.
         /// </returns>
-        Collection<PackageDependency> DetermineRequires(string fileName, CpioHeader fileHeader, byte[] header);
+        Collection<PackageDependency> DetermineRequires(ArchiveEntry entry);
 
         /// <summary>
         /// Gets the dependencies fulfilled by this file.
         /// </summary>
-        /// <param name="fileName">
-        /// The name of the file to analyze.
-        /// </param>
-        /// <param name="fileHeader">
-        /// The <see cref="CpioHeader"/> of the file to analyze.
-        /// </param>
-        /// <param name="header">
-        /// The first bytes of the file to analyze.
-        /// </param>
+        /// <param name="entry">
+        /// The entry to analyze.
+        /// <returns>
         /// <returns>
         /// The dependencies fulfilled by the file.
         /// </returns>
-        Collection<PackageDependency> DetermineProvides(string fileName, CpioHeader fileHeader, byte[] header);
+        Collection<PackageDependency> DetermineProvides(ArchiveEntry entry);
 
         /// <summary>
         /// Gets the <see cref="RpmFileColor"/> for this file.
         /// </summary>
-        /// <param name="fileName">
-        /// The name of the file to analyze.
-        /// </param>
-        /// <param name="fileHeader">
-        /// The <see cref="CpioHeader"/> of the file to analyze.
-        /// </param>
-        /// <param name="header">
-        /// The first bytes of the file to analyze.
+        /// <param name="entry">
+        /// The entry to analyze.
+        /// <returns>tes of the file to analyze.
         /// </param>
         /// <returns>
         /// The <see cref="RpmFileColor"/> for the file.
         /// </returns>
-        RpmFileColor DetermineColor(string fileName, CpioHeader fileHeader, byte[] header);
+        RpmFileColor DetermineColor(ArchiveEntry entry);
 
         /// <summary>
         /// Gets the class of this file.
         /// </summary>
-        /// <param name="fileName">
-        /// The name of the file to analyze.
-        /// </param>
-        /// <param name="fileHeader">
-        /// The <see cref="CpioHeader"/> of the file to analyze.
-        /// </param>
-        /// <param name="header">
-        /// The first bytes of the file to analyze.
-        /// </param>
+        /// <param name="entry">
+        /// The entry to analyze.
+        /// <returns>
         /// <returns>
         /// The class of this file.
         /// </returns>
-        string DetermineClass(string fileName, CpioHeader fileHeader, byte[] header);
+        string DetermineClass(ArchiveEntry entry);
 
-        bool IsExecutable(byte[] header);
+        bool IsExecutable(ArchiveEntry entry);
     }
 }

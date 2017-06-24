@@ -9,27 +9,34 @@
       <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(AssemblyFileVersion).$(RuntimeIdentifier)</PackageName>
       <IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
       <PackagePath>$(TargetDir)$(PackageName)</PackagePath>
+      <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
+      <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
     </PropertyGroup>
   </Target>
-  
+
   <Target Name="CreateRpm" DependsOnTargets="CreatePackageProperties">
     <PropertyGroup>
       <RpmPath>$(PackagePath).rpm</RpmPath>
       <CpioPath>$(IntermediatePackagePath).cpio</CpioPath>
-      <Prefix>./usr/share/$(TargetName)</Prefix>
+      <Prefix>/usr/share/$(TargetName)</Prefix>
       <Release>0</Release>
       <PackageName>$(TargetName)</PackageName>
     </PropertyGroup>
 
     <Message Text="Creating $(RpmPath)" Importance="normal"/>
-    
+
     <RpmTask PublishDir="$(PublishDir)"
              RpmPath="$(RpmPath)"
              CpioPath="$(CpioPath)"
              Prefix="$(Prefix)"
              Version="$(AssemblyFileVersion)"
              Release="$(Release)"
-             PackageName="$(PackageName)"/>
+             PackageName="$(PackageName)"
+             Content="@(Content)"
+             LinuxFolders="@(LinuxFolder)"
+             RpmDependencies="@(RpmDependency)"
+             CreateUser="$(CreateUser)"
+             InstallService="$(InstallService)"/>
   </Target>
 
   <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">

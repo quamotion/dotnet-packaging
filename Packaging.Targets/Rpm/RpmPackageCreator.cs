@@ -51,6 +51,9 @@ namespace Packaging.Targets.Rpm
         /// <summary>
         /// Creates a RPM Package.
         /// </summary>
+        /// <param name="archiveEntries">
+        /// The archive entries which make up the RPM package.
+        /// </param>
         /// <param name="payloadStream">
         /// A <see cref="Stream"/> which contains the CPIO archive for the RPM package.
         /// </param>
@@ -76,11 +79,15 @@ namespace Packaging.Targets.Rpm
         /// The <see cref="Stream"/> to which to write the package.
         /// </param>
         public void CreatePackage(
+            List<ArchiveEntry> archiveEntries,
             Stream payloadStream,
             string name,
             string version,
             string arch,
             string release,
+            bool createUser,
+            bool installService,
+            IEnumerable<PackageDependency> additionalDependencies,
             Action<RpmMetadata> additionalMetadata,
             PgpPrivateKey privateKey,
             Stream targetStream)
@@ -109,13 +116,10 @@ namespace Packaging.Targets.Rpm
             this.AddPackageProvides(metadata);
             this.AddLdDependencies(metadata);
 
-            using (CpioFile payload = new CpioFile(payloadStream, leaveOpen: true))
-            {
-                var files = this.CreateFiles(payload);
-                metadata.Files = files;
-            }
+            var files = this.CreateFiles(archiveEntries);
+            metadata.Files = files;
 
-            this.AddRpmDependencies(metadata);
+            this.AddRpmDependencies(metadata, additionalDependencies);
 
             // Try to define valid defaults for most metadata
             metadata.Locales = new Collection<string> { "C" }; // Should come before any localizable data.
@@ -133,8 +137,54 @@ namespace Packaging.Targets.Rpm
             metadata.RpmVersion = "4.11.3";
             metadata.SourcePkgId = new byte[0x10];
             metadata.SourceRpm = $"{name}-{version}-{release}.src.rpm";
-            metadata.PostInProg = "/sbin/ldconfig";
-            metadata.PostUnProg = "/sbin/ldconfig";
+
+            // Scripts which run before & after installation and removal.
+
+            metadata.PreIn = string.Empty;
+            metadata.PostIn = string.Empty;
+            metadata.PreUn = string.Empty;
+            metadata.PostUn = string.Empty;
+
+            if (createUser)
+            {
+                // Add the user and group, under which the service runs.
+                // These users are never removed because UIDs are re-used on Linux.
+                metadata.PreIn += $"/usr/sbin/groupadd -r {name} 2>/dev/null || :\n" +
+                    $"/usr/sbin/useradd -g {name} -s /sbin/nologin -r -d /usr/share/{name} {name} 2>/dev/null || :\n";
+            }
+
+            if (installService)
+            {
+                // Install and activate the service.
+                metadata.PostIn +=
+                    $"if [ $1 -eq 1 ] ; then \n" +
+                    $"    systemctl enable --now {name}.service >/dev/null 2>&1 || : \n" +
+                    $"fi\n";
+
+                metadata.PreUn +=
+                    $"if [ $1 -eq 0 ] ; then \n" +
+                    $"    # Package removal, not upgrade \n" +
+                    $"    systemctl --no-reload disable --now {name}.service > /dev/null 2>&1 || : \n" +
+                    $"fi\n";
+
+                metadata.PostUn +=
+                    $"if [ $1 -ge 1 ] ; then \n" +
+                    $"    # Package upgrade, not uninstall \n" +
+                    $"    systemctl try-restart {name}.service >/dev/null 2>&1 || : \n" +
+                    $"fi\n";
+            }
+
+            // Remove all directories marked as such (these are usually directories which contain temporary files)
+            foreach (var entryToRemove in archiveEntries.Where(e => e.RemoveOnUninstall))
+            {
+                metadata.PreUn += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
+            }
+
+            // All these actions are shell scripts.
+            metadata.PreInProg = "/bin/sh";
+            metadata.PostInProg = "/bin/sh";
+            metadata.PreUnProg = "/bin/sh";
+            metadata.PostUnProg = "/bin/sh";
 
             // Not providing these (or setting empty values) would cause rpmlint errors
             metadata.Description = $"{name} version {version}-{release}";
@@ -227,96 +277,45 @@ namespace Packaging.Targets.Rpm
         /// <summary>
         /// Creates the metadata for all files in the <see cref="CpioFile"/>.
         /// </summary>
-        /// <param name="payload">
-        /// The payload for which to generate the metadata.
+        /// <param name="archiveEntries">
+        /// The archive entries for which to generate the metadata.
         /// </param>
         /// <returns>
         /// A <see cref="Collection{RpmFile}"/> which contains all the metadata.
         /// </returns>
-        public Collection<RpmFile> CreateFiles(CpioFile payload)
+        public Collection<RpmFile> CreateFiles(List<ArchiveEntry> archiveEntries)
         {
             Collection<RpmFile> files = new Collection<RpmFile>();
 
-            while (payload.Read())
+            foreach (var entry in archiveEntries)
             {
-                byte[] hash;
-                byte[] buffer = new byte[1024];
-                byte[] header = null;
-                int read = 0;
+                var size = entry.FileSize;
 
-                using (var stream = payload.Open())
-                using (var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
+                if (entry.Mode.HasFlag(LinuxFileMode.S_IFDIR))
                 {
-                    while (true)
-                    {
-                        read = stream.Read(buffer, 0, buffer.Length);
-
-                        if (header == null)
-                        {
-                            header = new byte[read];
-                            Buffer.BlockCopy(buffer, 0, header, 0, read);
-                        }
-
-                        hasher.AppendData(buffer, 0, read);
-
-                        if (read < buffer.Length)
-                        {
-                            break;
-                        }
-                    }
-
-                    hash = hasher.GetHashAndReset();
-                }
-
-                string fileName = payload.EntryName;
-                int fileSize = (int)payload.EntryHeader.FileSize;
-
-                if (fileName.StartsWith("."))
-                {
-                    fileName = fileName.Substring(1);
-                }
-
-                string linkTo = string.Empty;
-
-                if (payload.EntryHeader.Mode.HasFlag(LinuxFileMode.S_IFLNK))
-                {
-                    // Find the link text
-                    int stringEnd = 0;
-
-                    while (stringEnd < header.Length - 1 && header[stringEnd] != 0)
-                    {
-                        stringEnd++;
-                    }
-
-                    linkTo = Encoding.UTF8.GetString(header, 0, stringEnd + 1);
-                    hash = new byte[] { };
-                }
-                else if (payload.EntryHeader.Mode.HasFlag(LinuxFileMode.S_IFDIR))
-                {
-                    fileSize = 0x00001000;
-                    hash = new byte[] { };
+                    size = 0x1000;
                 }
 
                 RpmFile file = new RpmFile()
                 {
-                    Size = fileSize,
-                    Mode = payload.EntryHeader.Mode,
-                    Rdev = (short)payload.EntryHeader.RDevMajor,
-                    ModifiedTime = payload.EntryHeader.Mtime,
-                    MD5Hash = hash,
-                    LinkTo = linkTo,
-                    Flags = this.analyzer.DetermineFlags(fileName, payload.EntryHeader, header),
-                    UserName = "root",
-                    GroupName = "root",
+                    Size = (int)size,
+                    Mode = entry.Mode,
+                    Rdev = 0,
+                    ModifiedTime = entry.Modified,
+                    MD5Hash = entry.Sha256, // Yes, the MD5 hash does not actually contain a MD5 hash
+                    LinkTo = entry.LinkTo,
+                    Flags = this.analyzer.DetermineFlags(entry),
+                    UserName = entry.Owner,
+                    GroupName = entry.Group,
                     VerifyFlags = RpmVerifyFlags.RPMVERIFY_ALL,
                     Device = 1,
-                    Inode = (int)payload.EntryHeader.Ino,
+                    Inode = (int)entry.Inode,
                     Lang = "",
-                    Color = this.analyzer.DetermineColor(fileName, payload.EntryHeader, header),
-                    Class = this.analyzer.DetermineClass(fileName, payload.EntryHeader, header),
-                    Requires = this.analyzer.DetermineRequires(fileName, payload.EntryHeader, header),
-                    Provides = this.analyzer.DetermineProvides(fileName, payload.EntryHeader, header),
-                    Name = fileName
+                    Color = this.analyzer.DetermineColor(entry),
+                    Class = this.analyzer.DetermineClass(entry),
+                    Requires = this.analyzer.DetermineRequires(entry),
+                    Provides = this.analyzer.DetermineProvides(entry),
+                    Name = entry.TargetPath
                 };
 
                 files.Add(file);
@@ -386,7 +385,7 @@ namespace Packaging.Targets.Rpm
         /// <param name="metadata">
         /// The <see cref="RpmMetadata"/> to which to add the dependencies.
         /// </param>
-        public void AddRpmDependencies(RpmMetadata metadata)
+        public void AddRpmDependencies(RpmMetadata metadata, IEnumerable<PackageDependency> additionalDependencies)
         {
             // Somehow, three rpmlib dependencies come before the rtld(GNU_HASH) dependency and one after.
             // The rtld(GNU_HASH) indicates that hashes are stored in the .gnu_hash instead of the .hash section
@@ -422,8 +421,15 @@ namespace Packaging.Targets.Rpm
                 new PackageDependency("rpmlib(FileDigests)",RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "4.6.0-1"),
                 new PackageDependency("rpmlib(PayloadFilesHavePrefix)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB,"4.0-1"),
                 new PackageDependency("rtld(GNU_HASH)",RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
-                new PackageDependency("rpmlib(PayloadIsXz)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "5.2-1")
             };
+
+            // Inject any additional dependencies the user may have specified.
+            if (additionalDependencies != null)
+            {
+                rpmDependencies.AddRange(additionalDependencies);
+            }
+
+            rpmDependencies.Add(new PackageDependency("rpmlib(PayloadIsXz)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "5.2-1"));
 
             var dependencies = metadata.Dependencies.ToList();
             var last = dependencies.Last();

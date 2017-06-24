@@ -3,9 +3,8 @@ using Microsoft.Build.Utilities;
 using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 
 namespace Packaging.Targets
 {
@@ -60,6 +59,53 @@ namespace Packaging.Targets
             set;
         }
 
+        [Required]
+        public ITaskItem[] Content
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a list of empty folders to create when
+        /// installing this package.
+        /// </summary>
+        public ITaskItem[] LinuxFolders
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a list of RPM packages on which this RPM
+        /// package dpeends.
+        /// </summary>
+        public ITaskItem[] RpmDependencies
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to create a Linux
+        /// user and group when installing the package.
+        /// </summary>
+        public bool CreateUser
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to install
+        /// and launch as systemd service when installing the package.
+        /// </summary>
+        public bool InstallService
+        {
+            get;
+            set;
+        }
+
         public override bool Execute()
         {
             this.Log.LogMessage(MessageImportance.Normal, "Creating RPM package '{0}' from folder '{1}'", this.RpmPath, this.PublishDir);
@@ -72,20 +118,43 @@ namespace Packaging.Targets
             using (var targetStream = File.Open(this.RpmPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             using (var cpioStream = File.Open(this.CpioPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
-                CpioFileCreator cpioCreator = new CpioFileCreator();
-                cpioCreator.FromDirectory(
+                ArchiveBuilder archiveBuilder = new ArchiveBuilder();
+                var archiveEntries = archiveBuilder.FromDirectory(
                     this.PublishDir,
                     this.Prefix,
+                    this.Content);
+
+                archiveEntries.AddRange(archiveBuilder.FromLinuxFolders(this.LinuxFolders));
+                archiveEntries = archiveEntries
+                    .OrderBy(e => e.TargetPathWithFinalSlash, StringComparer.Ordinal)
+                    .ToList();
+
+                CpioFileCreator cpioCreator = new CpioFileCreator();
+                cpioCreator.FromArchiveEntries(
+                    archiveEntries,
                     cpioStream);
                 cpioStream.Position = 0;
 
+                // Prepare the list of dependencies
+                var dependencies =
+                    this.RpmDependencies.Select(
+                        d => new PackageDependency(
+                            d.ItemSpec,
+                            RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_GREATER,
+                            d.GetVersion()))
+                        .ToArray();
+
                 RpmPackageCreator rpmCreator = new RpmPackageCreator();
                 rpmCreator.CreatePackage(
+                    archiveEntries,
                     cpioStream,
                     this.PackageName,
                     this.Version,
                     "x86_64",
                     this.Release,
+                    this.CreateUser,
+                    this.InstallService,
+                    dependencies,
                     null,
                     privateKey,
                     targetStream);

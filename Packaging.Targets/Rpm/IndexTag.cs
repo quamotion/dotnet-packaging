@@ -117,12 +117,24 @@
         /// </summary>
         RPMTAG_ARCH = 1022,
 
+        /// <summary>
+        /// Scripts which run before installing the package.
+        /// </summary>
         RPMTAG_PREIN = 1023,
 
+        /// <summary>
+        /// Scripts which run after installing the package.
+        /// </summary>
         RPMTAG_POSTIN = 1024,
 
+        /// <summary>
+        /// Scripts which run before uninstalling the package.
+        /// </summary>
         RPMTAG_PREUN = 1025,
 
+        /// <summary>
+        /// Scripts which run after uninstalling the package.
+        /// </summary>
         RPMTAG_POSTUN = 1026,
 
         /// <summary>
@@ -296,12 +308,24 @@
 
         RPMTAG_PREREQ = 1084,
 
+        /// <summary>
+        /// The program which launches the pre-install script.
+        /// </summary>
         RPMTAG_PREINPROG = 1085,
 
+        /// <summary>
+        /// The program which launches the post-install script.
+        /// </summary>
         RPMTAG_POSTINPROG = 1086,
 
+        /// <summary>
+        /// The program which launches the pre-removal script.
+        /// </summary>
         RPMTAG_PREUNPROG = 1087,
 
+        /// <summary>
+        /// The program which launches the post-removal script.
+        /// </summary>
         RPMTAG_POSTUNPROG = 1088,
 
         RPMTAG_BUILDARCHS = 1089,

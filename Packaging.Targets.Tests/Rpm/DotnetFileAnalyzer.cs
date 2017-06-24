@@ -1,53 +1,50 @@
-﻿using Packaging.Targets.Rpm;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Packaging.Targets.IO;
+﻿using Packaging.Targets.IO;
+using Packaging.Targets.Rpm;
 
 namespace Packaging.Targets.Tests.Rpm
 {
     internal class DotnetFileAnalyzer : FileAnalyzer
     {
-        public override string DetermineClass(string filename, CpioHeader fileHeader, byte[] header)
+        public override string DetermineClass(ArchiveEntry entry)
         {
-            if (filename.EndsWith(".map"))
+            if (entry.TargetPath.EndsWith(".map"))
             {
                 return "ASCII text, with very long lines, with no line terminators";
             }
-            else if (filename.EndsWith(".min.css"))
+            else if (entry.TargetPath.EndsWith(".min.css"))
             {
                 return "ASCII text, with very long lines, with CRLF line terminators";
             }
-            else if (filename.EndsWith("additional-methods.min.js"))
+            else if (entry.TargetPath.EndsWith("additional-methods.min.js"))
             {
                 return "UTF-8 Unicode text, with very long lines, with CRLF line terminators";
             }
-            else if (filename.EndsWith("jquery.validate.js"))
+            else if (entry.TargetPath.EndsWith("jquery.validate.js"))
             {
                 return "UTF-8 Unicode text, with very long lines, with CRLF line terminators";
             }
-            else if (filename.EndsWith("jquery.validate.min.js"))
+            else if (entry.TargetPath.EndsWith("jquery.validate.min.js"))
             {
                 return "UTF-8 Unicode text, with very long lines, with CRLF line terminators";
             }
-            else if(filename.EndsWith("jquery/LICENSE.txt"))
+            else if(entry.TargetPath.EndsWith("jquery/LICENSE.txt"))
             {
                 return "C source, ASCII text, with CRLF line terminators";
             }
-            else if (filename.EndsWith(".min.js"))
+            else if (entry.TargetPath.EndsWith(".min.js"))
             {
                 return "ASCII text, with very long lines, with CRLF line terminators";
             }
-            else if (filename.EndsWith("bootstrap.css"))
+            else if (entry.TargetPath.EndsWith("bootstrap.css"))
             {
                 return "C++ source, ASCII text, with very long lines, with CRLF line terminators";
             }
-            else if (filename.EndsWith("additional-methods.js"))
+            else if (entry.TargetPath.EndsWith("additional-methods.js"))
             {
                 return "UTF-8 Unicode text, with very long lines, with CRLF line terminators";
             }
 
-            var @class = base.DetermineClass(filename, fileHeader, header);
+            var @class = base.DetermineClass(entry);
 
             if (@class == "ASCII text")
             {
@@ -61,7 +58,7 @@ namespace Packaging.Targets.Tests.Rpm
             return @class;
         }
 
-        public override RpmFileFlags DetermineFlags(string filename, CpioHeader fileHeader, byte[] header)
+        public override RpmFileFlags DetermineFlags(ArchiveEntry entry)
         {
             return RpmFileFlags.None;
         }

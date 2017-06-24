@@ -9,7 +9,9 @@ namespace Packaging.Targets.Rpm
     internal class DefaultOrder
     {
         /// <summary>
-        /// Gets the default order in which the tags are saved in the header section.
+        /// Gets the default order in which the tags are saved in the header section. The order depends on the integer value
+        /// of the tag, in ascending order. RPM is very finicky about this order - if you do not respect it, the RPM package
+        /// will almost certainly be rejected which messages such as "headerRead failed: hdr load: BAD".
         /// </summary>
         public static List<IndexTag> Header
         {
@@ -34,6 +36,10 @@ namespace Packaging.Targets.Rpm
                     IndexTag.RPMTAG_URL,
                     IndexTag.RPMTAG_OS,
                     IndexTag.RPMTAG_ARCH,
+                    IndexTag.RPMTAG_PREIN,
+                    IndexTag.RPMTAG_POSTIN,
+                    IndexTag.RPMTAG_PREUN,
+                    IndexTag.RPMTAG_POSTUN,
                     IndexTag.RPMTAG_FILESIZES,
                     IndexTag.RPMTAG_FILEMODES,
                     IndexTag.RPMTAG_FILERDEVS,
@@ -53,7 +59,9 @@ namespace Packaging.Targets.Rpm
                     IndexTag.RPMTAG_CHANGELOGTIME,
                     IndexTag.RPMTAG_CHANGELOGNAME,
                     IndexTag.RPMTAG_CHANGELOGTEXT,
+                    IndexTag.RPMTAG_PREINPROG,
                     IndexTag.RPMTAG_POSTINPROG,
+                    IndexTag.RPMTAG_PREUNPROG,
                     IndexTag.RPMTAG_POSTUNPROG,
                     IndexTag.RPMTAG_COOKIE,
                     IndexTag.RPMTAG_FILEDEVICES,

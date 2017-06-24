@@ -115,8 +115,10 @@ namespace Packaging.Targets.Tests.Rpm
                 using (var payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
                 using (var cpio = new CpioFile(payloadStream, false))
                 {
+                    ArchiveBuilder builder = new ArchiveBuilder(new PlistFileAnalyzer());
                     RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
-                    var files = creator.CreateFiles(cpio);
+                    var entries = builder.FromCpio(cpio);
+                    var files = creator.CreateFiles(entries);
 
                     var metadata = new PublicRpmMetadata(package);
                     metadata.Name = "libplist";
@@ -128,7 +130,7 @@ namespace Packaging.Targets.Tests.Rpm
                     creator.AddLdDependencies(metadata);
 
                     metadata.Files = files;
-                    creator.AddRpmDependencies(metadata);
+                    creator.AddRpmDependencies(metadata, null);
 
                     this.AssertTagEqual(IndexTag.RPMTAG_FILESIZES, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_FILEMODES, originalPackage, package);
@@ -182,8 +184,10 @@ namespace Packaging.Targets.Tests.Rpm
                 using (var payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
                 using (var cpio = new CpioFile(payloadStream, false))
                 {
+                    ArchiveBuilder builder = new ArchiveBuilder(new PlistFileAnalyzer());
                     RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
-                    var files = creator.CreateFiles(cpio);
+                    var entries = builder.FromCpio(cpio);
+                    var files = creator.CreateFiles(entries);
 
                     // Core routine to populate files and dependencies
                     RpmPackage package = new RpmPackage();
@@ -197,7 +201,7 @@ namespace Packaging.Targets.Tests.Rpm
                     creator.AddLdDependencies(metadata);
 
                     metadata.Files = files;
-                    creator.AddRpmDependencies(metadata);
+                    creator.AddRpmDependencies(metadata, null);
 
                     PlistMetadata.ApplyDefaultMetadata(metadata);
 
