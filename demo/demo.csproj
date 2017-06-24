@@ -20,7 +20,8 @@
     <LinuxFolder Include="/var/log/demo" Group="demo" Owner="demo" RemoveOnUninstall="true" />
     <LinuxFolder Include="/var/run/demo" Group="demo" Owner="demo" RemoveOnUninstall="true" />
     <LinuxFolder Include="/var/lib/demo" Group="demo" Owner="demo" RemoveOnUninstall="true" />
-    <RpmDependency Include="java-headless" Version="1.6.0" />
+    <RpmDependency Include="libunwind" Version="1.1" />
+    <RpmDependency Include="libicu" Version="50.1.2" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="1.6.30" PrivateAssets="all" />
