@@ -108,6 +108,20 @@ namespace Packaging.Targets
         }
 
         /// <summary>
+        /// Gets the version of the RPM dependency.
+        /// </summary>
+        /// <param name="item">
+        /// The task item which represents the RPM dependency.
+        /// </param>
+        /// <returns>
+        /// The version of the dependency.
+        /// </returns>
+        public static string GetVersion(this ITaskItem item)
+        {
+            return TryGetValue(item, "Version", null);
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the item should be removed when the
         /// program is removed.
         /// </summary>

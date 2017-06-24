@@ -87,6 +87,7 @@ namespace Packaging.Targets.Rpm
             string release,
             bool createUser,
             bool installService,
+            IEnumerable<PackageDependency> additionalDependencies,
             Action<RpmMetadata> additionalMetadata,
             PgpPrivateKey privateKey,
             Stream targetStream)
@@ -118,7 +119,7 @@ namespace Packaging.Targets.Rpm
             var files = this.CreateFiles(archiveEntries);
             metadata.Files = files;
 
-            this.AddRpmDependencies(metadata);
+            this.AddRpmDependencies(metadata, additionalDependencies);
 
             // Try to define valid defaults for most metadata
             metadata.Locales = new Collection<string> { "C" }; // Should come before any localizable data.
@@ -384,7 +385,7 @@ namespace Packaging.Targets.Rpm
         /// <param name="metadata">
         /// The <see cref="RpmMetadata"/> to which to add the dependencies.
         /// </param>
-        public void AddRpmDependencies(RpmMetadata metadata)
+        public void AddRpmDependencies(RpmMetadata metadata, IEnumerable<PackageDependency> additionalDependencies)
         {
             // Somehow, three rpmlib dependencies come before the rtld(GNU_HASH) dependency and one after.
             // The rtld(GNU_HASH) indicates that hashes are stored in the .gnu_hash instead of the .hash section
@@ -420,8 +421,15 @@ namespace Packaging.Targets.Rpm
                 new PackageDependency("rpmlib(FileDigests)",RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "4.6.0-1"),
                 new PackageDependency("rpmlib(PayloadFilesHavePrefix)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB,"4.0-1"),
                 new PackageDependency("rtld(GNU_HASH)",RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
-                new PackageDependency("rpmlib(PayloadIsXz)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "5.2-1")
             };
+
+            // Inject any additional dependencies the user may have specified.
+            if (additionalDependencies != null)
+            {
+                rpmDependencies.AddRange(additionalDependencies);
+            }
+
+            rpmDependencies.Add(new PackageDependency("rpmlib(PayloadIsXz)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "5.2-1"));
 
             var dependencies = metadata.Dependencies.ToList();
             var last = dependencies.Last();

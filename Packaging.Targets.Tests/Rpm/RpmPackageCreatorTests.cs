@@ -112,7 +112,7 @@ namespace Packaging.Targets.Tests.Rpm
                     creator.AddLdDependencies(metadata);
 
                     metadata.Files = files;
-                    creator.AddRpmDependencies(metadata);
+                    creator.AddRpmDependencies(metadata, null);
 
                     PlistMetadata.ApplyDefaultMetadata(metadata);
 
@@ -166,7 +166,7 @@ namespace Packaging.Targets.Tests.Rpm
                 creator.AddLdDependencies(metadata);
 
                 metadata.Files = files;
-                creator.AddRpmDependencies(metadata);
+                creator.AddRpmDependencies(metadata, null);
 
                 PlistMetadata.ApplyDefaultMetadata(metadata);
 
@@ -269,6 +269,9 @@ namespace Packaging.Targets.Tests.Rpm
                         "2.0.1.151",
                         "x86_64",
                         "1.1",
+                        false,
+                        false,
+                        null,
                         (metadata) => PlistMetadata.ApplyDefaultMetadata(metadata),
                         privateKey,
                         targetStream);

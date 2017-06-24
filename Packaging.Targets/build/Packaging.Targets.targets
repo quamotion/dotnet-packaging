@@ -34,6 +34,7 @@
              PackageName="$(PackageName)"
              Content="@(Content)"
              LinuxFolders="@(LinuxFolder)"
+             RpmDependencies="@(RpmDependency)"
              CreateUser="$(CreateUser)"
              InstallService="$(InstallService)"/>
   </Target>

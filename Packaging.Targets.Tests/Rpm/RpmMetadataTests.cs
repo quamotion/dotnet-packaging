@@ -130,7 +130,7 @@ namespace Packaging.Targets.Tests.Rpm
                     creator.AddLdDependencies(metadata);
 
                     metadata.Files = files;
-                    creator.AddRpmDependencies(metadata);
+                    creator.AddRpmDependencies(metadata, null);
 
                     this.AssertTagEqual(IndexTag.RPMTAG_FILESIZES, originalPackage, package);
                     this.AssertTagEqual(IndexTag.RPMTAG_FILEMODES, originalPackage, package);
@@ -201,7 +201,7 @@ namespace Packaging.Targets.Tests.Rpm
                     creator.AddLdDependencies(metadata);
 
                     metadata.Files = files;
-                    creator.AddRpmDependencies(metadata);
+                    creator.AddRpmDependencies(metadata, null);
 
                     PlistMetadata.ApplyDefaultMetadata(metadata);
 

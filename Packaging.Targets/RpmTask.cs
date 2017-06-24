@@ -66,7 +66,21 @@ namespace Packaging.Targets
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a list of empty folders to create when
+        /// installing this package.
+        /// </summary>
         public ITaskItem[] LinuxFolders
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a list of RPM packages on which this RPM
+        /// package dpeends.
+        /// </summary>
+        public ITaskItem[] RpmDependencies
         {
             get;
             set;
@@ -121,6 +135,15 @@ namespace Packaging.Targets
                     cpioStream);
                 cpioStream.Position = 0;
 
+                // Prepare the list of dependencies
+                var dependencies =
+                    this.RpmDependencies.Select(
+                        d => new PackageDependency(
+                            d.ItemSpec,
+                            RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_GREATER,
+                            d.GetVersion()))
+                        .ToArray();
+
                 RpmPackageCreator rpmCreator = new RpmPackageCreator();
                 rpmCreator.CreatePackage(
                     archiveEntries,
@@ -131,6 +154,7 @@ namespace Packaging.Targets
                     this.Release,
                     this.CreateUser,
                     this.InstallService,
+                    dependencies,
                     null,
                     privateKey,
                     targetStream);
