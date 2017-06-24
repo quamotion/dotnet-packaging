@@ -18,9 +18,11 @@
     <PropertyGroup>
       <RpmPath>$(PackagePath).rpm</RpmPath>
       <CpioPath>$(IntermediatePackagePath).cpio</CpioPath>
-      <Prefix>/usr/share/$(TargetName)</Prefix>
+      <Prefix Condition="'$(Prefix)' == ''">/usr/share/$(PackagePrefix)</Prefix>
       <Release>0</Release>
-      <PackageName>$(TargetName)</PackageName>
+      <PackageName>$(PackagePrefix)</PackageName>
+      <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
+      <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName >
     </PropertyGroup>
 
     <Message Text="Creating $(RpmPath)" Importance="normal"/>
@@ -36,7 +38,9 @@
              LinuxFolders="@(LinuxFolder)"
              RpmDependencies="@(RpmDependency)"
              CreateUser="$(CreateUser)"
-             InstallService="$(InstallService)"/>
+             UserName="$(UserName)"
+             InstallService="$(InstallService)"
+             ServiceName="$(ServiceName)"/>
   </Target>
 
   <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">

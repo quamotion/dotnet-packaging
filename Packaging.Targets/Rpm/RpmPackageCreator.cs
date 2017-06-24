@@ -86,7 +86,10 @@ namespace Packaging.Targets.Rpm
             string arch,
             string release,
             bool createUser,
+            string userName,
             bool installService,
+            string serviceName,
+            string prefix,
             IEnumerable<PackageDependency> additionalDependencies,
             Action<RpmMetadata> additionalMetadata,
             PgpPrivateKey privateKey,
@@ -149,8 +152,8 @@ namespace Packaging.Targets.Rpm
             {
                 // Add the user and group, under which the service runs.
                 // These users are never removed because UIDs are re-used on Linux.
-                metadata.PreIn += $"/usr/sbin/groupadd -r {name} 2>/dev/null || :\n" +
-                    $"/usr/sbin/useradd -g {name} -s /sbin/nologin -r -d /usr/share/{name} {name} 2>/dev/null || :\n";
+                metadata.PreIn += $"/usr/sbin/groupadd -r {userName} 2>/dev/null || :\n" +
+                    $"/usr/sbin/useradd -g {userName} -s /sbin/nologin -r -d {prefix} {userName} 2>/dev/null || :\n";
             }
 
             if (installService)
@@ -158,19 +161,19 @@ namespace Packaging.Targets.Rpm
                 // Install and activate the service.
                 metadata.PostIn +=
                     $"if [ $1 -eq 1 ] ; then \n" +
-                    $"    systemctl enable --now {name}.service >/dev/null 2>&1 || : \n" +
+                    $"    systemctl enable --now {serviceName}.service >/dev/null 2>&1 || : \n" +
                     $"fi\n";
 
                 metadata.PreUn +=
                     $"if [ $1 -eq 0 ] ; then \n" +
                     $"    # Package removal, not upgrade \n" +
-                    $"    systemctl --no-reload disable --now {name}.service > /dev/null 2>&1 || : \n" +
+                    $"    systemctl --no-reload disable --now {serviceName}.service > /dev/null 2>&1 || : \n" +
                     $"fi\n";
 
                 metadata.PostUn +=
                     $"if [ $1 -ge 1 ] ; then \n" +
                     $"    # Package upgrade, not uninstall \n" +
-                    $"    systemctl try-restart {name}.service >/dev/null 2>&1 || : \n" +
+                    $"    systemctl try-restart {serviceName}.service >/dev/null 2>&1 || : \n" +
                     $"fi\n";
             }
 

@@ -97,10 +97,28 @@ namespace Packaging.Targets
         }
 
         /// <summary>
+        /// Gets or sets the name of the Linux user and group to create.
+        /// </summary>
+        public string UserName
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether to install
         /// and launch as systemd service when installing the package.
         /// </summary>
         public bool InstallService
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the SystemD service to create.
+        /// </summary>
+        public string ServiceName
         {
             get;
             set;
@@ -153,7 +171,10 @@ namespace Packaging.Targets
                     "x86_64",
                     this.Release,
                     this.CreateUser,
+                    this.UserName,
                     this.InstallService,
+                    this.ServiceName,
+                    this.Prefix,
                     dependencies,
                     null,
                     privateKey,
