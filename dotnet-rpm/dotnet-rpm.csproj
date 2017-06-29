@@ -29,5 +29,11 @@ See https://github.com/qmfrederik/dotnet-packaging/ for more information on how 
       <Pack>true</Pack>
       <PackagePath>lib\$(TargetFramework)\</PackagePath>
     </Content>
+
+    <!-- Required in the package root to run the cli tool always with bundled runtime -->
+    <Content Include="../prefercliruntime">
+      <PackagePath>prefercliruntime</PackagePath>
+      <Pack>true</Pack>
+    </Content>
   </ItemGroup>
 </Project>
