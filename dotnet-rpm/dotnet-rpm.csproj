@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
     <VersionPrefix>0.1.1</VersionPrefix>
     <Authors>Frederik Carlier</Authors>
     <Company>Quamotion</Company>
@@ -28,6 +28,12 @@ See https://github.com/qmfrederik/dotnet-packaging/ for more information on how 
     <Content Include="$(NugetPackageFolder)\microsoft.extensions.commandlineutils\1.1.1\lib\netstandard1.3\Microsoft.Extensions.CommandLineUtils.dll" Link="Microsoft.Extensions.CommandLineUtils.dll">
       <Pack>true</Pack>
       <PackagePath>lib\$(TargetFramework)\</PackagePath>
+    </Content>
+
+    <!-- Required in the package root to run the cli tool always with bundled runtime -->
+    <Content Include="../prefercliruntime">
+      <PackagePath>prefercliruntime</PackagePath>
+      <Pack>true</Pack>
     </Content>
   </ItemGroup>
 </Project>

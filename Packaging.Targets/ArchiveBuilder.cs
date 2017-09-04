@@ -142,27 +142,32 @@ namespace Packaging.Targets
         {
             Collection<ArchiveEntry> value = new Collection<ArchiveEntry>();
 
-            foreach (var folder in metadata)
+            // This can be null if the user did not define any folders.
+            // In that case: nothing to do.
+            if (metadata != null)
             {
-                var path = folder.ItemSpec.Replace("\\", "/");
-
-                // Write out an entry for the current directory
-                // (actually, this is _not_ done)
-                ArchiveEntry directoryEntry = new ArchiveEntry()
+                foreach (var folder in metadata)
                 {
-                    FileSize = 0x00001000,
-                    Sha256 = Array.Empty<byte>(),
-                    Mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
-                    Modified = DateTime.Now,
-                    Group = folder.GetGroup(),
-                    Owner = folder.GetOwner(),
-                    Inode = this.inode++,
-                    TargetPath = path,
-                    LinkTo = string.Empty,
-                    RemoveOnUninstall = folder.GetRemoveOnUninstall()
-                };
+                    var path = folder.ItemSpec.Replace("\\", "/");
 
-                value.Add(directoryEntry);
+                    // Write out an entry for the current directory
+                    // (actually, this is _not_ done)
+                    ArchiveEntry directoryEntry = new ArchiveEntry()
+                    {
+                        FileSize = 0x00001000,
+                        Sha256 = Array.Empty<byte>(),
+                        Mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
+                        Modified = DateTime.Now,
+                        Group = folder.GetGroup(),
+                        Owner = folder.GetOwner(),
+                        Inode = this.inode++,
+                        TargetPath = path,
+                        LinkTo = string.Empty,
+                        RemoveOnUninstall = folder.GetRemoveOnUninstall()
+                    };
+
+                    value.Add(directoryEntry);
+                }
             }
 
             return value;
