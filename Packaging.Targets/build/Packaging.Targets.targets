@@ -11,6 +11,10 @@
       <PackagePath>$(TargetDir)$(PackageName)</PackagePath>
       <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
       <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
+
+      <!-- Use the AssemblyFileVersion as the PackageVersion, but default to 1.0.0.0 if an AssemblyFileVersion has not been set. -->
+      <PackageVersion Condition="'$(AssemblyFileVersion)' != ''">$(AssemblyFileVersion)</PackageVersion>
+      <PackageVersion Condition="'$(AssemblyFileVersion)' == ''">1.0.0.0</PackageVersion>
     </PropertyGroup>
   </Target>
 
@@ -31,7 +35,7 @@
              RpmPath="$(RpmPath)"
              CpioPath="$(CpioPath)"
              Prefix="$(Prefix)"
-             Version="$(AssemblyFileVersion)"
+             Version="$(PackageVersion)"
              Release="$(Release)"
              PackageName="$(PackageName)"
              Content="@(Content)"
