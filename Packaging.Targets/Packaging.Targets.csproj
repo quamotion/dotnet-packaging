@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFrameworks>netstandard1.5;netstandard2.0</TargetFrameworks>
     <VersionPrefix>0.1.1</VersionPrefix>
     <NugetPackageFolder Condition="$(NugetPackageFolder) == ''">$(USERPROFILE)\.nuget\packages</NugetPackageFolder>
     <Authors>Frederik Carlier</Authors>
@@ -20,10 +20,21 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.2" />
-    <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
+    <!-- MSBuild ships as part of the .NET CLI -->
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <!-- BoncyCastle and SharpZipLib are included in the lib\ folder in the Packaging.Targets package (see below), so we don't need an
+         explicit dependency on them, either -->
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.3">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="System.Globalization.Extensions" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
   </ItemGroup>
@@ -32,13 +43,25 @@
       <Pack>true</Pack>
       <PackagePath>build\</PackagePath>
     </Content>
+    
+    <!-- SharpZipLib -->
     <Content Include="$(NugetPackageFolder)\sharpziplib.netstandard\0.86.0.1\lib\netstandard1.3\SharpZipLib.NETStandard.dll" Link="SharpZipLib.NETStandard.dll">
       <Pack>true</Pack>
-      <PackagePath>lib\$(TargetFramework)\</PackagePath>
+      <PackagePath>lib\netstandard1.5\</PackagePath>
     </Content>
-    <Content Include="$(NugetPackageFolder)\portable.bouncycastle\1.8.1.2\lib\netstandard1.3\BouncyCastle.Crypto.dll" Link="BouncyCastle.Crypto.dll">
+    <Content Include="$(NugetPackageFolder)\sharpziplib.netstandard\0.86.0.1\lib\netstandard1.3\SharpZipLib.NETStandard.dll" Link="SharpZipLib.NETStandard.dll">
       <Pack>true</Pack>
-      <PackagePath>lib\$(TargetFramework)\</PackagePath>
+      <PackagePath>lib\netstandard2.0\</PackagePath>
+    </Content>
+
+    <!-- Bouncy Castle-->
+    <Content Include="$(NugetPackageFolder)\portable.bouncycastle\1.8.1.3\lib\netstandard1.3\BouncyCastle.Crypto.dll" Link="BouncyCastle.Crypto.dll">
+      <Pack>true</Pack>
+      <PackagePath>lib\netstandard1.5\</PackagePath>
+    </Content>
+    <Content Include="$(NugetPackageFolder)\portable.bouncycastle\1.8.1.3\lib\netstandard2.0\BouncyCastle.Crypto.dll" Link="BouncyCastle.Crypto.dll">
+      <Pack>true</Pack>
+      <PackagePath>lib\netstandard2.0\</PackagePath>
     </Content>
   </ItemGroup>
   <ItemGroup>
