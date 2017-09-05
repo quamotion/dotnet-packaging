@@ -154,13 +154,17 @@ namespace Packaging.Targets
                 cpioStream.Position = 0;
 
                 // Prepare the list of dependencies
-                var dependencies =
+                PackageDependency[] dependencies = Array.Empty<PackageDependency>();
+
+                if (this.RpmDependencies != null)
+                {
                     this.RpmDependencies.Select(
                         d => new PackageDependency(
                             d.ItemSpec,
                             RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_GREATER,
                             d.GetVersion()))
                         .ToArray();
+                }
 
                 RpmPackageCreator rpmCreator = new RpmPackageCreator();
                 rpmCreator.CreatePackage(
