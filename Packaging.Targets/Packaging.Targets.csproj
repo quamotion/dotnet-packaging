@@ -20,15 +20,23 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409" />
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.3" />
-    <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
+    <!-- MSBuild ships as part of the .NET CLI -->
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <!-- BoncyCastle and SharpZipLib are included in the lib\ folder in the Packaging.Targets package (see below), so we don't need an
+         explicit dependency on them, either -->
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.3">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="System.Globalization.Extensions" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <PackageReference Include="NETStandard.Library" Version="2.0.0"/>
   </ItemGroup>
   <ItemGroup>
     <Content Include="build\*.*">
