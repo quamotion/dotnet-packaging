@@ -27,6 +27,9 @@
     <PackageReference Include="System.Globalization.Extensions" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+    <PackageReference Include="NETStandard.Library" Version="2.0.0"/>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="build\*.*">
       <Pack>true</Pack>
