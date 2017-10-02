@@ -8,7 +8,7 @@
       <PackagePrefix Condition="'$(PackagePrefix)' == ''">$(TargetName)</PackagePrefix>
       <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(AssemblyFileVersion).$(RuntimeIdentifier)</PackageName>
       <IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
-      <PackagePath>$(TargetDir)$(PackageName)</PackagePath>
+      <PackagePath Condition="'($PackagePath)' == ''">$(TargetDir)$(PackageName)</PackagePath>
       <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
       <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
 
@@ -20,7 +20,7 @@
 
   <Target Name="CreateRpm" DependsOnTargets="CreatePackageProperties">
     <PropertyGroup>
-      <RpmPath>$(PackagePath).rpm</RpmPath>
+      <RpmPath Condition="'$(RpmPath)' == '">$(PackagePath).rpm</RpmPath>
       <CpioPath>$(IntermediatePackagePath).cpio</CpioPath>
       <Prefix Condition="'$(Prefix)' == ''">/usr/share/$(PackagePrefix)</Prefix>
       <Release>0</Release>
@@ -49,7 +49,7 @@
 
   <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">
     <PropertyGroup>
-      <TarballPath>$(PackagePath).tar.gz</TarballPath>
+      <TarballPath Condition="'$(TarballPath)' == ''">$(PackagePath).tar.gz</TarballPath>
     </PropertyGroup>
 
     <Message Text="Creating $(TarballPath)" Importance="normal"/>
@@ -60,7 +60,7 @@
 
   <Target Name="CreateZip" DependsOnTargets="CreatePackageProperties">
     <PropertyGroup>
-      <ZipPath>$(PackagePath).zip</ZipPath>
+      <ZipPath Condition="'$(ZipPath)' == '">$(PackagePath).zip</ZipPath>
     </PropertyGroup>
 
     <Message Text="Creating $(ZipPath)" Importance="normal"/>
@@ -90,7 +90,7 @@
     <HarvestObjectFilePath>$(IntermediateOutputPath)$(TargetName).harvest.wixobj</HarvestObjectFilePath>
     <ProductSourceFilePath>$(MSBuildThisFileDirectory)\Product.wxs</ProductSourceFilePath>
     <ProductObjectFilePath>$(IntermediateOutputPath)$(TargetName).product.wixobj</ProductObjectFilePath>
-    <SetupFilePath>$(TargetDir)$(TargetName).msi</SetupFilePath>
+    <SetupFilePath Condition="'$(SetupFilePath)' == '">$(TargetDir)$(TargetName).msi</SetupFilePath>
     <Heat>$(WixInstallPath)bin\heat.exe</Heat>
     <Candle>$(WixInstallPath)bin\candle.exe</Candle>
     <Light>$(WixInstallPath)bin\light.exe</Light>
