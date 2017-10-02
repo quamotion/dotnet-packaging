@@ -73,8 +73,8 @@ namespace Packaging.Targets.IO
                 FileSize = 0,
                 Gid = 0,
                 Ino = entry.Inode,
-                Mode = entry.Mode,
-                Mtime = entry.Modified,
+                FileMode = entry.Mode,
+                LastModified = entry.Modified,
                 Nlink = 1,
                 RDevMajor = 0,
                 RDevMinor = 0,
@@ -121,8 +121,8 @@ namespace Packaging.Targets.IO
                     Gid = 0, // root
                     Uid = 0, // root
                     Ino = entry.Inode,
-                    Mode = entry.Mode,
-                    Mtime = entry.Modified,
+                    FileMode = entry.Mode,
+                    LastModified = entry.Modified,
                     NameSize = (uint)entry.TargetPath.Length + 1,
                     Nlink = 1,
                     RDevMajor = 0,
