@@ -26,7 +26,7 @@ namespace Packaging.Targets.Rpm
             {
                 while (file.Read())
                 {
-                    names.Add(file.EntryName);
+                    names.Add(file.FileName);
 
                     using (Stream stream = file.Open())
                     {
