@@ -29,7 +29,7 @@
       <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName >
     </PropertyGroup>
 
-    <Message Text="Creating $(RpmPath)" Importance="normal"/>
+    <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
 
     <RpmTask PublishDir="$(PublishDir)"
              RpmPath="$(RpmPath)"
@@ -52,7 +52,7 @@
       <TarballPath>$(PackagePath).tar.gz</TarballPath>
     </PropertyGroup>
 
-    <Message Text="Creating $(TarballPath)" Importance="normal"/>
+    <Message Text="Creating tarball $(TarballPath)" Importance="high"/>
 
     <TarballTask PublishDir="$(PublishDir)"
              TarballPath="$(TarballPath)"/>
@@ -63,7 +63,7 @@
       <ZipPath>$(PackagePath).zip</ZipPath>
     </PropertyGroup>
 
-    <Message Text="Creating $(ZipPath)" Importance="normal"/>
+    <Message Text="Creating zip package $(ZipPath)" Importance="high"/>
 
     <ZipTask PublishDir="$(PublishDir)"
              ZipPath="$(ZipPath)"/>
@@ -96,6 +96,7 @@
     <Light>$(WixInstallPath)bin\light.exe</Light>
   </PropertyGroup>
   <Target Name="Msi" DependsOnTargets="Publish">
+    <Message Text="Creating msi package $(SetupFilePath)" Importance="high"/>
     <!-- $(PublishDir) ends with a \, which would escape the " that follows it. So we add an additional \ -->
     <Exec Command='"$(Heat)" dir "$(PublishDir)\" -nologo -scom -sreg -sfrag -srd -gg -dr INSTALLFOLDER -cg SourceComponentGroup -var var.PublishDir -o $(HarvestSourceFilePath)'/>
 
