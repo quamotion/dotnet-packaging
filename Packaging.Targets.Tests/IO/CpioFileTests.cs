@@ -27,7 +27,7 @@ namespace Packaging.Targets.Tests.IO
 
             SHA256 sha = SHA256.Create();
 
-            using (Stream stream = File.OpenRead(@"IO\test.cpio"))
+            using (Stream stream = File.OpenRead(@"IO/test.cpio"))
             using (CpioFile file = new CpioFile(stream, true))
             {
                 while (file.Read())
@@ -74,10 +74,10 @@ namespace Packaging.Targets.Tests.IO
         [Fact]
         public void WriteCpioFileTests()
         {
-            using (Stream stream = File.OpenRead(@"IO\test.cpio"))
+            using (Stream stream = File.OpenRead(@"IO/test.cpio"))
             using (CpioFile source = new CpioFile(stream, true))
             using (MemoryStream output = new MemoryStream())
-            using (Stream expectedOutput = File.OpenRead(@"IO\test.cpio"))
+            using (Stream expectedOutput = File.OpenRead(@"IO/test.cpio"))
             using (Stream validatingOutput = new ValidatingCompositeStream(null, output, expectedOutput))
             using (CpioFile target = new CpioFile(validatingOutput, true))
             {

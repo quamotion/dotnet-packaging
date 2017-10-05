@@ -1,6 +1,7 @@
 ﻿using Packaging.Targets.Rpm;
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace Packaging.Targets.Tests.Rpm
 {
@@ -37,7 +38,7 @@ namespace Packaging.Targets.Tests.Rpm
             metadata.Summary = "Library for manipulating Apple Binary and XML Property Lists";
             metadata.Url = "http://www.libimobiledevice.org/";
             metadata.Vendor = "obs://build.opensuse.org/home:qmfrederik";
-
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
             Collection<ChangelogEntry> changeLogEntries = new Collection<ChangelogEntry>()
                     {
                         new ChangelogEntry(DateTimeOffset.Parse("1/24/2014 12:00:00 PM +00:00"), "Daniel Mach <dmach@redhat.com> - 1.10-4", "- Mass rebuild 2014-01-24"),

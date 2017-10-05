@@ -19,7 +19,7 @@ namespace Packaging.Targets.Tests.Rpm
         [Fact]
         public void ReadMetadataPropertiesTest()
         {
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
             {
                 var package = RpmPackageReader.Read(stream);
                 var metadata = new RpmMetadata(package);
@@ -107,7 +107,7 @@ namespace Packaging.Targets.Tests.Rpm
         [Fact]
         public void SetFilesTest()
         {
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
             {
                 var originalPackage = RpmPackageReader.Read(stream);
                 var package = new RpmPackage();
@@ -177,7 +177,7 @@ namespace Packaging.Targets.Tests.Rpm
         [Fact]
         public void CreatePackageMetadata()
         {
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
             {
                 var originalPackage = RpmPackageReader.Read(stream);
 

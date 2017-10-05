@@ -18,8 +18,8 @@ namespace Packaging.Targets.Tests.Rpm
         /// Tests the <see cref="RpmPackageCreator.CreateFiles(CpioFile)"/> method, making sure the list of files which is returned
         /// for a given CPIO archive is correct. Uses the libplist RPM package as a test payload.
         /// </summary>
-        [InlineData(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm", "plist")]
-        [InlineData(@"Rpm\dotnet_test-1.0-0.noarch.rpm", "dotnet")]
+        [InlineData(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm", "plist")]
+        [InlineData(@"Rpm/dotnet_test-1.0-0.noarch.rpm", "dotnet")]
         [Theory]
         public void CreateFiles(string rpm, string analyzerName)
         {
@@ -88,7 +88,7 @@ namespace Packaging.Targets.Tests.Rpm
         [Fact]
         public void CalculateOffsetTest()
         {
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
             {
                 var originalPackage = RpmPackageReader.Read(stream);
 
@@ -139,7 +139,7 @@ namespace Packaging.Targets.Tests.Rpm
         [Fact]
         public void CalculateSignatureTest()
         {
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
             {
                 var originalPackage = RpmPackageReader.Read(stream);
 
@@ -242,7 +242,7 @@ namespace Packaging.Targets.Tests.Rpm
             var privateKey = secretKeyRing.GetSecretKey().ExtractPrivateKey("dotnet".ToCharArray());
             var publicKey = secretKeyRing.GetPublicKey();
 
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
             using (var targetStream = File.Open(@"RpmPackageCreatorTests_CreateTest.rpm", FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
                 var originalPackage = RpmPackageReader.Read(stream);

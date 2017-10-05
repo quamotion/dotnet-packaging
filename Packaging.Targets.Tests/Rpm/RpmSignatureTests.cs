@@ -18,7 +18,7 @@ namespace Packaging.Targets.Tests.Rpm
         [Fact]
         public void SignaturePropertiesTest()
         {
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
             {
                 var package = RpmPackageReader.Read(stream);
                 var signature = new RpmSignature(package);
@@ -40,8 +40,8 @@ namespace Packaging.Targets.Tests.Rpm
         [Fact]
         public void VerifyTest()
         {
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
-            using (Stream pgpKey = File.OpenRead(@"Rpm\_key.pub"))
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream pgpKey = File.OpenRead(@"Rpm/_key.pub"))
             {
                 var package = RpmPackageReader.Read(stream);
                 var signature = new RpmSignature(package);
