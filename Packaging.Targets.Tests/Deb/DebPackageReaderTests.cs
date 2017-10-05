@@ -1,6 +1,9 @@
 ﻿using Packaging.Targets.Deb;
 using System;
 using System.IO;
+using System.Security.Cryptography;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Packaging.Targets.IO;
 using Xunit;
 
 namespace Packaging.Targets.Tests.Deb
@@ -29,6 +32,32 @@ namespace Packaging.Targets.Tests.Deb
                 Assert.Equal("libplist", package.ControlFile["Source"]);
                 Assert.Equal("1.12-3.1", package.ControlFile["Version"]);
                 Assert.Equal("amd64", package.ControlFile["Architecture"]);
+
+                stream.Seek(0, SeekOrigin.Begin);
+                using(var payload = DebPackageReader.GetPayloadStream(stream))
+                using (var tarFile = new TarFile(payload, leaveOpen: true))
+                {
+                    while (tarFile.Read())
+                    {
+                        var tarHeader = (TarHeader) tarFile.FileHeader;
+                        Assert.Equal(tarHeader.Checksum, tarHeader.ComputeChecksum());
+                        if (tarFile.FileName.EndsWith("/"))
+                            tarFile.Skip();
+                        else
+                        {
+                            var fname = tarFile.FileName;
+                            Assert.StartsWith("./", fname);
+                            fname = fname.Substring(2);
+                            var sum = package.Md5Sums[fname];
+                            string hash;
+                            using (var fileStream = tarFile.Open())
+                            using (var md5 = MD5.Create())
+                                hash = BitConverter.ToString(md5.ComputeHash(fileStream)).Replace("-", "")
+                                    .ToLower();
+                            Assert.Equal(sum, hash);
+                        }
+                    }
+                }
             }
         }
     }

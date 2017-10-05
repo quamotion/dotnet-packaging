@@ -1,5 +1,7 @@
 ﻿using Packaging.Targets.IO;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 
@@ -22,15 +24,48 @@ namespace Packaging.Targets.Deb
         internal static DebPackage Read(Stream stream)
         {
             DebPackage package = new DebPackage();
-
             using (ArFile archive = new ArFile(stream, leaveOpen: true))
             {
-                ReadDebianBinary(archive, package);
-                ReadControlArchive(archive, package);
+                while (archive.Read())
+                {
+                    if(archive.FileName == "debian-binary")
+                        ReadDebianBinary(archive, package);
+                    else if (archive.FileName == "control.tar.gz")
+                        ReadControlArchive(archive, package);
+                }
             }
-
             return package;
         }
+
+        internal static Stream GetPayloadStream(Stream stream)
+        {
+            using (ArFile archive = new ArFile(stream, leaveOpen: true))
+            {
+                while (archive.Read())
+                {
+                    if (archive.FileName.StartsWith("data.tar."))
+                    {
+                        var ext = Path.GetExtension(archive.FileName);
+                        if(ext == ".gz")
+                            return new GZipDecompressor(archive.Open(), false);
+                        if (ext == ".xz")
+                        {
+                            //For some reason it complains about corrupted data when we try to read using smaller chunks
+                            var payload = new MemoryStream();
+                            using (var xz = new XZInputStream(archive.Open()))
+                            {
+                                xz.CopyTo(payload);
+                                payload.Seek(0, SeekOrigin.Begin);
+                                return payload;
+                            }
+                        }
+                        throw new InvalidDataException("Don't know how to decompress " + archive.FileName);
+                    }
+                }
+                throw new InvalidDataException("data.tar.?? not found");
+            }
+        }
+        
 
         /// <summary>
         /// Reads and parses the <c>debian-binary</c> file in the Debian archive.
@@ -43,16 +78,6 @@ namespace Packaging.Targets.Deb
         /// </param>
         private static void ReadDebianBinary(ArFile archive, DebPackage package)
         {
-            if (!archive.Read())
-            {
-                throw new InvalidDataException();
-            }
-
-            if (archive.FileName != "debian-binary")
-            {
-                throw new InvalidDataException();
-            }
-
             using (Stream stream = archive.Open())
             using (StreamReader reader = new StreamReader(stream))
             {
@@ -61,19 +86,11 @@ namespace Packaging.Targets.Deb
             }
         }
 
+       
         private static void ReadControlArchive(ArFile archive, DebPackage package)
         {
-            if (!archive.Read())
-            {
-                throw new InvalidDataException();
-            }
-
-            // gzip and xz compression are supported, but for now, we only read gz
-            if (archive.FileName != "control.tar.gz")
-            {
-                throw new InvalidDataException();
-            }
-
+            package.ControlExtras = new Dictionary<string, DebPackageControlFileData>();
+            package.Md5Sums = new Dictionary<string, string>();
             using (Stream stream = archive.Open())
             using (GZipDecompressor decompressedStream = new GZipDecompressor(stream, leaveOpen: true))
             using (TarFile tarFile = new TarFile(decompressedStream, leaveOpen: true))
@@ -88,9 +105,39 @@ namespace Packaging.Targets.Deb
                                 package.ControlFile = ControlFileParser.Read(controlFile);
                             }
                             break;
-
-                        default:
+                        case "./md5sums":
+                            using (var sums = new StreamReader(tarFile.Open()))
+                            {
+                                string line;
+                                while (null != (line = sums.ReadLine()))
+                                {
+                                    var s = line.Split(new[] {"  "}, 2, StringSplitOptions.None);
+                                    package.Md5Sums[s[1]] = s[0];
+                                }
+                            }
+                            break;
+                        case "./preinst":
+                            package.PreInstallScript = tarFile.ReadAsUtf8String();
+                            break;
+                        case "./postinst":
+                            package.PostInstallScript = tarFile.ReadAsUtf8String();
+                            break;
+                        case "./prerm":
+                            package.PreRemoveScript = tarFile.ReadAsUtf8String();
+                            break;     
+                        case "./postrm":
+                            package.PostRemoveScript = tarFile.ReadAsUtf8String();
+                            break;
+                                
+                        case "./":
                             tarFile.Skip();
+                            break;
+                        default:
+                            package.ControlExtras[tarFile.FileName] = new DebPackageControlFileData
+                            {
+                                Mode = tarFile.FileHeader.FileMode,
+                                Contents = tarFile.ReadAsUtf8String()
+                            };
                             break;
                     }
                 }
