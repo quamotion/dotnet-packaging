@@ -19,8 +19,8 @@ namespace Packaging.Targets.Tests.Rpm
         [Fact]
         public void WriteRpmPackageTest()
         {
-            using (Stream stream = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
-            using (Stream expected = File.OpenRead(@"Rpm\libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream expected = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
             using (Stream actual = new MemoryStream())
             using (Stream output = new ValidatingCompositeStream(null, actual, expected))
             {

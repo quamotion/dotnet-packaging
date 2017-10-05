@@ -16,7 +16,7 @@ namespace Packaging.Targets.Tests.IO
         [Fact]
         public void ReadTest()
         {
-            using (Stream stream = File.OpenRead(@"Deb\libplist3_1.12-3.1_amd64.deb"))
+            using (Stream stream = File.OpenRead(@"Deb/libplist3_1.12-3.1_amd64.deb"))
             using (ArFile arFile = new ArFile(stream, leaveOpen: true))
             {
                 Collection<string> filenames = new Collection<string>();
