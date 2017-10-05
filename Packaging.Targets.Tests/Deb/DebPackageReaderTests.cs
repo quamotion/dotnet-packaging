@@ -41,14 +41,15 @@ namespace Packaging.Targets.Tests.Deb
                     {
                         var tarHeader = (TarHeader) tarFile.FileHeader;
                         Assert.Equal(tarHeader.Checksum, tarHeader.ComputeChecksum());
-                        if (tarFile.FileName.EndsWith("/"))
+                        if (tarHeader.TypeFlag != TarTypeFlag.RegType)
                             tarFile.Skip();
                         else
                         {
                             var fname = tarFile.FileName;
                             Assert.StartsWith("./", fname);
                             fname = fname.Substring(2);
-                            var sum = package.Md5Sums[fname];
+                            if (!package.Md5Sums.TryGetValue(fname, out var sum))
+                                throw new Exception($"Checksum for {fname} not found");
                             string hash;
                             using (var fileStream = tarFile.Open())
                             using (var md5 = MD5.Create())
