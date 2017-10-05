@@ -228,6 +228,7 @@ namespace Packaging.Targets
 
             byte[] fileHeader = null;
             byte[] hash = null;
+            byte[] md5hash = null;
             byte[] buffer = new byte[1024];
             bool isAscii = true;
 
@@ -242,6 +243,7 @@ namespace Packaging.Targets
                 }
 
                 using (var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
+                using(var md5hasher = IncrementalHash.CreateHash(HashAlgorithmName.MD5))
                 {
                     int read;
 
@@ -256,6 +258,7 @@ namespace Packaging.Targets
                         }
 
                         hasher.AppendData(buffer, 0, read);
+                        md5hasher.AppendData(buffer, 0, read);
                         isAscii = isAscii && buffer.All(c => c < 128);
 
                         if (read < buffer.Length)
@@ -265,6 +268,7 @@ namespace Packaging.Targets
                     }
 
                     hash = hasher.GetHashAndReset();
+                    md5hash = hasher.GetHashAndReset();
                 }
 
                 // Only support ELF32 and ELF64 colors; otherwise default to BLACK.
@@ -311,6 +315,7 @@ namespace Packaging.Targets
                     SourceFilename = entry,
                     TargetPath = name,
                     Sha256 = hash,
+                    Md5Hash = md5hash,
                     Type = entryType,
                     LinkTo = linkTo,
                     Inode = this.inode++,

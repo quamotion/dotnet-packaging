@@ -56,6 +56,12 @@ namespace Packaging.Targets.IO
         { get; set; }
 
         /// <summary>
+        /// Gets or sets the MD5 of the file contents.
+        /// </summary>
+        public byte[] Md5Hash 
+        { get; set; }
+        
+        /// <summary>
         /// Gets or sets the file type (executable or not).
         /// </summary>
         public ArchiveEntryType Type
