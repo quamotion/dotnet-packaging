@@ -1,112 +1,107 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Packaging.Targets.IO
 {
     /// <summary>
     /// Represents the header for an individual entry in a <c>.tar</c> archive.
     /// </summary>
-    internal struct TarHeader : IArchiveHeader
+    [StructLayout(LayoutKind.Sequential)]
+    internal unsafe struct TarHeader : IArchiveHeader
     {
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 100)]
-        private char[] name;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 100)] private byte[] name;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)]
-        private char[] mode;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)] private byte[] mode;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)]
-        private char[] uid;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)] private byte[] uid;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)]
-        private char[] gid;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)] private byte[] gid;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 12)]
-        private char[] size;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 12)] private byte[] size;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 12)]
-        private char[] mtime;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 12)] private byte[] mtime;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)]
-        private char[] chksum;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)] private byte[] chksum;
 
         private byte typeflag;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 100)]
-        private char[] linkname;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 100)] private byte[] linkname;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 6)]
-        private char[] magic;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 6)] private byte[] magic;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 2)]
-        private char[] version;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 2)] private byte[] version;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 32)]
-        private char[] uname;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 32)] private byte[] uname;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 32)]
-        private char[] gname;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 32)] private byte[] gname;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)]
-        private char[] devmajor;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)] private byte[] devmajor;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)]
-        private char[] devminor;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)] private byte[] devminor;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 155)]
-        private char[] prefix;
+        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 155)] private byte[] prefix;
 
-        
-        
+
         /// <summary>
         /// Gets or sets the name of the current file.
         /// </summary>
         public string FileName
         {
-            get { return this.GetString(this.name); }
-            set { this.name = value.ToCharArray(); }
+            get => GetString(name, 100);
+            set => name = CreateString(value, 100);
         }
 
         public LinuxFileMode FileMode
         {
-            get { return (LinuxFileMode)Convert.ToUInt32(this.GetString(this.mode), 8); }
-            set { this.mode = ((uint)value).ToString("x8").ToCharArray(); }
+            get => (LinuxFileMode) Convert.ToUInt32(this.GetString(mode, 8), 8);
+            set => mode = GetUIntTo8((uint) value);
         }
 
         public uint UserId
         {
-            get { return Convert.ToUInt32(this.GetString(this.uid), 8); }
-            set { this.uid = value.ToString().ToCharArray(); }
+            get => Convert.ToUInt32(this.GetString(uid, 8), 8);
+            set => uid = GetUIntTo8(value);
         }
 
         public uint GroupId
         {
-            get { return Convert.ToUInt32(this.GetString(this.gid), 8); }
-            set { this.gid = value.ToString("x8").ToCharArray(); }
+            get => Convert.ToUInt32(this.GetString(gid, 8), 8);
+            set => gid = GetUIntTo8((uint) value);
         }
 
         public uint FileSize
         {
-            get { return Convert.ToUInt32(this.GetString(this.size), 8); }
-            set { this.size = value.ToString("x8").ToCharArray(); }
+            get => Convert.ToUInt32(this.GetString(size, 12), 8);
+            set => size = GetUIntTo8((uint) value, 12);
         }
 
         public DateTimeOffset LastModified
         {
-            get { return DateTimeOffset.FromUnixTimeSeconds((long)Convert.ToUInt64(this.GetString(this.mtime), 8)); }
-            set { this.mtime = value.ToUnixTimeSeconds().ToString("x8").ToCharArray(); }
+            get => DateTimeOffset.FromUnixTimeSeconds((long) Convert.ToUInt64(this.GetString(mtime, 12), 8));
+            set => mtime = GetUIntTo8((uint) value.ToUnixTimeSeconds(), 12);
         }
 
         public uint Checksum
         {
-            get { return Convert.ToUInt32(this.GetString(this.chksum), 8); }
-            set { this.chksum = value.ToString("x8").ToCharArray(); }
+            get => Convert.ToUInt32(this.GetString(chksum, 8), 8);
+            set
+            {
+                //GNU tar does that, I have no idea why
+                var s = GetUIntTo8(value, 7);
+                var buffer = new byte[8];
+                Array.Copy(s, buffer, 7);
+                buffer[7] = 32;
+                chksum = buffer;
+            }
         }
 
-        public unsafe uint ComputeChecksum()
+        public uint ComputeChecksum()
         {
             var other = this;
-            other.chksum = new string(' ', 8).ToCharArray();
+            for (var c = 0; c < 8; c++)
+                other.chksum[c] = 32;
             var data = new byte[Marshal.SizeOf<TarHeader>()];
             fixed (byte* ptr = data)
                 Marshal.StructureToPtr(other, new IntPtr(ptr), true);
@@ -118,73 +113,107 @@ namespace Packaging.Targets.IO
 
         public TarTypeFlag TypeFlag
         {
-            get { return (TarTypeFlag)this.typeflag; }
-            set { this.typeflag = (byte)value; }
+            get => (TarTypeFlag) typeflag;
+            set => typeflag = (byte) value;
         }
 
         public string LinkName
         {
-            get { return this.GetString(this.linkname); }
-            set { this.linkname = value.ToCharArray(); }
+            get => this.GetString(linkname, 100);
+            set => linkname = CreateString(value, 100);
         }
 
         public string Magic
         {
-            get { return this.GetString(this.magic).Trim(); }
-            set { this.magic = value.PadRight(6).ToCharArray(); }
+            get => this.GetString(magic, 6)?.Trim();
+            set => magic = CreateString(value.PadRight(6), 6);
         }
 
         public uint? Version
         {
             get
             {
-                if (uint.TryParse(version.ToString(), out uint rv))
+                var v = GetString(version, 2);
+                if (uint.TryParse(v, out uint rv))
                     return rv;
                 return null;
             }
-            set { this.version = (value == null ? " " : value.Value.ToString("x8")).ToCharArray(); }
+            set
+            {
+                if (value == null)
+                    version = new byte[] {32, 0};
+                else
+                    version = GetUIntTo8(value, 2);
+            }
         }
 
         public string UserName
         {
-            get { return this.GetString(this.uname); }
-            set { this.uname = value.ToCharArray(); }
+            get => this.GetString(uname, 32);
+            set => uname = CreateString(value, 32);
         }
 
         public string GroupName
         {
-            get { return this.GetString(this.gname); }
-            set { this.gname = value.ToCharArray(); }
+            get => this.GetString(gname, 32);
+            set => gname = CreateString(value, 32);
         }
 
         public uint? DevMajor
         {
-            get => devmajor[0] == (char) 0 ? (uint?) null : Convert.ToUInt32(this.GetString(this.devmajor), 8);
-            set => devmajor = (value == null ? new string((char) 0, 8) : value.Value.ToString("x8")).ToCharArray();
+            get => devmajor[0] == 0 ? (uint?) null : Convert.ToUInt32(this.GetString(devmajor, 8), 8);
+            set => devmajor = GetUIntTo8(value);
         }
 
         public uint? DevMinor
         {
-            get => devminor[0] == (char) 0 ? (uint?) null : Convert.ToUInt32(this.GetString(this.devminor), 8);
-            set => devminor = (value == null ? new string((char) 0, 8) : value.Value.ToString("x8")).ToCharArray();
+            get => devminor[0] ==  0 ? (uint?) null : Convert.ToUInt32(this.GetString(devminor, 8), 8);
+            set => devminor = GetUIntTo8(value);
         }
 
         public string Prefix
         {
-            get { return this.GetString(this.prefix); }
-            set { this.prefix = value.ToCharArray(); }
+            get => this.GetString(prefix, 155);
+            set => prefix = CreateString(value, 155);
         }
 
-        private string GetString(char[] buffer)
+        private string GetString(byte[] data, int maxLen)
         {
-            int count = 0;
-
-            while (count < buffer.Length && buffer[count] != '\0')
+            int len;
+            for (len = 0; len < maxLen; len++)
             {
-                count++;
+                if (data[len] == 0)
+                {
+                    break;
+                }
             }
-
-            return new string(buffer, 0, count);
+            if (len == 0)
+                return null;
+            return Encoding.UTF8.GetString(data, 0, len);
         }
+
+        private static readonly string Empty8 = new string('\0', 8);
+
+        byte[] GetUIntTo8(uint? data, int len = 8)
+        {
+            if (data == null)
+                return new byte[len];
+            return CreateString(Convert.ToString(data.Value, 8).PadLeft(len - 1, '0'), len);
+
+        }
+
+        byte[] CreateString(string s, int len)
+        {
+            var target = new byte[len];
+            if (s == null)
+                return target;
+            var buffer = Encoding.UTF8.GetBytes(s);
+            if (buffer.Length > len)
+                throw new Exception($"String {s} exceeds the limit of {len}");
+            for (var c = 0; c < len; c++)
+                target[c] = (c < buffer.Length) ? buffer[c] : (byte) 0;
+            return target;
+        }
+
     }
 }

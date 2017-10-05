@@ -24,23 +24,20 @@ namespace Packaging.Targets.IO
         }
 
         private TarHeader entryHeader;
-
+        
         /// <inheritdoc/>
         public override bool Read()
         {
-            if (this.EntryStream != null)
-            {
-                this.EntryStream.Dispose();
-            }
-
             this.Align(512);
+            EntryStream?.Dispose();
+            EntryStream = null;
 
             this.entryHeader = this.Stream.ReadStruct<TarHeader>();
             this.FileHeader = this.entryHeader;
             this.FileName = this.entryHeader.FileName;
 
             // There are two empty blocks at the end of the file.
-            if (this.entryHeader.Magic == string.Empty)
+            if (string.IsNullOrEmpty(entryHeader.Magic))
             {
                 return false;
             }
@@ -49,8 +46,8 @@ namespace Packaging.Targets.IO
             {
                 throw new InvalidDataException("The magic for the file entry is invalid");
             }
-
-            this.Align(512);
+            
+            Align(512);
 
             // TODO: Validate Checksum
             this.EntryStream = new SubStream(this.Stream, this.Stream.Position, this.entryHeader.FileSize, leaveParentOpen: true);

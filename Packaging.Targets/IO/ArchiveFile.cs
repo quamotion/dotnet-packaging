@@ -124,22 +124,15 @@ namespace Packaging.Targets.IO
         /// </param>
         protected void Align(int alignmentBase)
         {
-            if (this.EntryStream == null)
-            {
-                return;
-            }
+            var currentIndex =
+                (int) (EntryStream != null ? (EntryStream.Offset + EntryStream.Length) : Stream.Position);
 
-            if (this.Stream.CanSeek)
-            {
-                // The file data is padded to a multiple of four bytes.
-                var nextIndex = this.EntryStream.Offset + this.EntryStream.Length;
-                nextIndex += PaddingSize(alignmentBase, (int)this.EntryStream.Length);
-                this.Stream.Seek(nextIndex, SeekOrigin.Begin);
-            }
+            if (Stream.CanSeek)
+                Stream.Seek(currentIndex + PaddingSize(alignmentBase, currentIndex), SeekOrigin.Begin);
             else
             {
-                byte[] buffer = new byte[PaddingSize(alignmentBase, (int)this.Stream.Position)];
-                this.Stream.Read(buffer, 0, buffer.Length);
+                byte[] buffer = new byte[PaddingSize(alignmentBase, currentIndex)];
+                Stream.Read(buffer, 0, buffer.Length);
             }
         }
 
