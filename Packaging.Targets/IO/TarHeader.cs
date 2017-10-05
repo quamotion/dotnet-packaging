@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Packaging.Targets.IO
@@ -55,6 +56,8 @@ namespace Packaging.Targets.IO
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 155)]
         private char[] prefix;
 
+        
+        
         /// <summary>
         /// Gets or sets the name of the current file.
         /// </summary>
@@ -90,7 +93,7 @@ namespace Packaging.Targets.IO
 
         public DateTimeOffset LastModified
         {
-            get { return DateTimeOffset.FromUnixTimeSeconds((long)Convert.ToUInt32(this.GetString(this.mtime))); }
+            get { return DateTimeOffset.FromUnixTimeSeconds((long)Convert.ToUInt64(this.GetString(this.mtime), 8)); }
             set { this.mtime = value.ToUnixTimeSeconds().ToString("x8").ToCharArray(); }
         }
 
@@ -98,6 +101,19 @@ namespace Packaging.Targets.IO
         {
             get { return Convert.ToUInt32(this.GetString(this.chksum), 8); }
             set { this.chksum = value.ToString("x8").ToCharArray(); }
+        }
+
+        public unsafe uint ComputeChecksum()
+        {
+            var other = this;
+            other.chksum = new string(' ', 8).ToCharArray();
+            var data = new byte[Marshal.SizeOf<TarHeader>()];
+            fixed (byte* ptr = data)
+                Marshal.StructureToPtr(other, new IntPtr(ptr), true);
+            uint sum = 0;
+            foreach (var b in data)
+                sum += b;
+            return sum;
         }
 
         public TarTypeFlag TypeFlag
@@ -118,10 +134,15 @@ namespace Packaging.Targets.IO
             set { this.magic = value.PadRight(6).ToCharArray(); }
         }
 
-        public uint Version
+        public uint? Version
         {
-            get { return Convert.ToUInt32(this.GetString(this.version), 8); }
-            set { this.version = value.ToString("x8").ToCharArray(); }
+            get
+            {
+                if (uint.TryParse(version.ToString(), out uint rv))
+                    return rv;
+                return null;
+            }
+            set { this.version = (value == null ? " " : value.Value.ToString("x8")).ToCharArray(); }
         }
 
         public string UserName
@@ -136,16 +157,16 @@ namespace Packaging.Targets.IO
             set { this.gname = value.ToCharArray(); }
         }
 
-        public uint DevMajor
+        public uint? DevMajor
         {
-            get { return Convert.ToUInt32(this.GetString(this.devmajor), 8); }
-            set { this.devmajor = value.ToString("x8").ToCharArray(); }
+            get => devmajor[0] == (char) 0 ? (uint?) null : Convert.ToUInt32(this.GetString(this.devmajor), 8);
+            set => devmajor = (value == null ? new string((char) 0, 8) : value.Value.ToString("x8")).ToCharArray();
         }
 
-        public uint DevMinor
+        public uint? DevMinor
         {
-            get { return Convert.ToUInt32(this.GetString(this.devminor), 8); }
-            set { this.devminor = value.ToString("x8").ToCharArray(); }
+            get => devminor[0] == (char) 0 ? (uint?) null : Convert.ToUInt32(this.GetString(this.devminor), 8);
+            set => devminor = (value == null ? new string((char) 0, 8) : value.Value.ToString("x8")).ToCharArray();
         }
 
         public string Prefix
