@@ -292,64 +292,9 @@ namespace Packaging.Targets.Rpm
 
             foreach (var entry in archiveEntries)
             {
-<<<<<<< HEAD
                 var size = entry.FileSize;
 
                 if (entry.Mode.HasFlag(LinuxFileMode.S_IFDIR))
-=======
-                byte[] hash;
-                byte[] buffer = new byte[1024];
-                byte[] header = null;
-                int read = 0;
-
-                using (var stream = payload.Open())
-                using (var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
-                {
-                    while (true)
-                    {
-                        read = stream.Read(buffer, 0, buffer.Length);
-
-                        if (header == null)
-                        {
-                            header = new byte[read];
-                            Buffer.BlockCopy(buffer, 0, header, 0, read);
-                        }
-
-                        hasher.AppendData(buffer, 0, read);
-
-                        if (read < buffer.Length)
-                        {
-                            break;
-                        }
-                    }
-
-                    hash = hasher.GetHashAndReset();
-                }
-
-                string fileName = payload.FileName;
-                int fileSize = (int)payload.EntryHeader.FileSize;
-
-                if (fileName.StartsWith("."))
-                {
-                    fileName = fileName.Substring(1);
-                }
-
-                string linkTo = string.Empty;
-
-                if (payload.EntryHeader.FileMode.HasFlag(LinuxFileMode.S_IFLNK))
-                {
-                    // Find the link text
-                    int stringEnd = 0;
-
-                    while (stringEnd < header.Length - 1 && header[stringEnd] != 0)
-                    {
-                        stringEnd++;
-                    }
-
-                    linkTo = Encoding.UTF8.GetString(header, 0, stringEnd + 1);
-                    hash = new byte[] { };
-                }
-                else if (payload.EntryHeader.FileMode.HasFlag(LinuxFileMode.S_IFDIR))
                 {
                     size = 0x1000;
                 }
