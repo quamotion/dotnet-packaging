@@ -33,7 +33,8 @@ namespace Packaging.Targets.IO
 
         public static void WriteTrailer(Stream stream)
         {
-            var trailer = new byte[Marshal.SizeOf<TarHeader>() * 2];
+            Align(stream);
+            var trailer = new byte[1024];
             stream.Write(trailer, 0, trailer.Length);
         }
 
@@ -48,6 +49,7 @@ namespace Packaging.Targets.IO
 
         public static void WriteEntry(Stream stream, TarHeader header, Stream data)
         {
+            header.Checksum = header.ComputeChecksum();
             stream.WriteStruct(header);
             Align(stream);
             data.CopyTo(stream);
