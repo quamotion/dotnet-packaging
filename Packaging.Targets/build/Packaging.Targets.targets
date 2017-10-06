@@ -12,7 +12,9 @@
       <PackagePath Condition="'$(PackagePath)' == ''">$(TargetDir)$(PackageName)</PackagePath>
       <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
       <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
-
+      <PackageMaintainer Condition="'$(PackageMaintainer)' == ''">Anonymous &lt;noreply@example.com&gt;</PackageMaintainer>
+      <PackageDescription Condition="'$(PackageDescription)' == ''">$(PackageName)</PackageDescription>
+                         
       <!-- Use the AssemblyFileVersion as the PackageVersion, but default to 1.0.0.0 if an AssemblyFileVersion has not been set. -->
       <PackageVersion Condition="'$(AssemblyFileVersion)' != ''">$(AssemblyFileVersion)</PackageVersion>
       <PackageVersion Condition="'$(AssemblyFileVersion)' == ''">1.0.0.0</PackageVersion>
@@ -70,6 +72,8 @@
              LinuxFolders="@(LinuxFolder)"
              DebDependencies="@(DebDependency)"
              CreateUser="$(CreateUser)"
+             Maintainer="$(PackageMaintainer)"
+             Description="$(PackageDescription)"
              UserName="$(UserName)"
              InstallService="$(InstallService)"
              ServiceName="$(ServiceName)"/>
