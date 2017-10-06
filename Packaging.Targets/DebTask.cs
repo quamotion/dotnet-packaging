@@ -100,7 +100,8 @@ namespace Packaging.Targets
                     return;
                 if (!dirs.Contains(dirPath))
                 {
-                    EnsureDir(GetDirPath(dirPath));
+                    if (dirPath != "/")
+                        EnsureDir(GetDirPath(dirPath));
                     dirs.Add(dirPath);
                     toAdd.Add(new ArchiveEntry()
                     {
@@ -118,6 +119,7 @@ namespace Packaging.Targets
 
             foreach (var entry in entries)
                 EnsureDir(GetDirPath(entry.TargetPathWithFinalSlash));
+            EnsureDir("/");
             entries.AddRange(toAdd);
         }
         
