@@ -276,7 +276,7 @@ namespace Packaging.Targets.IO
                             throw new Exception("Compressed file is truncated or otherwise corrupt");
 
                         default:
-                            throw new Exception("Uknown error.Possibly a bug");
+                            throw new Exception("Unknown error.Possibly a bug");
                     }
                 }
             }

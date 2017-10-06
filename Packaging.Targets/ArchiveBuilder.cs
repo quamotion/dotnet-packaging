@@ -176,8 +176,14 @@ namespace Packaging.Targets
         /// <summary>
         /// Extracts the <see cref="ArchiveEntry"/> objects from a directory.
         /// </summary>
-        /// <param name="file">
+        /// <param name="directory">
         /// The directory from which to extract the entries.
+        /// </param>
+        /// <param name="prefix">
+        /// The prefix of the target directory.
+        /// </param>
+        /// <param name="metadata">
+        /// Additional metadata to use.
         /// </param>
         /// <returns>
         /// A list of <see cref="ArchiveEntry"/> objects representing the data in the directory.
