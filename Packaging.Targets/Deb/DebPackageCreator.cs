@@ -17,6 +17,8 @@ namespace Packaging.Targets.Deb
             List<ArchiveEntry> archiveEntries,
             Stream tarXzStream,
             string name,
+            string description,
+            string maintainer,
             string version,
             string arch,
             bool createUser,
@@ -39,8 +41,11 @@ namespace Packaging.Targets.Deb
                     ["Package"] = name,
                     ["Version"] = version,
                     ["Architecture"] = arch,
+                    ["Maintainer"] = maintainer,
+                    ["Description"] = description
                 }
             };
+            
             if (createUser)
             {
                 // Add the user and group, under which the service runs.

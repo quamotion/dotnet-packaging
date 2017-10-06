@@ -36,6 +36,12 @@ namespace Packaging.Targets
 
         [Required]
         public ITaskItem[] Content { get; set; }
+        
+        [Required]
+        public string Maintainer { get; set; }
+        
+        [Required]
+        public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets a list of empty folders to create when
@@ -166,6 +172,8 @@ namespace Packaging.Targets
                         archiveEntries,
                         tarXzStream,
                         PackageName,
+                        Description,
+                        Maintainer,
                         Version,
                         "amd64",
                         CreateUser,
