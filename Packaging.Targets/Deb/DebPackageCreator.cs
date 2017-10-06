@@ -90,18 +90,21 @@ namespace Packaging.Targets.Deb
                 string.Join("\n", pkg.ControlFile
                     .OrderByDescending(x => x.Key == "Package").ThenBy(x => x.Key)
                     .Select(x => $"{x.Key}: {x.Value}")) + "\n");
+            
             WriteControlEntry(controlTar, "./md5sums",
                 string.Join("\n", pkg.Md5Sums.Select(x => $"{x.Value}  {x.Key}")) + "\n");
 
-            if (string.IsNullOrWhiteSpace(pkg.PreInstallScript))
-                WriteControlEntry(controlTar, "./preinst", $"#!/bin/sh\n{pkg.PreInstallScript}\n");
+            var execMode = LinuxFileMode.S_IRUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IXUSR |
+                           LinuxFileMode.S_IRGRP | LinuxFileMode.S_IROTH;
             
+            if (string.IsNullOrWhiteSpace(pkg.PreInstallScript))
+                WriteControlEntry(controlTar, "./preinst", $"#!/bin/sh\n{pkg.PreInstallScript}\n", execMode);
             if (string.IsNullOrWhiteSpace(pkg.PostInstallScript))
-                WriteControlEntry(controlTar, "./preinst", $"#!/bin/sh\n{pkg.PostInstallScript}\n");
+                WriteControlEntry(controlTar, "./preinst", $"#!/bin/sh\n{pkg.PostInstallScript}\n", execMode);
             if (string.IsNullOrWhiteSpace(pkg.PreRemoveScript))
-                WriteControlEntry(controlTar, "./prerm", $"#!/bin/sh\n{pkg.PreRemoveScript}\n");
+                WriteControlEntry(controlTar, "./prerm", $"#!/bin/sh\n{pkg.PreRemoveScript}\n", execMode);
             if (string.IsNullOrWhiteSpace(pkg.PostRemoveScript))
-                WriteControlEntry(controlTar, "./postrm", $"#!/bin/sh\n{pkg.PostRemoveScript}\n");
+                WriteControlEntry(controlTar, "./postrm", $"#!/bin/sh\n{pkg.PostRemoveScript}\n", execMode);
 
             var confFiles = entries
                 .Where(e => e.Mode.HasFlag(LinuxFileMode.S_IFREG) && e.TargetPath.StartsWith("/etc/"))
@@ -120,15 +123,17 @@ namespace Packaging.Targets.Deb
             ArFileCreator.WriteEntry(targetStream, "control.tar.gz", ArFileMode, controlTarGz);
         }
         
-        static void WriteControlEntry(Stream tar, string name, string data = null)
+        static void WriteControlEntry(Stream tar, string name, string data = null, LinuxFileMode? fileMode = null)
         {
             var s = (data != null) ? new MemoryStream(Encoding.UTF8.GetBytes(data)) : new MemoryStream();
-
+            var mode = fileMode ?? LinuxFileMode.S_IRUSR | LinuxFileMode.S_IWUSR |
+                       LinuxFileMode.S_IRGRP | LinuxFileMode.S_IROTH;
+            mode |= (data == null
+                ? LinuxFileMode.S_IFDIR | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IXOTH
+                : LinuxFileMode.S_IFREG);
             var hdr = new TarHeader
             {
-                FileMode = LinuxFileMode.S_IRUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IROTH
-                           | LinuxFileMode.S_IXUSR| LinuxFileMode.S_IXGRP| LinuxFileMode.S_IXOTH
-                           | (data == null ? LinuxFileMode.S_IFDIR : LinuxFileMode.S_IFREG),
+                FileMode = mode,
                 FileName = name,
                 FileSize = (uint) s.Length,
                 GroupName = "root",
