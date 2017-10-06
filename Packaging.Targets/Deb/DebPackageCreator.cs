@@ -91,7 +91,7 @@ namespace Packaging.Targets.Deb
                     .OrderByDescending(x => x.Key == "Package").ThenBy(x => x.Key)
                     .Select(x => $"{x.Key}: {x.Value}")) + "\n");
             WriteControlEntry(controlTar, "./md5sums",
-                string.Join("\n", pkg.Md5Sums.Select(x => $"{x.Key}  {x.Value}")) + "\n");
+                string.Join("\n", pkg.Md5Sums.Select(x => $"{x.Value}  {x.Key}")) + "\n");
 
             if (string.IsNullOrWhiteSpace(pkg.PreInstallScript))
                 WriteControlEntry(controlTar, "./preinst", $"#!/bin/sh\n{pkg.PreInstallScript}\n");

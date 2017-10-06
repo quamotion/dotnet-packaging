@@ -268,7 +268,7 @@ namespace Packaging.Targets
                     }
 
                     hash = hasher.GetHashAndReset();
-                    md5hash = hasher.GetHashAndReset();
+                    md5hash = md5hasher.GetHashAndReset();
                 }
 
                 // Only support ELF32 and ELF64 colors; otherwise default to BLACK.
