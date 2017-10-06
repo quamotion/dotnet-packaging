@@ -7,18 +7,19 @@ namespace Packaging.Targets.Tests.Rpm
     /// </summary>
     internal class PublicRpmMetadata : RpmMetadata
     {
-        public PublicRpmMetadata(RpmPackage package) : base(package)
+        public PublicRpmMetadata(RpmPackage package)
+            : base(package)
         {
         }
 
         public void SetStringArrayPublic(IndexTag tag, string[] value)
         {
-            base.SetStringArray(tag, value);
+            this.SetStringArray(tag, value);
         }
 
         public void SetIntArrayPublic(IndexTag tag, int[] value)
         {
-            base.SetIntArray(tag, value);
+            this.SetIntArray(tag, value);
         }
     }
 }

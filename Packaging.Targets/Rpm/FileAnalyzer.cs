@@ -58,7 +58,7 @@ namespace Packaging.Targets.Rpm
         /// <inheritdoc/>
         public virtual RpmFileColor DetermineColor(ArchiveEntry entry)
         {
-            // Only support ELF32 and ELF64 
+            // Only support ELF32 and ELF64
             switch (entry.Type)
             {
                 case ArchiveEntryType.Executable32:

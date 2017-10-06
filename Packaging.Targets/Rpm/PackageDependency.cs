@@ -80,7 +80,6 @@ namespace Packaging.Targets.Rpm
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-
             return 13 * this.Name.GetHashCode() + 7 * (int)this.Flags + 7 * this.Version.GetHashCode();
         }
 

@@ -112,19 +112,21 @@ namespace Packaging.Targets.Rpm
         public static PgpKeyRingGenerator GenerateKeyRingGenerator(string identity, string password)
         {
             var rsaParams = new RsaKeyGenerationParameters(BigInteger.ValueOf(0x10001), new SecureRandom(), 2048, 12);
-            var symmetricAlgorithms = new SymmetricKeyAlgorithmTag[] {
+            var symmetricAlgorithms = new SymmetricKeyAlgorithmTag[]
+            {
                     SymmetricKeyAlgorithmTag.Aes256,
                     SymmetricKeyAlgorithmTag.Aes192,
                     SymmetricKeyAlgorithmTag.Aes128
-                }.Select(a => (int)a).ToArray();
+            }.Select(a => (int)a).ToArray();
 
-            var hashAlgorithms = new HashAlgorithmTag[] {
+            var hashAlgorithms = new HashAlgorithmTag[]
+            {
                     HashAlgorithmTag.Sha256,
                     HashAlgorithmTag.Sha1,
                     HashAlgorithmTag.Sha384,
                     HashAlgorithmTag.Sha512,
                     HashAlgorithmTag.Sha224,
-                }.Select(a => (int)a).ToArray();
+            }.Select(a => (int)a).ToArray();
 
             IAsymmetricCipherKeyPairGenerator generator = GeneratorUtilities.GetKeyPairGenerator("RSA");
             generator.Init(rsaParams);

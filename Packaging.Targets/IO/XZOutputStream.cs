@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
  * The MIT License (MIT)
 
  * Copyright (c) 2015 Roman Belkov, Kirill Melentyev
@@ -30,12 +30,6 @@ namespace Packaging.Targets.IO
 {
     public unsafe class XZOutputStream : Stream
     {
-        private LzmaStream _lzmaStream;
-        private readonly Stream _mInnerStream;
-        private readonly bool leaveOpen;
-        private readonly byte[] _outbuf;
-        private bool disposed;
-
         /// <summary>
         /// Default compression preset.
         /// </summary>
@@ -46,55 +40,73 @@ namespace Packaging.Targets.IO
         // of speed and chunk size
         private const int BufSize = 4096;
 
-        public XZOutputStream(Stream s) 
+        private readonly Stream innerStream;
+        private readonly bool leaveOpen;
+        private readonly byte[] outbuf;
+        private LzmaStream lzmaStream;
+        private bool disposed;
+
+        public XZOutputStream(Stream s)
             : this(s, 1)
         {
         }
 
-        public XZOutputStream(Stream s, int threads) 
+        public XZOutputStream(Stream s, int threads)
             : this(s, threads, DefaultPreset)
         {
         }
 
-        public XZOutputStream(Stream s, int threads, uint preset) 
+        public XZOutputStream(Stream s, int threads, uint preset)
             : this(s, threads, preset, false)
         {
         }
 
-        /// <inheritdoc/>
         public XZOutputStream(Stream s, int threads, uint preset, bool leaveOpen)
         {
-            _mInnerStream = s;
+            this.innerStream = s;
             this.leaveOpen = leaveOpen;
 
             LzmaResult ret;
-            if (threads == 1) ret = NativeMethods.lzma_easy_encoder(ref _lzmaStream, preset, LzmaCheck.Crc64);
+            if (threads == 1)
+            {
+                ret = NativeMethods.lzma_easy_encoder(ref this.lzmaStream, preset, LzmaCheck.Crc64);
+            }
             else
             {
-                if (threads <= 0) throw new ArgumentOutOfRangeException(nameof(threads));
+                if (threads <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(threads));
+                }
+
                 if (threads > Environment.ProcessorCount)
                 {
                     Trace.TraceWarning("{0} threads required, but only {1} processors available", threads, Environment.ProcessorCount);
                     threads = Environment.ProcessorCount;
                 }
+
                 var mt = new LzmaMT()
                 {
                     preset = preset,
                     check = LzmaCheck.Crc64,
                     threads = (uint)threads
                 };
-                ret = NativeMethods.lzma_stream_encoder_mt(ref _lzmaStream, ref mt);
+                ret = NativeMethods.lzma_stream_encoder_mt(ref this.lzmaStream, ref mt);
             }
 
             if (ret == LzmaResult.OK)
             {
-                _outbuf = new byte[BufSize];
-                _lzmaStream.AvailOut = BufSize;
+                this.outbuf = new byte[BufSize];
+                this.lzmaStream.AvailOut = BufSize;
                 return;
             }
 
             GC.SuppressFinalize(this);
             throw GetError(ret);
+        }
+
+        ~XZOutputStream()
+        {
+            this.Dispose(false);
         }
 
         /// <inheritdoc/>
@@ -153,6 +165,28 @@ namespace Packaging.Targets.IO
             }
         }
 
+        /// <summary>
+        /// Single-call buffer encoding
+        /// </summary>
+        public static byte[] Encode(byte[] buffer, uint preset = DefaultPreset)
+        {
+            var res = new byte[(long)NativeMethods.lzma_stream_buffer_bound((UIntPtr)buffer.Length)];
+
+            UIntPtr outPos;
+            var ret = NativeMethods.lzma_easy_buffer_encode(preset, LzmaCheck.Crc64, null, buffer, (UIntPtr)buffer.Length, res, &outPos, (UIntPtr)res.Length);
+            if (ret != LzmaResult.OK)
+            {
+                throw GetError(ret);
+            }
+
+            if ((long)outPos < res.Length)
+            {
+                Array.Resize(ref res, (int)(ulong)outPos);
+            }
+
+            return res;
+        }
+
         /// <inheritdoc/>
         public override void Flush()
         {
@@ -192,80 +226,81 @@ namespace Packaging.Targets.IO
 
             var guard = buffer[checked((uint)offset + (uint)count) - 1];
 
-            if (_lzmaStream.AvailIn != 0) throw new InvalidOperationException();
-            _lzmaStream.AvailIn = (uint)count;
+            if (this.lzmaStream.AvailIn != 0)
+            {
+                throw new InvalidOperationException();
+            }
+
+            this.lzmaStream.AvailIn = (uint)count;
             do
             {
                 LzmaResult ret;
                 fixed (byte* inbuf = &buffer[offset])
                 {
-                    _lzmaStream.NextIn = (IntPtr)inbuf;
-                    fixed (byte* outbuf = &_outbuf[BufSize - (int)(ulong)_lzmaStream.AvailOut])
+                    this.lzmaStream.NextIn = (IntPtr)inbuf;
+                    fixed (byte* outbuf = &this.outbuf[BufSize - this.lzmaStream.AvailOut])
                     {
-                        _lzmaStream.NextOut = (IntPtr)outbuf;
-                        ret = NativeMethods.lzma_code(ref _lzmaStream, LzmaAction.Run);
+                        this.lzmaStream.NextOut = (IntPtr)outbuf;
+                        ret = NativeMethods.lzma_code(ref this.lzmaStream, LzmaAction.Run);
                     }
-                    offset += (int)((ulong)_lzmaStream.NextIn - (ulong)(IntPtr)inbuf);
-                }
-                if (ret != LzmaResult.OK) throw ThrowError(ret);
 
-                if (_lzmaStream.AvailOut == 0)
-                {
-                    _mInnerStream.Write(_outbuf, 0, BufSize);
-                    _lzmaStream.AvailOut = (uint)BufSize;
+                    offset += (int)((ulong)this.lzmaStream.NextIn - (ulong)(IntPtr)inbuf);
                 }
-            } while (_lzmaStream.AvailIn != 0);
+
+                if (ret != LzmaResult.OK)
+                {
+                    throw this.ThrowError(ret);
+                }
+
+                if (this.lzmaStream.AvailOut == 0)
+                {
+                    this.innerStream.Write(this.outbuf, 0, BufSize);
+                    this.lzmaStream.AvailOut = BufSize;
+                }
+            }
+            while (this.lzmaStream.AvailIn != 0);
         }
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             // finish encoding only if all input has been successfully processed
-            if (_lzmaStream.InternalState != IntPtr.Zero && _lzmaStream.AvailIn == 0)
+            if (this.lzmaStream.InternalState != IntPtr.Zero && this.lzmaStream.AvailIn == 0)
             {
                 LzmaResult ret;
                 do
                 {
-                    fixed (byte* outbuf = &_outbuf[BufSize - (int)(ulong)_lzmaStream.AvailOut])
+                    fixed (byte* outbuf = &this.outbuf[BufSize - (int)this.lzmaStream.AvailOut])
                     {
-                        _lzmaStream.NextOut = (IntPtr)outbuf;
-                        ret = NativeMethods.lzma_code(ref _lzmaStream, LzmaAction.Finish);
+                        this.lzmaStream.NextOut = (IntPtr)outbuf;
+                        ret = NativeMethods.lzma_code(ref this.lzmaStream, LzmaAction.Finish);
                     }
-                    if (ret > LzmaResult.StreamEnd) throw ThrowError(ret);
 
-                    var writeSize = BufSize - (int)(ulong)_lzmaStream.AvailOut;
+                    if (ret > LzmaResult.StreamEnd)
+                    {
+                        throw this.ThrowError(ret);
+                    }
+
+                    var writeSize = BufSize - (int)this.lzmaStream.AvailOut;
                     if (writeSize != 0)
                     {
-                        _mInnerStream.Write(_outbuf, 0, writeSize);
-                        _lzmaStream.AvailOut = (uint)BufSize;
+                        this.innerStream.Write(this.outbuf, 0, writeSize);
+                        this.lzmaStream.AvailOut = BufSize;
                     }
-                } while (ret != LzmaResult.StreamEnd);
+                }
+                while (ret != LzmaResult.StreamEnd);
             }
 
-            NativeMethods.lzma_end(ref _lzmaStream);
+            NativeMethods.lzma_end(ref this.lzmaStream);
 
-            if (disposing && !leaveOpen) _mInnerStream?.Dispose();
+            if (disposing && !this.leaveOpen)
+            {
+                this.innerStream?.Dispose();
+            }
 
             base.Dispose(disposing);
-        }
 
-        /// <summary>
-        /// Single-call buffer encoding
-        /// </summary>
-        public static byte[] Encode(byte[] buffer, uint preset = DefaultPreset)
-        {
-            var res = new byte[(long)NativeMethods.lzma_stream_buffer_bound((UIntPtr)buffer.Length)];
-
-            UIntPtr outPos;
-            var ret = NativeMethods.lzma_easy_buffer_encode(preset, LzmaCheck.Crc64, null, buffer, (UIntPtr)buffer.Length, res, &outPos, (UIntPtr)res.Length);
-            if (ret != LzmaResult.OK) throw GetError(ret);
-            if ((long)outPos < res.Length) Array.Resize(ref res, (int)(ulong)outPos);
-            return res;
-        }
-
-        ~XZOutputStream()
-        {
-            this.Dispose(false);
+            this.disposed = true;
         }
 
         private static Exception GetError(LzmaResult ret)
@@ -293,7 +328,7 @@ namespace Packaging.Targets.IO
 
         private Exception ThrowError(LzmaResult ret)
         {
-            NativeMethods.lzma_end(ref this._lzmaStream);
+            NativeMethods.lzma_end(ref this.lzmaStream);
             return GetError(ret);
         }
     }

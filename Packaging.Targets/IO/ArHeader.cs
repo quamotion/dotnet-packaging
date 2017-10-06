@@ -35,8 +35,8 @@ namespace Packaging.Targets.IO
         /// </summary>
         public string FileName
         {
-            get => GetString(fileName, 16).Trim();
-            set => fileName = CreateString(value, 16);
+            get => this.GetString(this.fileName, 16).Trim();
+            set => this.fileName = this.CreateString(value, 16);
         }
 
         /// <summary>
@@ -44,40 +44,40 @@ namespace Packaging.Targets.IO
         /// </summary>
         public DateTimeOffset LastModified
         {
-            get => DateTimeOffset.FromUnixTimeSeconds(int.Parse(GetString(lastModified, 12).Trim()));
-            set => this.lastModified = CreateString(value.ToUnixTimeSeconds().ToString(), 12);
+            get => DateTimeOffset.FromUnixTimeSeconds(int.Parse(this.GetString(this.lastModified, 12).Trim()));
+            set => this.lastModified = this.CreateString(value.ToUnixTimeSeconds().ToString(), 12);
         }
 
         /// <summary>
-        /// Gets of sets the user ID of the owner of the file.
+        /// Gets or sets the user ID of the owner of the file.
         /// </summary>
         public uint OwnerId
         {
-            get => ReadUInt(ownerId);
-            set => ownerId = CreateString(value.ToString(), 6);
+            get => this.ReadUInt(this.ownerId);
+            set => this.ownerId = this.CreateString(value.ToString(), 6);
         }
-        
+
         /// <summary>
         /// Gets or sets group ID of the owner of the file.
         /// </summary>
         public uint GroupId
         {
-            get => ReadUInt(groupId);
-            set => groupId = CreateString(value.ToString(), 6);
+            get => this.ReadUInt(this.groupId);
+            set => this.groupId = this.CreateString(value.ToString(), 6);
         }
 
         /// <inheritdoc/>
         public LinuxFileMode FileMode
         {
-            get => (LinuxFileMode) Convert.ToUInt32(GetString(fileMode, 8).Trim(), 8);
-            set => fileMode = CreateString(Convert.ToString((uint)value, 8), 8);
+            get => (LinuxFileMode)Convert.ToUInt32(this.GetString(this.fileMode, 8).Trim(), 8);
+            set => this.fileMode = this.CreateString(Convert.ToString((uint)value, 8), 8);
         }
 
         /// <inheritdoc/>
         public uint FileSize
         {
-            get => ReadUInt(fileSize);
-            set => fileSize = CreateString(value.ToString(), 10);
+            get => this.ReadUInt(this.fileSize);
+            set => this.fileSize = this.CreateString(value.ToString(), 10);
         }
 
         /// <summary>
@@ -85,8 +85,8 @@ namespace Packaging.Targets.IO
         /// </summary>
         public string EndChar
         {
-            get => GetString(endChar, 2);
-            set => endChar = CreateString(value, 2);
+            get => this.GetString(this.endChar, 2);
+            set => this.endChar = this.CreateString(value, 2);
         }
 
         /// <inheritdoc/>
@@ -94,7 +94,7 @@ namespace Packaging.Targets.IO
         {
             return this.FileName;
         }
-        
+
         private string GetString(byte[] data, int maxLen)
         {
             int len;
@@ -105,24 +105,36 @@ namespace Packaging.Targets.IO
                     break;
                 }
             }
+
             if (len == 0)
+            {
                 return null;
+            }
+
             return Encoding.UTF8.GetString(data, 0, len);
         }
-        
-        
-        uint ReadUInt(byte[] data) => Convert.ToUInt32(GetString(data, data.Length).Trim());
 
-        byte[] CreateString(string s, int len)
+        private uint ReadUInt(byte[] data) => Convert.ToUInt32(this.GetString(data, data.Length).Trim());
+
+        private byte[] CreateString(string s, int len)
         {
             var target = new byte[len];
             if (s == null)
+            {
                 return target;
+            }
+
             var buffer = Encoding.UTF8.GetBytes(s);
             if (buffer.Length > len)
+            {
                 throw new Exception($"String {s} exceeds the limit of {len}");
+            }
+
             for (var c = 0; c < len; c++)
-                target[c] = (c < buffer.Length) ? buffer[c] : (byte) 0x20;
+            {
+                target[c] = (c < buffer.Length) ? buffer[c] : (byte)0x20;
+            }
+
             return target;
         }
     }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Packaging.Targets.Rpm
 {
-    class RpmPackageReader
+    internal class RpmPackageReader
     {
         public static RpmPackage Read(Stream stream)
         {

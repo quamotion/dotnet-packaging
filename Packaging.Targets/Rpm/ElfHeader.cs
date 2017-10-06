@@ -1,5 +1,6 @@
 ﻿namespace Packaging.Targets.Rpm
 {
+#pragma warning disable SA1307 // Accessible fields must begin with upper-case letter
     /// <summary>
     /// Represents the first fields of a header of an ELF file.
     /// </summary>
@@ -41,4 +42,5 @@
         /// </summary>
         public ElfMachine machine;
     }
+#pragma warning restore SA1307 // Accessible fields must begin with upper-case letter
 }

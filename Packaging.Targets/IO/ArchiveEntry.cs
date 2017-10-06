@@ -58,9 +58,9 @@ namespace Packaging.Targets.IO
         /// <summary>
         /// Gets or sets the MD5 of the file contents.
         /// </summary>
-        public byte[] Md5Hash 
+        public byte[] Md5Hash
         { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the file type (executable or not).
         /// </summary>
@@ -84,7 +84,7 @@ namespace Packaging.Targets.IO
         /// </summary>
         public bool IsAscii
         { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether this entry (and any child entries) is forcefully
         /// removed when the application is uninstalled.

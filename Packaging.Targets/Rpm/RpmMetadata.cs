@@ -29,7 +29,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the length of the immutable region, starting from the position of the <see cref="IndexTag.RPMTAG_HEADERIMMUTABLE"/>
+        /// Gets or sets the length of the immutable region, starting from the position of the <see cref="IndexTag.RPMTAG_HEADERIMMUTABLE"/>
         /// record. This record should be the last record in the signature block, and the value is negative, indicating the previous
         /// blocks are considered immutable.
         /// </summary>
@@ -57,7 +57,7 @@ namespace Packaging.Targets.Rpm
                 header.Offset = value;
                 header.Count = 0x10;
                 header.Type = IndexType.RPM_BIN_TYPE;
-                header.Tag = (uint)(IndexTag.RPMTAG_HEADERIMMUTABLE);
+                header.Tag = (uint)IndexTag.RPMTAG_HEADERIMMUTABLE;
 
                 byte[] data;
 
@@ -72,7 +72,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets a list of all locales supported by this package. The default, invariant locale is marked as the <c>C</c> locale.
+        /// Gets or sets a list of all locales supported by this package. The default, invariant locale is marked as the <c>C</c> locale.
         /// </summary>
         public Collection<string> Locales
         {
@@ -81,7 +81,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the package.
+        /// Gets or sets the name of the package.
         /// </summary>
         public string Name
         {
@@ -90,7 +90,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the package version.
+        /// Gets or sets the package version.
         /// </summary>
         public string Version
         {
@@ -99,7 +99,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the release number of the package.
+        /// Gets or sets the release number of the package.
         /// </summary>
         public string Release
         {
@@ -108,7 +108,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the a summary (one line) description of the package.
+        /// Gets or sets the a summary (one line) description of the package.
         /// </summary>
         public string Summary
         {
@@ -117,7 +117,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the full description of the package.
+        /// Gets or sets the full description of the package.
         /// </summary>
         public string Description
         {
@@ -126,7 +126,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the date and time at which the package was built.
+        /// Gets or sets the date and time at which the package was built.
         /// </summary>
         public DateTimeOffset BuildTime
         {
@@ -135,7 +135,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the host on which the package was built.
+        /// Gets or sets the name of the host on which the package was built.
         /// </summary>
         public string BuildHost
         {
@@ -144,7 +144,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the sum of the sizes of the regular files in the package.
+        /// Gets or sets the sum of the sizes of the regular files in the package.
         /// </summary>
         public int Size
         {
@@ -153,7 +153,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the distribution for which the package was built.
+        /// Gets or sets the name of the distribution for which the package was built.
         /// </summary>
         public string Distribution
         {
@@ -162,7 +162,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the organization which produced the package.
+        /// Gets or sets the name of the organization which produced the package.
         /// </summary>
         public string Vendor
         {
@@ -171,7 +171,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the license which applies to this package.
+        /// Gets or sets the license which applies to this package.
         /// </summary>
         public string License
         {
@@ -180,7 +180,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the administrative group to which this package belongs.
+        /// Gets or sets the administrative group to which this package belongs.
         /// </summary>
         public string Group
         {
@@ -189,7 +189,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the generic package information URL.
+        /// Gets or sets the generic package information URL.
         /// </summary>
         public string Url
         {
@@ -198,7 +198,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the generic name of the OS for which this package was built. Should be <c>linux</c>.
+        /// Gets or sets the generic name of the OS for which this package was built. Should be <c>linux</c>.
         /// </summary>
         public string Os
         {
@@ -207,7 +207,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the architecture for which the package was built, as defined in the architecture-specific
+        /// Gets or sets the name of the architecture for which the package was built, as defined in the architecture-specific
         /// LSB specifications.
         /// </summary>
         public string Arch
@@ -217,7 +217,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the source RPM.
+        /// Gets or sets the name of the source RPM.
         /// </summary>
         public string SourceRpm
         {
@@ -226,7 +226,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the version of the RPM tool used to build this package.
+        /// Gets or sets the version of the RPM tool used to build this package.
         /// </summary>
         public string RpmVersion
         {
@@ -235,7 +235,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the scipt to run before installation of this package.
+        /// Gets or sets the scipt to run before installation of this package.
         /// </summary>
         public string PreIn
         {
@@ -244,7 +244,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the scipt to run after installation of this package.
+        /// Gets or sets the scipt to run after installation of this package.
         /// </summary>
         public string PostIn
         {
@@ -253,7 +253,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the scipt to run before removal of this package.
+        /// Gets or sets the scipt to run before removal of this package.
         /// </summary>
         public string PreUn
         {
@@ -262,7 +262,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the scipt to run after removal of this package.
+        /// Gets or sets the scipt to run after removal of this package.
         /// </summary>
         public string PostUn
         {
@@ -271,7 +271,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the program to run before installation of this package.
+        /// Gets or sets the name of the program to run before installation of this package.
         /// </summary>
         public string PreInProg
         {
@@ -280,7 +280,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the program to run after installation of this package.
+        /// Gets or sets the name of the program to run after installation of this package.
         /// </summary>
         public string PostInProg
         {
@@ -289,7 +289,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the program to run before removal of this package.
+        /// Gets or sets the name of the program to run before removal of this package.
         /// </summary>
         public string PreUnProg
         {
@@ -298,7 +298,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the program to run after removal of this package.
+        /// Gets or sets the name of the program to run after removal of this package.
         /// </summary>
         public string PostUnProg
         {
@@ -307,7 +307,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets an opaque string whose contents are undefined.
+        /// Gets or sets an opaque string whose contents are undefined.
         /// </summary>
         public string Cookie
         {
@@ -316,7 +316,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets additional flags which may have been passed to the compiler when building this package.
+        /// Gets or sets additional flags which may have been passed to the compiler when building this package.
         /// </summary>
         public string OptFlags
         {
@@ -325,7 +325,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the URL for the package.
+        /// Gets or sets the URL for the package.
         /// </summary>
         public string DistUrl
         {
@@ -334,7 +334,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the format of the payload. Should be <c>cpio.</c>
+        /// Gets or sets the format of the payload. Should be <c>cpio.</c>
         /// </summary>
         public string PayloadFormat
         {
@@ -343,7 +343,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the name of the compressor used to compress the payload.
+        /// Gets or sets the name of the compressor used to compress the payload.
         /// </summary>
         public string PayloadCompressor
         {
@@ -352,7 +352,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the compression level used for the payload.
+        /// Gets or sets the compression level used for the payload.
         /// </summary>
         public string PayloadFlags
         {
@@ -361,7 +361,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets an opaque string whose value is undefined.
+        /// Gets or sets an opaque string whose value is undefined.
         /// </summary>
         public string Platform
         {
@@ -376,7 +376,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the hashing algorithm used to calculate the hash of files embedded
+        /// Gets or sets the hashing algorithm used to calculate the hash of files embedded
         /// in this RPM archive.
         /// </summary>
         public PgpHashAlgo FileDigetsAlgo
@@ -386,7 +386,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets all change log entries.
+        /// Gets or sets all change log entries.
         /// </summary>
         public IEnumerable<ChangelogEntry> ChangelogEntries
         {
@@ -431,7 +431,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets a list of all files embedded in this package.
+        /// Gets or sets a list of all files embedded in this package.
         /// </summary>
         public IEnumerable<RpmFile> Files
         {
@@ -472,7 +472,7 @@ namespace Packaging.Targets.Rpm
                         // https://github.com/rpm-software-management/rpm/blob/8f509d669b9ae79c86dd510c5a4bc5109f60d733/build/rpmfc.c#L734
                         var value = dependsDict[j];
 
-                        var dependencyType = GetDependencyTag((char)((value >> 24) & 0xFF));
+                        var dependencyType = this.GetDependencyTag((char)((value >> 24) & 0xFF));
                         var index = value & 0x00ffffff;
 
                         var values = this.GetStringArray(dependencyType);
@@ -630,6 +630,7 @@ namespace Packaging.Targets.Rpm
                     {
                         classDict.Add(file.Class);
                     }
+
                     classes[i] = classDict.IndexOf(file.Class);
 
                     var dirName = Path.GetDirectoryName(file.Name).Replace('\\', '/') + '/';
@@ -649,22 +650,22 @@ namespace Packaging.Targets.Rpm
 
                     foreach (var provide in file.Provides)
                     {
-                        byte type = (byte)GetDependencyType(IndexTag.RPMTAG_PROVIDENAME);
+                        byte type = (byte)this.GetDependencyType(IndexTag.RPMTAG_PROVIDENAME);
 
                         // Incomplete - we should check for not only name but also flags & version
                         var index = provideNames.IndexOf(provide.Name);
-                        index |= (type << 24);
+                        index |= type << 24;
 
                         dependsDict.Add(index);
                     }
 
                     foreach (var dependency in file.Requires)
                     {
-                        byte type = (byte)GetDependencyType(IndexTag.RPMTAG_REQUIRENAME);
+                        byte type = (byte)this.GetDependencyType(IndexTag.RPMTAG_REQUIRENAME);
 
                         // Incomplete - we should check for not only name but also flags & version
                         var index = requireNames.IndexOf(dependency.Name);
-                        index |= (type << 24);
+                        index |= type << 24;
 
                         dependsDict.Add(index);
                     }
@@ -699,14 +700,13 @@ namespace Packaging.Targets.Rpm
             }
         }
 
-
         public IEnumerable<PackageDependency> Dependencies
         {
             get
             {
-                var flags = GetIntArray(IndexTag.RPMTAG_REQUIREFLAGS);
-                var names = GetStringArray(IndexTag.RPMTAG_REQUIRENAME);
-                var vers = GetStringArray(IndexTag.RPMTAG_REQUIREVERSION);
+                var flags = this.GetIntArray(IndexTag.RPMTAG_REQUIREFLAGS);
+                var names = this.GetStringArray(IndexTag.RPMTAG_REQUIRENAME);
+                var vers = this.GetStringArray(IndexTag.RPMTAG_REQUIREVERSION);
 
                 for (int i = 0; i < flags.Count; i++)
                 {
@@ -744,9 +744,9 @@ namespace Packaging.Targets.Rpm
         {
             get
             {
-                var flags = GetIntArray(IndexTag.RPMTAG_PROVIDEFLAGS);
-                var names = GetStringArray(IndexTag.RPMTAG_PROVIDENAME);
-                var vers = GetStringArray(IndexTag.RPMTAG_PROVIDEVERSION);
+                var flags = this.GetIntArray(IndexTag.RPMTAG_PROVIDEFLAGS);
+                var names = this.GetStringArray(IndexTag.RPMTAG_PROVIDENAME);
+                var vers = this.GetStringArray(IndexTag.RPMTAG_PROVIDEVERSION);
 
                 for (int i = 0; i < flags.Count; i++)
                 {
@@ -936,7 +936,8 @@ namespace Packaging.Targets.Rpm
         {
             if (!this.Package.Header.Records.ContainsKey(tag))
             {
-                this.Package.Header.Records.Add(tag,
+                this.Package.Header.Records.Add(
+                    tag,
                     new IndexRecord()
                     {
                         Header = new IndexHeader()

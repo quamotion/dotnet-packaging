@@ -22,12 +22,12 @@ namespace Packaging.Targets.Tests.Rpm
                 case "/usr/lib64/libplist++.so.3.1.0":
                     return new Collection<PackageDependency>()
                     {
-                        new PackageDependency("libplist++.so.3()(64bit)", RpmSense.RPMSENSE_FIND_PROVIDES, "")
+                        new PackageDependency("libplist++.so.3()(64bit)", RpmSense.RPMSENSE_FIND_PROVIDES, string.Empty)
                     };
                 case "/usr/lib64/libplist.so.3.1.0":
                     return new Collection<PackageDependency>()
                     {
-                        new PackageDependency("libplist.so.3()(64bit)", RpmSense.RPMSENSE_FIND_PROVIDES, "")
+                        new PackageDependency("libplist.so.3()(64bit)", RpmSense.RPMSENSE_FIND_PROVIDES, string.Empty)
                     };
             }
 
@@ -42,39 +42,39 @@ namespace Packaging.Targets.Tests.Rpm
                 case "/usr/bin/plistutil":
                     return new Collection<PackageDependency>()
                     {
-                        new PackageDependency("libpthread.so.0(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libc.so.6(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libplist.so.3()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libpthread.so.0()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libc.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("rtld(GNU_HASH)", RpmSense.RPMSENSE_FIND_REQUIRES, "")
+                        new PackageDependency("libpthread.so.0(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libc.so.6(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libplist.so.3()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libpthread.so.0()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libc.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("rtld(GNU_HASH)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty)
                     };
                 case "/usr/lib64/libplist++.so.3.1.0":
                     return new Collection<PackageDependency>()
                     {
-                        new PackageDependency("libgcc_s.so.1(GCC_3.0)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libpthread.so.0(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libc.so.6(GLIBC_2.14)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libc.so.6(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libstdc++.so.6(CXXABI_1.3)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libstdc++.so.6(GLIBCXX_3.4)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libplist.so.3()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libpthread.so.0()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libstdc++.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libm.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libc.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libgcc_s.so.1()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("rtld(GNU_HASH)", RpmSense.RPMSENSE_FIND_REQUIRES, "")
+                        new PackageDependency("libgcc_s.so.1(GCC_3.0)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libpthread.so.0(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libc.so.6(GLIBC_2.14)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libc.so.6(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libstdc++.so.6(CXXABI_1.3)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libstdc++.so.6(GLIBCXX_3.4)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libplist.so.3()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libpthread.so.0()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libstdc++.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libm.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libc.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libgcc_s.so.1()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("rtld(GNU_HASH)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty)
                     };
                 case "/usr/lib64/libplist.so.3.1.0":
                     return new Collection<PackageDependency>()
                     {
-                        new PackageDependency("libpthread.so.0(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libc.so.6(GLIBC_2.14)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libc.so.6(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libpthread.so.0()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("libc.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, ""),
-                        new PackageDependency("rtld(GNU_HASH)", RpmSense.RPMSENSE_FIND_REQUIRES, "")
+                        new PackageDependency("libpthread.so.0(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libc.so.6(GLIBC_2.14)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libc.so.6(GLIBC_2.2.5)(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libpthread.so.0()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("libc.so.6()(64bit)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                        new PackageDependency("rtld(GNU_HASH)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty)
                     };
             }
 

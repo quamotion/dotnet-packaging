@@ -10,7 +10,7 @@ namespace Packaging.Targets.Rpm
     /// <summary>
     /// Provides methods which support writing a <see cref="RpmPackage"/> to a <see cref="Stream"/>.
     /// </summary>
-    class RpmPackageWriter
+    internal class RpmPackageWriter
     {
         /// <summary>
         /// Writes a <see cref="RpmPackage"/> to a <see cref="Stream"/>.

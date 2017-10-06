@@ -27,7 +27,7 @@ namespace Packaging.Targets.Tests.Rpm
             {
                 return "UTF-8 Unicode text, with very long lines, with CRLF line terminators";
             }
-            else if(entry.TargetPath.EndsWith("jquery/LICENSE.txt"))
+            else if (entry.TargetPath.EndsWith("jquery/LICENSE.txt"))
             {
                 return "C source, ASCII text, with CRLF line terminators";
             }

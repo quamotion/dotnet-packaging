@@ -16,6 +16,14 @@ namespace Packaging.Targets.IO
     /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/index.h"/>
     public class NativeMethods
     {
+        /// <summary>
+        /// The name of the lzma library.
+        /// </summary>
+        /// <remarks>
+        /// You can fetch liblzma from https://github.com/RomanBelkov/XZ.NET/blob/master/XZ.NET/liblzma.dll
+        /// </remarks>
+        private const string LibraryName = @"lzma";
+
         static NativeMethods()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -55,14 +63,6 @@ namespace Packaging.Targets.IO
                 }
             }
         }
-
-        /// <summary>
-        /// The name of the lzma library.
-        /// </summary>
-        /// <remarks>
-        /// You can fetch liblzma from https://github.com/RomanBelkov/XZ.NET/blob/master/XZ.NET/liblzma.dll
-        /// </remarks>
-        private const string LibraryName = @"lzma";
 
         /// <summary>
         /// Initialize .xz Stream decoder
@@ -281,7 +281,9 @@ namespace Packaging.Targets.IO
         /// <param name="mt">
         /// Pointer to multithreaded compression options
         /// </param>
-        /// <returns></returns>
+        /// <returns>
+        /// A <see cref="LzmaResult"/> value which indicates success or failure.
+        /// </returns>
         [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         internal static extern LzmaResult lzma_stream_encoder_mt(ref LzmaStream stream, ref LzmaMT mt);
 
@@ -299,8 +301,11 @@ namespace Packaging.Targets.IO
         /// If the calculated maximum size doesn't fit into size_t or would make the Stream grow past LZMA_VLI_MAX (which should never happen in practice), zero is returned to indicate the error.
         /// </para>
         /// </summary>
-        /// <param name="uncompressed_size"></param>
+        /// <param name="uncompressed_size">
+        /// The uncompressed size.
+        /// </param>
         /// <returns>
+        /// The buffer output size.
         /// </returns>
         /// <remarks>
         /// The limit calculated by this function applies only to single-call encoding. Multi-call encoding may (and probably will) have larger maximum expansion when encoding uncompressible data. Currently there is no function to calculate the maximum expansion of multi-call encoding.
@@ -359,6 +364,6 @@ namespace Packaging.Targets.IO
         /// The maximum required output buffer size can be calculated with lzma_stream_buffer_bound()
         /// </remarks>
         [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal unsafe static extern LzmaResult lzma_easy_buffer_encode(UInt32 preset, LzmaCheck check, void* allocator, byte[] @in, UIntPtr in_size, byte[] @out, UIntPtr* out_pos, UIntPtr out_size);
+        internal static unsafe extern LzmaResult lzma_easy_buffer_encode(uint preset, LzmaCheck check, void* allocator, byte[] @in, UIntPtr in_size, byte[] @out, UIntPtr* out_pos, UIntPtr out_size);
     }
 }

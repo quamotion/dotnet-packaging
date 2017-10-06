@@ -8,6 +8,8 @@ namespace Packaging.Targets.IO
     /// </summary>
     public class TarFile : ArchiveFile
     {
+        private TarHeader entryHeader;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TarFile"/> class.
         /// </summary>
@@ -23,21 +25,19 @@ namespace Packaging.Targets.IO
         {
         }
 
-        private TarHeader entryHeader;
-        
         /// <inheritdoc/>
         public override bool Read()
         {
             this.Align(512);
-            EntryStream?.Dispose();
-            EntryStream = null;
+            this.EntryStream?.Dispose();
+            this.EntryStream = null;
 
             this.entryHeader = this.Stream.ReadStruct<TarHeader>();
             this.FileHeader = this.entryHeader;
             this.FileName = this.entryHeader.FileName;
 
             // There are two empty blocks at the end of the file.
-            if (string.IsNullOrEmpty(entryHeader.Magic))
+            if (string.IsNullOrEmpty(this.entryHeader.Magic))
             {
                 return false;
             }
@@ -46,8 +46,8 @@ namespace Packaging.Targets.IO
             {
                 throw new InvalidDataException("The magic for the file entry is invalid");
             }
-            
-            Align(512);
+
+            this.Align(512);
 
             // TODO: Validate Checksum
             this.EntryStream = new SubStream(this.Stream, this.Stream.Position, this.entryHeader.FileSize, leaveParentOpen: true);

@@ -1,5 +1,4 @@
-﻿//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿// Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -18,7 +17,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-//
 
 using System;
 using System.Collections.Generic;
@@ -32,11 +30,11 @@ namespace DiscUtils.Internal
     /// </summary>
     internal class ConcatStream : Stream
     {
-        private readonly bool _canWrite;
+        private readonly bool canWrite;
         private readonly bool leaveOpen;
 
-        private long _position;
-        private Stream[] _streams;
+        private long position;
+        private Stream[] streams;
 
         public ConcatStream(params Stream[] streams)
             : this(false, streams)
@@ -45,16 +43,16 @@ namespace DiscUtils.Internal
 
         public ConcatStream(bool leaveOpen, params Stream[] streams)
         {
-            _streams = streams;
+            this.streams = streams;
             this.leaveOpen = leaveOpen;
 
             // Only allow writes if all streams can be written
-            _canWrite = true;
+            this.canWrite = true;
             foreach (Stream stream in streams)
             {
                 if (!stream.CanWrite)
                 {
-                    _canWrite = false;
+                    this.canWrite = false;
                 }
             }
         }
@@ -63,7 +61,7 @@ namespace DiscUtils.Internal
         {
             get
             {
-                CheckDisposed();
+                this.CheckDisposed();
                 return true;
             }
         }
@@ -72,7 +70,7 @@ namespace DiscUtils.Internal
         {
             get
             {
-                CheckDisposed();
+                this.CheckDisposed();
                 return true;
             }
         }
@@ -81,8 +79,8 @@ namespace DiscUtils.Internal
         {
             get
             {
-                CheckDisposed();
-                return _canWrite;
+                this.CheckDisposed();
+                return this.canWrite;
             }
         }
 
@@ -90,11 +88,11 @@ namespace DiscUtils.Internal
         {
             get
             {
-                CheckDisposed();
+                this.CheckDisposed();
                 long length = 0;
-                for (int i = 0; i < _streams.Length; ++i)
+                for (int i = 0; i < this.streams.Length; ++i)
                 {
-                    length += _streams[i].Length;
+                    length += this.streams[i].Length;
                 }
 
                 return length;
@@ -105,29 +103,29 @@ namespace DiscUtils.Internal
         {
             get
             {
-                CheckDisposed();
-                return _position;
+                this.CheckDisposed();
+                return this.position;
             }
 
             set
             {
-                CheckDisposed();
-                _position = value;
+                this.CheckDisposed();
+                this.position = value;
             }
         }
 
         public override void Flush()
         {
-            CheckDisposed();
-            for (int i = 0; i < _streams.Length; ++i)
+            this.CheckDisposed();
+            for (int i = 0; i < this.streams.Length; ++i)
             {
-                _streams[i].Flush();
+                this.streams[i].Flush();
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            CheckDisposed();
+            this.CheckDisposed();
 
             int totalRead = 0;
             int numRead = 0;
@@ -135,87 +133,88 @@ namespace DiscUtils.Internal
             do
             {
                 long activeStreamStartPos;
-                int activeStream = GetActiveStream(out activeStreamStartPos);
+                int activeStream = this.GetActiveStream(out activeStreamStartPos);
 
-                _streams[activeStream].Position = _position - activeStreamStartPos;
+                this.streams[activeStream].Position = this.position - activeStreamStartPos;
 
-                numRead = _streams[activeStream].Read(buffer, offset + totalRead, count - totalRead);
+                numRead = this.streams[activeStream].Read(buffer, offset + totalRead, count - totalRead);
 
                 totalRead += numRead;
-                _position += numRead;
-            } while (numRead != 0);
+                this.position += numRead;
+            }
+            while (numRead != 0);
 
             return totalRead;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            CheckDisposed();
+            this.CheckDisposed();
 
             long effectiveOffset = offset;
             if (origin == SeekOrigin.Current)
             {
-                effectiveOffset += _position;
+                effectiveOffset += this.position;
             }
             else if (origin == SeekOrigin.End)
             {
-                effectiveOffset += Length;
+                effectiveOffset += this.Length;
             }
 
             if (effectiveOffset < 0)
             {
                 throw new IOException("Attempt to move before beginning of disk");
             }
-            Position = effectiveOffset;
-            return Position;
+
+            this.Position = effectiveOffset;
+            return this.Position;
         }
 
         public override void SetLength(long value)
         {
-            CheckDisposed();
+            this.CheckDisposed();
 
             long lastStreamOffset;
-            int lastStream = GetStream(Length, out lastStreamOffset);
+            int lastStream = this.GetStream(this.Length, out lastStreamOffset);
             if (value < lastStreamOffset)
             {
-                throw new IOException(string.Format(CultureInfo.InvariantCulture,
-                    "Unable to reduce stream length to less than {0}", lastStreamOffset));
+                throw new IOException($"Unable to reduce stream length to less than {lastStreamOffset}");
             }
 
-            _streams[lastStream].SetLength(value - lastStreamOffset);
+            this.streams[lastStream].SetLength(value - lastStreamOffset);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            CheckDisposed();
+            this.CheckDisposed();
 
             int totalWritten = 0;
             while (totalWritten != count)
             {
                 // Offset of the stream = streamOffset
                 long streamOffset;
-                int streamIdx = GetActiveStream(out streamOffset);
+                int streamIdx = this.GetActiveStream(out streamOffset);
 
                 // Offset within the stream = streamPos
-                long streamPos = _position - streamOffset;
-                _streams[streamIdx].Position = streamPos;
+                long streamPos = this.position - streamOffset;
+                this.streams[streamIdx].Position = streamPos;
 
                 // Write (limited to the stream's length), except for final stream - that may be
                 // extendable
                 int numToWrite;
-                if (streamIdx == _streams.Length - 1)
+                if (streamIdx == this.streams.Length - 1)
                 {
                     numToWrite = count - totalWritten;
                 }
                 else
                 {
-                    numToWrite = (int)Math.Min(count - totalWritten, _streams[streamIdx].Length - streamPos);
+                    numToWrite = (int)Math.Min(count - totalWritten, this.streams[streamIdx].Length - streamPos);
                 }
 
-                _streams[streamIdx].Write(buffer, offset + totalWritten, numToWrite);
+                this.streams[streamIdx].Write(buffer, offset + totalWritten, numToWrite);
 
                 totalWritten += numToWrite;
-                _position += numToWrite;
+                this.position += numToWrite;
             }
         }
 
@@ -223,17 +222,17 @@ namespace DiscUtils.Internal
         {
             try
             {
-                if (disposing && _streams != null)
+                if (disposing && this.streams != null)
                 {
                     if (!this.leaveOpen)
                     {
-                        foreach (Stream stream in _streams)
+                        foreach (Stream stream in this.streams)
                         {
                             stream.Dispose();
                         }
                     }
 
-                    _streams = null;
+                    this.streams = null;
                 }
             }
             finally
@@ -244,7 +243,7 @@ namespace DiscUtils.Internal
 
         private int GetActiveStream(out long startPos)
         {
-            return GetStream(_position, out startPos);
+            return this.GetStream(this.position, out startPos);
         }
 
         private int GetStream(long targetPos, out long streamStartPos)
@@ -252,9 +251,9 @@ namespace DiscUtils.Internal
             // Find the stream that _position is within
             streamStartPos = 0;
             int focusStream = 0;
-            while (focusStream < _streams.Length - 1 && streamStartPos + _streams[focusStream].Length <= targetPos)
+            while (focusStream < this.streams.Length - 1 && streamStartPos + this.streams[focusStream].Length <= targetPos)
             {
-                streamStartPos += _streams[focusStream].Length;
+                streamStartPos += this.streams[focusStream].Length;
                 focusStream++;
             }
 
@@ -263,7 +262,7 @@ namespace DiscUtils.Internal
 
         private void CheckDisposed()
         {
-            if (_streams == null)
+            if (this.streams == null)
             {
                 throw new ObjectDisposedException(nameof(ConcatStream));
             }

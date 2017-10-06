@@ -86,7 +86,6 @@ namespace Packaging.Targets.Rpm
             return GetDecompressedPayloadStream(package, compressedPayloadStream);
         }
 
-
         /// <summary>
         /// Gets a <see cref="Stream"/> which allows reading the decompressed payload data.
         /// </summary>

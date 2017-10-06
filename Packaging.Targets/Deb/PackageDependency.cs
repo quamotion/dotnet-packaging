@@ -3,32 +3,29 @@
     public class PackageDependency
     {
         public string Name { get; set; }
+
         public string Version { get; set; }
+
         public PackageDependencyRelation Relation { get; set; } = PackageDependencyRelation.GreaterOrEqual;
+
         public override string ToString()
         {
-            var rel = Relation == PackageDependencyRelation.StrictlyLower
+            var rel = this.Relation == PackageDependencyRelation.StrictlyLower
                 ? "<<"
-                : Relation == PackageDependencyRelation.LowerOrEqual
+                : this.Relation == PackageDependencyRelation.LowerOrEqual
                     ? "<="
-                    : Relation == PackageDependencyRelation.ExactlyEqual
+                    : this.Relation == PackageDependencyRelation.ExactlyEqual
                         ? "=="
-                        : Relation == PackageDependencyRelation.GreaterOrEqual
+                        : this.Relation == PackageDependencyRelation.GreaterOrEqual
                             ? ">="
                             : ">>";
 
-            if (Version == null)
-                return Name;
-            return $"{Name} ({rel} {Version})";
-        }
-    }
+            if (this.Version == null)
+            {
+                return this.Name;
+            }
 
-    public enum PackageDependencyRelation
-    {
-        StrictlyLower,
-        LowerOrEqual,
-        ExactlyEqual,
-        GreaterOrEqual,
-        StrictlyGreater
+            return $"{this.Name} ({rel} {this.Version})";
+        }
     }
 }

@@ -12,7 +12,6 @@ namespace Packaging.Targets.Rpm
         /// </summary>
         public ChangelogEntry()
         {
-
         }
 
         /// <summary>

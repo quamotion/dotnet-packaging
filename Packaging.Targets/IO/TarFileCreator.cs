@@ -8,7 +8,6 @@ namespace Packaging.Targets.IO
 {
     internal static class TarFileCreator
     {
-
         /// <summary>
         /// Generates a <see cref="CpioFile"/> based on a list of <see cref="ArchiveEntry"/>
         /// values.
@@ -27,6 +26,7 @@ namespace Packaging.Targets.IO
                 {
                     WriteEntry(targetStream, entry);
                 }
+
                 WriteTrailer(targetStream);
             }
         }
@@ -38,15 +38,6 @@ namespace Packaging.Targets.IO
             stream.Write(trailer, 0, trailer.Length);
         }
 
-        static void Align(Stream stream)
-        {
-            var spos = stream.Position % 512;
-            if(spos == 0)
-                return;
-            var align = new byte[512 -spos];
-            stream.Write(align, 0, align.Length);
-        }
-
         public static void WriteEntry(Stream stream, TarHeader header, Stream data)
         {
             header.Checksum = header.ComputeChecksum();
@@ -55,7 +46,7 @@ namespace Packaging.Targets.IO
             data.CopyTo(stream);
             Align(stream);
         }
-        
+
         public static void WriteEntry(Stream stream, ArchiveEntry entry, Stream data = null)
         {
             var targetPath = entry.TargetPath;
@@ -63,6 +54,7 @@ namespace Packaging.Targets.IO
             {
                 targetPath = "." + targetPath;
             }
+
             var isDir = entry.Mode.HasFlag(LinuxFileMode.S_IFDIR);
             var isLink = !isDir && !string.IsNullOrWhiteSpace(entry.LinkTo);
             var isFile = !isDir && !isLink;
@@ -72,7 +64,6 @@ namespace Packaging.Targets.IO
                     ? TarTypeFlag.DirType
                     : TarTypeFlag.LnkType;
 
-            
             bool dispose = false;
             if (data == null)
             {
@@ -82,8 +73,11 @@ namespace Packaging.Targets.IO
                     data = File.OpenRead(entry.SourceFilename);
                 }
                 else
+                {
                     data = new MemoryStream();
+                }
             }
+
             try
             {
                 var hdr = new TarHeader()
@@ -92,12 +86,12 @@ namespace Packaging.Targets.IO
                     DevMajor = null,
                     DevMinor = null,
                     FileName = targetPath,
-                    FileSize = (uint) data.Length,
+                    FileSize = (uint)data.Length,
                     GroupId = 0,
                     UserId = 0,
                     GroupName = entry.Group,
-                    LinkName = "",
-                    Prefix = "",
+                    LinkName = string.Empty,
+                    Prefix = string.Empty,
                     TypeFlag = type,
                     UserName = entry.Owner,
                     Version = null,
@@ -108,10 +102,23 @@ namespace Packaging.Targets.IO
             }
             finally
             {
-                if(dispose)
+                if (dispose)
+                {
                     data.Dispose();
+                }
             }
         }
 
+        private static void Align(Stream stream)
+        {
+            var spos = stream.Position % 512;
+            if (spos == 0)
+            {
+                return;
+            }
+
+            var align = new byte[512 - spos];
+            stream.Write(align, 0, align.Length);
+        }
     }
 }
