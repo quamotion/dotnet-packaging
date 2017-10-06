@@ -40,7 +40,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the length of the immutable region, starting from the position of the <see cref="SignatureTag.RPMTAG_HEADERSIGNATURES"/>
+        /// Gets or sets the length of the immutable region, starting from the position of the <see cref="SignatureTag.RPMTAG_HEADERSIGNATURES"/>
         /// record. This record should be the last record in the signature block, and the value is negative, indicating the previous
         /// blocks are considered immutable.
         /// </summary>
@@ -53,7 +53,6 @@ namespace Packaging.Targets.Rpm
                 // https://dentrassi.de/2016/04/15/writing-rpm-files-in-plain-java/
                 // https://blog.bethselamin.de/posts/argh-pm.html
                 // For now, we're always assuming the entire header and the entire signature is immutable
-
                 var immutableSignatureRegion = (byte[])this.Package.Signature.Records[SignatureTag.RPMTAG_HEADERSIGNATURES].Value;
 
                 using (MemoryStream s = new MemoryStream(immutableSignatureRegion))
@@ -69,7 +68,7 @@ namespace Packaging.Targets.Rpm
                 header.Offset = value;
                 header.Count = 0x10;
                 header.Type = IndexType.RPM_BIN_TYPE;
-                header.Tag = (uint)(SignatureTag.RPMTAG_HEADERSIGNATURES);
+                header.Tag = (uint)SignatureTag.RPMTAG_HEADERSIGNATURES;
 
                 byte[] data;
 
@@ -84,7 +83,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the SHA1 hash of the header section.
+        /// Gets or sets the SHA1 hash of the header section.
         /// </summary>
         public byte[] Sha1Hash
         {
@@ -93,7 +92,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the MD5 hash of the header section and the compressed payload.
+        /// Gets or sets the MD5 hash of the header section and the compressed payload.
         /// </summary>
         public byte[] MD5Hash
         {
@@ -102,7 +101,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the <see cref="PgpSignature"/> of the header section.
+        /// Gets or sets the <see cref="PgpSignature"/> of the header section.
         /// </summary>
         public PgpSignature HeaderPgpSignature
         {
@@ -111,7 +110,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the <see cref="PgpSignature"/> of the header section and compressed payload.
+        /// Gets or sets the <see cref="PgpSignature"/> of the header section and compressed payload.
         /// </summary>
         public PgpSignature HeaderAndPayloadPgpSignature
         {
@@ -120,7 +119,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the combined size of the header section and the compressed payload.
+        /// Gets or sets the combined size of the header section and the compressed payload.
         /// </summary>
         public int HeaderAndPayloadSize
         {
@@ -129,7 +128,7 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets the size of the uncompressed payload.
+        /// Gets or sets the size of the uncompressed payload.
         /// </summary>
         public int UncompressedPayloadSize
         {
@@ -138,63 +137,9 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
-        /// Gets a PGP signature.
-        /// </summary>
-        /// <param name="tag">
-        /// The tag which contains the PGP signature.
-        /// </param>
-        /// <returns>
-        /// A <see cref="PgpSignature"/> object which represents the PGP signature.
-        /// </returns>
-        private PgpSignature GetPgpSignature(SignatureTag tag)
-        {
-            byte[] value = (byte[])this.Package.Signature.Records[tag].Value;
-
-            using (MemoryStream stream = new MemoryStream(value))
-            using (var signatureStream = PgpUtilities.GetDecoderStream(stream))
-            {
-                PgpObjectFactory pgpFactory = new PgpObjectFactory(signatureStream);
-                PgpSignatureList signatureList = (PgpSignatureList)pgpFactory.NextPgpObject();
-                PgpSignature signature = signatureList[0];
-                return signature;
-            }
-        }
-
-        private void SetPgpSignature(SignatureTag tag, PgpSignature signature)
-        {
-            PgpSignatureList signatureList = new PgpSignatureList(signature);
-            byte[] value = signature.GetEncoded();
-
-            this.SetByteArray(tag, value);
-        }
-
-        /// <summary>
-        /// Converst a hexadecimal string to a <see cref="byte"/> array.
-        /// </summary>
-        /// <param name="hex">
-        /// A <see cref="string"/> containing the hexadecimal representation of the value.
-        /// </param>
-        /// <returns>
-        /// A byte array representing the same value.
-        /// </returns>
-        internal static byte[] StringToByteArray(string hex)
-        {
-            int NumberChars = hex.Length;
-            byte[] bytes = new byte[NumberChars / 2];
-
-            for (int i = 0; i < NumberChars; i += 2)
-            {
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-
-            }
-
-            return bytes;
-        }
-
-        /// <summary>
         /// Verifys the signature of a RPM package.
         /// </summary>
-        /// <param name="pgpPublicKey">
+        /// <param name="pgpPublicKeyStream">
         /// A <see cref="Stream"/> which contains the public key used to verify the data.
         /// </param>
         /// <returns>
@@ -207,7 +152,7 @@ namespace Packaging.Targets.Rpm
             var publicKeys = publicKeyRings.SelectMany(x => x.GetPublicKeys().OfType<PgpPublicKey>());
             var publicKey = publicKeys.FirstOrDefault();
 
-            return Verify(publicKey);
+            return this.Verify(publicKey);
         }
 
         public bool Verify(PgpPublicKey pgpPublicKey)
@@ -227,7 +172,8 @@ namespace Packaging.Targets.Rpm
                 this.Package.Stream,
                 this.Package.HeaderOffset,
                 this.Package.PayloadOffset - this.Package.HeaderOffset,
-                leaveParentOpen: true, readOnly: true))
+                leaveParentOpen: true,
+                readOnly: true))
             using (Stream headerAndPayloadStream = new SubStream(
                 this.Package.Stream,
                 this.Package.HeaderOffset,
@@ -300,6 +246,28 @@ namespace Packaging.Targets.Rpm
             return true;
         }
 
+        /// <summary>
+        /// Converst a hexadecimal string to a <see cref="byte"/> array.
+        /// </summary>
+        /// <param name="hex">
+        /// A <see cref="string"/> containing the hexadecimal representation of the value.
+        /// </param>
+        /// <returns>
+        /// A byte array representing the same value.
+        /// </returns>
+        internal static byte[] StringToByteArray(string hex)
+        {
+            int numberChars = hex.Length;
+            byte[] bytes = new byte[numberChars / 2];
+
+            for (int i = 0; i < numberChars; i += 2)
+            {
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            }
+
+            return bytes;
+        }
+
         protected void SetInt(SignatureTag tag, int value)
         {
             this.SetSingleValue(tag, IndexType.RPM_INT32_TYPE, value);
@@ -368,6 +336,37 @@ namespace Packaging.Targets.Rpm
             {
                 this.Package.Signature.Records[tag] = record;
             }
+        }
+
+        /// <summary>
+        /// Gets a PGP signature.
+        /// </summary>
+        /// <param name="tag">
+        /// The tag which contains the PGP signature.
+        /// </param>
+        /// <returns>
+        /// A <see cref="PgpSignature"/> object which represents the PGP signature.
+        /// </returns>
+        private PgpSignature GetPgpSignature(SignatureTag tag)
+        {
+            byte[] value = (byte[])this.Package.Signature.Records[tag].Value;
+
+            using (MemoryStream stream = new MemoryStream(value))
+            using (var signatureStream = PgpUtilities.GetDecoderStream(stream))
+            {
+                PgpObjectFactory pgpFactory = new PgpObjectFactory(signatureStream);
+                PgpSignatureList signatureList = (PgpSignatureList)pgpFactory.NextPgpObject();
+                PgpSignature signature = signatureList[0];
+                return signature;
+            }
+        }
+
+        private void SetPgpSignature(SignatureTag tag, PgpSignature signature)
+        {
+            PgpSignatureList signatureList = new PgpSignatureList(signature);
+            byte[] value = signature.GetEncoded();
+
+            this.SetByteArray(tag, value);
         }
     }
 }

@@ -47,6 +47,7 @@ namespace Packaging.Targets.IO
         [DllImport(Kernel32, SetLastError = true)]
         public static extern IntPtr LoadLibrary(string dllToLoad);
 
+#pragma warning disable SA1300 // Element must begin with upper-case letter
         /// <summary>
         /// The function <see cref="dlopen"/> loads the dynamic library file named by the
         /// null-terminated string filename.
@@ -84,5 +85,6 @@ namespace Packaging.Targets.IO
         /// <seealso href="http://linux.die.net/man/3/dlopen"/>
         [DllImport("libdl.so")]
         public static extern IntPtr dlerror();
+#pragma warning restore SA1300 // Element must begin with upper-case letter
     }
 }

@@ -57,7 +57,6 @@ namespace Packaging.Targets.Deb
                         string value = parts[1].Trim();
 
                         values.Add(currentKey, value);
-
                     }
                 }
             }

@@ -20,7 +20,7 @@ namespace Packaging.Targets.IO
         /// </summary>
         public CpioFileCreator()
         {
-            fileAnayzer = new FileAnalyzer();
+            this.fileAnayzer = new FileAnalyzer();
         }
 
         /// <summary>

@@ -71,13 +71,13 @@ namespace Packaging.Targets.Tests.Rpm
                 Assert.Equal(6, files[0].Requires.Count);
                 Assert.Equal("libpthread.so.0(GLIBC_2.2.5)(64bit)", files[0].Requires[0].Name);
                 Assert.Equal(RpmSense.RPMSENSE_FIND_REQUIRES, files[0].Requires[0].Flags);
-                Assert.Equal("", files[0].Requires[0].Version);
+                Assert.Equal(string.Empty, files[0].Requires[0].Version);
                 Assert.Equal(1, files[0].Device);
                 Assert.Equal(RpmFileFlags.None, files[0].Flags);
                 Assert.Equal("root", files[0].GroupName);
                 Assert.Equal(1, files[0].Inode);
-                Assert.Equal("", files[0].Lang);
-                Assert.Equal("", files[0].LinkTo);
+                Assert.Equal(string.Empty, files[0].Lang);
+                Assert.Equal(string.Empty, files[0].LinkTo);
                 Assert.Equal(new byte[] { 0xf5, 0x17, 0x06, 0x2e, 0xe2, 0x60, 0xd9, 0x30, 0x4e, 0x74, 0xef, 0xed, 0xbb, 0x51, 0xf2, 0x53, 0x21, 0xde, 0xd8, 0x71, 0xcb, 0xb7, 0xcc, 0x68, 0x0c, 0xa2, 0x9b, 0x48, 0x0a, 0x11, 0x03, 0xbd }, files[0].MD5Hash);
                 Assert.Equal(LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG, files[0].Mode);
                 Assert.Equal(new DateTimeOffset(2017, 4, 21, 20, 56, 27, TimeSpan.Zero), files[0].ModifiedTime);
@@ -90,7 +90,7 @@ namespace Packaging.Targets.Tests.Rpm
                 var dependencies = metadata.Dependencies.ToArray();
                 Assert.Equal(0x13, dependencies.Length);
                 Assert.Equal(RpmSense.RPMSENSE_INTERP | RpmSense.RPMSENSE_SCRIPT_POST, dependencies[0].Flags);
-                Assert.Equal("", dependencies[0].Version);
+                Assert.Equal(string.Empty, dependencies[0].Version);
                 Assert.Equal("/sbin/ldconfig", dependencies[0].Name);
 
                 var provides = metadata.Provides.ToArray();
@@ -210,7 +210,7 @@ namespace Packaging.Targets.Tests.Rpm
 
                     foreach (var record in originalPackage.Header.Records)
                     {
-                        AssertTagEqual(record.Key, originalPackage, package);
+                        this.AssertTagEqual(record.Key, originalPackage, package);
                     }
                 }
             }

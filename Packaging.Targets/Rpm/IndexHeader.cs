@@ -16,7 +16,7 @@ namespace Packaging.Targets.Rpm
         public IndexType Type;
 
         /// <summary>
-        /// Location in the Store of the data associated with this Index Record. This value should between 0 and the value contained 
+        /// Location in the Store of the data associated with this Index Record. This value should between 0 and the value contained
         /// in <see cref="RpmHeader.Size"/>.
         /// </summary>
         public int Offset;

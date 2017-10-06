@@ -447,7 +447,6 @@
         /// </summary>
         RPMTAG_RHNPLATFORM = 1131,
 
-
         /// <summary>
         /// This tag contains an opaque string whose contents are undefined.
         /// </summary>
@@ -627,6 +626,7 @@
         /// This value is reserved for future use; conforming packages may not use this flag.
         /// </summary>
         RPMFILE_DONOTUSE = 1 << 2,
+
         /// <summary>
         /// The file need not exist on the installed system.
         /// </summary>

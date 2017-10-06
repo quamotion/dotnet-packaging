@@ -10,7 +10,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
 
     <!-- The BouncyCastle dependency is defined as Private for Packaging.Targets, so we need to re-define it here. -->
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.3"/>
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,6 +46,14 @@
     <None Update="Rpm\_key.pub">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <!-- Code analysis -->
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>..\Packaging.Targets\dotnet-packaging.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="..\Packaging.Targets\stylecop.json" />
   </ItemGroup>
 
 </Project>

@@ -28,6 +28,7 @@
         /// The SHA 384 hashing algorithm.
         /// </summary>
         PGPHASHALGO_SHA384 = 9,
+
         /// <summary>
         /// The SHA 512 hashing algorithm.
         /// </summary>

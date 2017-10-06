@@ -23,7 +23,8 @@ namespace Packaging.Targets
         /// A new <typeparamref name="T"/> struct, with the data read
         /// from the stream.
         /// </returns>
-        public static T ReadStruct<T>(this Stream stream) where T : struct
+        public static T ReadStruct<T>(this Stream stream)
+            where T : struct
         {
             if (stream == null)
             {
@@ -106,36 +107,6 @@ namespace Packaging.Targets
             stream.Write(bytes, 0, bytes.Length);
         }
 
-        private static void RespectEndianness<T>(byte[] data)
-        {
-            foreach (var field in typeof(T).GetTypeInfo().DeclaredFields)
-            {
-                int length = 0;
-
-                var type = field.FieldType;
-
-                if (type.GetTypeInfo().IsEnum)
-                {
-                    type = Enum.GetUnderlyingType(type);
-                }
-
-                if (type == typeof(short) || type == typeof(ushort))
-                {
-                    length = 2;
-                }
-                else if (type == typeof(int) || type == typeof(uint))
-                {
-                    length = 4;
-                }
-
-                if (length > 0)
-                {
-                    var offset = Marshal.OffsetOf<T>(field.Name).ToInt32();
-                    Array.Reverse(data, offset, length);
-                }
-            }
-        }
-
         /// <summary>
         /// Writes a <see cref="short"/> to a <see cref="Stream"/> using big-endian encoding.
         /// </summary>
@@ -182,6 +153,36 @@ namespace Packaging.Targets
             var data = BitConverter.GetBytes(value);
             Array.Reverse(data);
             stream.Write(data, 0, data.Length);
+        }
+
+        private static void RespectEndianness<T>(byte[] data)
+        {
+            foreach (var field in typeof(T).GetTypeInfo().DeclaredFields)
+            {
+                int length = 0;
+
+                var type = field.FieldType;
+
+                if (type.GetTypeInfo().IsEnum)
+                {
+                    type = Enum.GetUnderlyingType(type);
+                }
+
+                if (type == typeof(short) || type == typeof(ushort))
+                {
+                    length = 2;
+                }
+                else if (type == typeof(int) || type == typeof(uint))
+                {
+                    length = 4;
+                }
+
+                if (length > 0)
+                {
+                    var offset = Marshal.OffsetOf<T>(field.Name).ToInt32();
+                    Array.Reverse(data, offset, length);
+                }
+            }
         }
     }
 }

@@ -105,7 +105,7 @@ namespace Packaging.Targets.IO
 
             this.Stream.WriteStruct(header);
             this.Stream.Write(nameBytes, 0, nameBytes.Length);
-            this.Stream.WriteByte(0); //Trailing 0
+            this.Stream.WriteByte(0); // Trailing 0
 
             // The pathname is followed by NUL bytes so that the total size of the fixed
             // header plus pathname is a multiple of four.

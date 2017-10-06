@@ -43,40 +43,6 @@ namespace Packaging.Targets.Tests.IO
             }
         }
 
-        ArHeader CloneHeader(ArHeader hdr)
-        {
-            return new ArHeader
-            {
-                EndChar = hdr.EndChar,
-                FileMode = hdr.FileMode,
-                FileName = hdr.FileName,
-                FileSize = hdr.FileSize,
-                GroupId = hdr.GroupId,
-                OwnerId = hdr.OwnerId,
-                LastModified = hdr.LastModified
-            };
-        }
-        
-        void AssertCompareClonedHeader(ArHeader original, ArHeader clone)
-        {
-            var ms = new MemoryStream();
-            ms.WriteStruct(clone);
-            ms.Seek(0, SeekOrigin.Begin);
-            clone = ms.ReadStruct<ArHeader>();
-            foreach (var f in typeof(ArHeader).GetFields(BindingFlags.Instance | BindingFlags.NonPublic |
-                                                          BindingFlags.Public))
-            {
-                var orig = f.GetValue(original);
-                var mod = f.GetValue(clone);
-                if (mod is byte[] modchars)
-                    Assert.True(modchars.SequenceEqual((byte[]) orig), $"Failed check for {f.Name}");
-                else
-                    Assert.True(orig.Equals(mod), $"Failed check for {f.Name}");
-            }
-        }
-        
-
-        
         [Fact]
         public void WriteTest()
         {
@@ -89,11 +55,49 @@ namespace Packaging.Targets.Tests.IO
                 var input = new ArFile(original, true);
                 while (input.Read())
                 {
-                    var header = (ArHeader) input.FileHeader;
-                    var clone = CloneHeader(header);
-                    AssertCompareClonedHeader(header, clone);
-                    using(var data = input.Open())
+                    var header = (ArHeader)input.FileHeader;
+                    var clone = this.CloneHeader(header);
+                    this.AssertCompareClonedHeader(header, clone);
+                    using (var data = input.Open())
+                    {
                         ArFileCreator.WriteEntry(output, clone, data);
+                    }
+                }
+            }
+        }
+
+        private ArHeader CloneHeader(ArHeader hdr)
+        {
+            return new ArHeader
+            {
+                EndChar = hdr.EndChar,
+                FileMode = hdr.FileMode,
+                FileName = hdr.FileName,
+                FileSize = hdr.FileSize,
+                GroupId = hdr.GroupId,
+                OwnerId = hdr.OwnerId,
+                LastModified = hdr.LastModified
+            };
+        }
+
+        private void AssertCompareClonedHeader(ArHeader original, ArHeader clone)
+        {
+            var ms = new MemoryStream();
+            ms.WriteStruct(clone);
+            ms.Seek(0, SeekOrigin.Begin);
+            clone = ms.ReadStruct<ArHeader>();
+            foreach (var f in typeof(ArHeader).GetFields(BindingFlags.Instance | BindingFlags.NonPublic |
+                                                          BindingFlags.Public))
+            {
+                var orig = f.GetValue(original);
+                var mod = f.GetValue(clone);
+                if (mod is byte[] modchars)
+                {
+                    Assert.True(modchars.SequenceEqual((byte[])orig), $"Failed check for {f.Name}");
+                }
+                else
+                {
+                    Assert.True(orig.Equals(mod), $"Failed check for {f.Name}");
                 }
             }
         }

@@ -28,7 +28,7 @@ namespace Packaging.Targets
         {
             this.Log.LogMessage(MessageImportance.Normal, "Creating zip archive '{0}' from folder '{1}'", this.ZipPath, this.PublishDir);
 
-            CreateWindowsTarball();
+            this.CreateWindowsTarball();
 
             this.Log.LogMessage(MessageImportance.Normal, "Created zip archive '{0}' from folder '{1}'", this.ZipPath, this.PublishDir);
             return true;
@@ -39,7 +39,7 @@ namespace Packaging.Targets
             using (var stream = File.Create(this.ZipPath))
             using (var zipFile = ZipFile.Create(stream))
             {
-                AddDirectory(zipFile, this.PublishDir, string.Empty);
+                this.AddDirectory(zipFile, this.PublishDir, string.Empty);
             }
         }
 
@@ -61,7 +61,7 @@ namespace Packaging.Targets
 
             foreach (var child in Directory.GetDirectories(directory))
             {
-                AddDirectory(zipFile, child, Path.Combine(directoryEntryName, Path.GetFileName(child)));
+                this.AddDirectory(zipFile, child, Path.Combine(directoryEntryName, Path.GetFileName(child)));
             }
         }
     }

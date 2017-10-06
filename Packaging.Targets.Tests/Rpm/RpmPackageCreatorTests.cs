@@ -128,10 +128,10 @@ namespace Packaging.Targets.Tests.Rpm
                             continue;
                         }
 
-                        AssertTagOffsetEqual(record.Key, originalPackage, package);
+                        this.AssertTagOffsetEqual(record.Key, originalPackage, package);
                     }
 
-                    AssertTagOffsetEqual(IndexTag.RPMTAG_HEADERIMMUTABLE, originalPackage, package);
+                    this.AssertTagOffsetEqual(IndexTag.RPMTAG_HEADERIMMUTABLE, originalPackage, package);
                 }
             }
         }
@@ -173,12 +173,12 @@ namespace Packaging.Targets.Tests.Rpm
                 creator.CalculateHeaderOffsets(package);
 
                 // Make sure the header is really correct
-
                 using (Stream originalHeaderStream = new SubStream(
                     originalPackage.Stream,
                     originalPackage.HeaderOffset,
                     originalPackage.PayloadOffset - originalPackage.HeaderOffset,
-                    leaveParentOpen: true, readOnly: true))
+                    leaveParentOpen: true,
+                    readOnly: true))
                 using (Stream headerStream = creator.GetHeaderStream(package))
                 {
                     byte[] originalData = new byte[originalHeaderStream.Length];
@@ -223,10 +223,10 @@ namespace Packaging.Targets.Tests.Rpm
                             continue;
                         }
 
-                        AssertTagEqual(record.Key, originalPackage, package);
+                        this.AssertTagEqual(record.Key, originalPackage, package);
                     }
 
-                    AssertTagEqual(SignatureTag.RPMTAG_HEADERSIGNATURES, originalPackage, package);
+                    this.AssertTagEqual(SignatureTag.RPMTAG_HEADERSIGNATURES, originalPackage, package);
                 }
             }
         }

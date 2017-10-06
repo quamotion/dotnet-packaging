@@ -28,12 +28,17 @@ namespace Packaging.Targets.Deb
             {
                 while (archive.Read())
                 {
-                    if(archive.FileName == "debian-binary")
+                    if (archive.FileName == "debian-binary")
+                    {
                         ReadDebianBinary(archive, package);
+                    }
                     else if (archive.FileName == "control.tar.gz")
+                    {
                         ReadControlArchive(archive, package);
+                    }
                 }
             }
+
             return package;
         }
 
@@ -46,11 +51,14 @@ namespace Packaging.Targets.Deb
                     if (archive.FileName.StartsWith("data.tar."))
                     {
                         var ext = Path.GetExtension(archive.FileName);
-                        if(ext == ".gz")
+                        if (ext == ".gz")
+                        {
                             return new GZipDecompressor(archive.Open(), false);
+                        }
+
                         if (ext == ".xz")
                         {
-                            //For some reason it complains about corrupted data when we try to read using smaller chunks
+                            // For some reason it complains about corrupted data when we try to read using smaller chunks
                             var payload = new MemoryStream();
                             using (var xz = new XZInputStream(archive.Open()))
                             {
@@ -59,13 +67,14 @@ namespace Packaging.Targets.Deb
                                 return payload;
                             }
                         }
+
                         throw new InvalidDataException("Don't know how to decompress " + archive.FileName);
                     }
                 }
+
                 throw new InvalidDataException("data.tar.?? not found");
             }
         }
-        
 
         /// <summary>
         /// Reads and parses the <c>debian-binary</c> file in the Debian archive.
@@ -86,7 +95,6 @@ namespace Packaging.Targets.Deb
             }
         }
 
-       
         private static void ReadControlArchive(ArFile archive, DebPackage package)
         {
             package.ControlExtras = new Dictionary<string, DebPackageControlFileData>();
@@ -104,17 +112,19 @@ namespace Packaging.Targets.Deb
                             {
                                 package.ControlFile = ControlFileParser.Read(controlFile);
                             }
+
                             break;
                         case "./md5sums":
                             using (var sums = new StreamReader(tarFile.Open()))
                             {
                                 string line;
-                                while (null != (line = sums.ReadLine()))
+                                while ((line = sums.ReadLine()) != null)
                                 {
-                                    var s = line.Split(new[] {"  "}, 2, StringSplitOptions.None);
+                                    var s = line.Split(new[] { "  " }, 2, StringSplitOptions.None);
                                     package.Md5Sums[s[1]] = s[0];
                                 }
                             }
+
                             break;
                         case "./preinst":
                             package.PreInstallScript = tarFile.ReadAsUtf8String();
@@ -124,11 +134,11 @@ namespace Packaging.Targets.Deb
                             break;
                         case "./prerm":
                             package.PreRemoveScript = tarFile.ReadAsUtf8String();
-                            break;     
+                            break;
                         case "./postrm":
                             package.PostRemoveScript = tarFile.ReadAsUtf8String();
                             break;
-                                
+
                         case "./":
                             tarFile.Skip();
                             break;

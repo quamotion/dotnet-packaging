@@ -52,7 +52,7 @@ namespace Packaging.Targets.IO
 
             this.Align(2);
 
-            if(this.Stream.Position == this.Stream.Length)
+            if (this.Stream.Position == this.Stream.Length)
             {
                 return false;
             }
@@ -65,7 +65,7 @@ namespace Packaging.Targets.IO
             {
                 throw new InvalidDataException("The magic for the file entry is invalid");
             }
-            
+
             this.EntryStream = new SubStream(this.Stream, this.Stream.Position, this.entryHeader.FileSize, leaveParentOpen: true);
 
             return true;

@@ -21,7 +21,7 @@ namespace Packaging.Targets
 
         [Required]
         public string DebTarPath { get; set; }
-        
+
         [Required]
         public string DebTarXzPath { get; set; }
 
@@ -36,10 +36,10 @@ namespace Packaging.Targets
 
         [Required]
         public ITaskItem[] Content { get; set; }
-        
+
         [Required]
         public string Maintainer { get; set; }
-        
+
         [Required]
         public string Description { get; set; }
 
@@ -77,7 +77,86 @@ namespace Packaging.Targets
         /// </summary>
         public string ServiceName { get; set; }
 
-        void EnsureDirectories(List<ArchiveEntry> entries)
+        public override bool Execute()
+        {
+            this.Log.LogMessage(
+                MessageImportance.High,
+                "Creating DEB package '{0}' from folder '{1}'",
+                this.DebPath,
+                this.PublishDir);
+
+            using (var targetStream = File.Open(this.DebPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+            using (var tarStream = File.Open(this.DebTarPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+            {
+                ArchiveBuilder archiveBuilder = new ArchiveBuilder();
+                var archiveEntries = archiveBuilder.FromDirectory(
+                    this.PublishDir,
+                    this.Prefix,
+                    this.Content);
+
+                archiveEntries.AddRange(archiveBuilder.FromLinuxFolders(this.LinuxFolders));
+                this.EnsureDirectories(archiveEntries);
+
+                archiveEntries = archiveEntries
+                    .OrderBy(e => e.TargetPathWithFinalSlash, StringComparer.Ordinal)
+                    .ToList();
+
+                TarFileCreator.FromArchiveEntries(archiveEntries, tarStream);
+                tarStream.Position = 0;
+
+                // Prepare the list of dependencies
+                PackageDependency[] dependencies = Array.Empty<PackageDependency>();
+
+                if (this.DebDependencies != null)
+                {
+                    dependencies = this.DebDependencies.Select(
+                        d => new PackageDependency
+                        {
+                            Name = d.ItemSpec,
+                            Version = d.GetVersion()
+                        }).ToArray();
+                }
+
+                // XZOutputStream class has low quality (doesn't even know it's current position,
+                // needs to be disposed to finish compression, etc),
+                // So we are doing compression in a separate step
+                using (var tarXzStream = File.Open(this.DebTarXzPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+                using (var xzStream = new XZOutputStream(tarXzStream))
+                {
+                    tarStream.CopyTo(xzStream);
+                }
+
+                using (var tarXzStream = File.Open(this.DebTarXzPath, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    DebPackageCreator.BuildDebPackage(
+                        archiveEntries,
+                        tarXzStream,
+                        this.PackageName,
+                        this.Description,
+                        this.Maintainer,
+                        this.Version,
+                        "amd64",
+                        this.CreateUser,
+                        this.UserName,
+                        this.InstallService,
+                        this.ServiceName,
+                        this.Prefix,
+                        dependencies,
+                        null,
+                        targetStream);
+                }
+
+                this.Log.LogMessage(
+                    MessageImportance.High,
+                    "Created DEB package '{0}' from folder '{1}'",
+                    this.DebPath,
+                    this.PublishDir);
+
+                return true;
+            }
+        }
+
+        private void EnsureDirectories(List<ArchiveEntry> entries)
         {
             var dirs = new HashSet<string>(entries.Where(x => x.Mode.HasFlag(LinuxFileMode.S_IFDIR))
                 .Select(d => d.TargetPathWithFinalSlash));
@@ -87,21 +166,33 @@ namespace Packaging.Targets
             string GetDirPath(string path)
             {
                 path = path.TrimEnd('/');
-                if (path == "")
+                if (path == string.Empty)
+                {
                     return "/";
+                }
+
                 if (!path.Contains("/"))
+                {
                     return "/";
+                }
+
                 return path.Substring(0, path.LastIndexOf('/'));
             }
-            
+
             void EnsureDir(string dirPath)
             {
-                if (dirPath == "")
+                if (dirPath == string.Empty)
+                {
                     return;
+                }
+
                 if (!dirs.Contains(dirPath))
                 {
                     if (dirPath != "/")
+                    {
                         EnsureDir(GetDirPath(dirPath));
+                    }
+
                     dirs.Add(dirPath);
                     toAdd.Add(new ArchiveEntry()
                     {
@@ -118,79 +209,12 @@ namespace Packaging.Targets
             }
 
             foreach (var entry in entries)
+            {
                 EnsureDir(GetDirPath(entry.TargetPathWithFinalSlash));
+            }
+
             EnsureDir("/");
             entries.AddRange(toAdd);
-        }
-        
-        
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, "Creating DEB package '{0}' from folder '{1}'", DebPath,
-                PublishDir);
-            using (var targetStream = File.Open(DebPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
-            using (var tarStream = File.Open(DebTarPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
-            {
-                ArchiveBuilder archiveBuilder = new ArchiveBuilder();
-                var archiveEntries = archiveBuilder.FromDirectory(
-                    PublishDir,
-                    Prefix,
-                    Content);
-
-                archiveEntries.AddRange(archiveBuilder.FromLinuxFolders(LinuxFolders));
-                EnsureDirectories(archiveEntries);
-
-                archiveEntries = archiveEntries
-                    .OrderBy(e => e.TargetPathWithFinalSlash, StringComparer.Ordinal)
-                    .ToList();
-               
-
-                TarFileCreator.FromArchiveEntries(archiveEntries, tarStream);
-                tarStream.Position = 0;
-                
-                // Prepare the list of dependencies
-                PackageDependency[] dependencies = Array.Empty<PackageDependency>();
-
-                if (DebDependencies != null)
-                {
-                    dependencies = DebDependencies.Select(
-                        d => new PackageDependency
-                        {
-                            Name = d.ItemSpec,
-                            Version = d.GetVersion()
-                        }).ToArray();
-
-                }
-                
-                // XZOutputStream class has low quality (doesn't even know it's current position, 
-                // needs to be disposed to finish compression, etc),
-                // So we are doing compression in a separate step
-                using (var tarXzStream = File.Open(DebTarXzPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
-                using (var xzStream = new XZOutputStream(tarXzStream))
-                    tarStream.CopyTo(xzStream);
-
-                using (var tarXzStream = File.Open(DebTarXzPath, FileMode.Open, FileAccess.Read, FileShare.None))
-                    DebPackageCreator.BuildDebPackage(
-                        archiveEntries,
-                        tarXzStream,
-                        PackageName,
-                        Description,
-                        Maintainer,
-                        Version,
-                        "amd64",
-                        CreateUser,
-                        UserName,
-                        InstallService,
-                        ServiceName,
-                        Prefix,
-                        dependencies,
-                        null,
-                        targetStream);
-                
-                Log.LogMessage(MessageImportance.High, "Created DEB package '{0}' from folder '{1}'", DebPath,
-                    PublishDir);
-                return true;
-            }
         }
     }
 }

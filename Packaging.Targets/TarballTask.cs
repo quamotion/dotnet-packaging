@@ -29,7 +29,7 @@ namespace Packaging.Targets
         {
             this.Log.LogMessage(MessageImportance.Normal, "Creating tarball '{0}' from folder '{1}'", this.TarballPath, this.PublishDir);
 
-            CreateLinuxTarball();
+            this.CreateLinuxTarball();
 
             this.Log.LogMessage(MessageImportance.Normal, "Created tarball '{0}' from folder '{1}'", this.TarballPath, this.PublishDir);
             return true;

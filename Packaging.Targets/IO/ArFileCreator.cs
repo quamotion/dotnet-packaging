@@ -15,7 +15,7 @@ namespace Packaging.Targets.IO
 
         public static void WriteEntry(Stream output, string name, LinuxFileMode mode, string data)
             => WriteEntry(output, name, mode, new MemoryStream(Encoding.UTF8.GetBytes(data)));
-        
+
         public static void WriteEntry(Stream output, string name, LinuxFileMode mode, Stream data)
         {
             var hdr = new ArHeader
@@ -30,13 +30,15 @@ namespace Packaging.Targets.IO
             };
             WriteEntry(output, hdr, data);
         }
-        
+
         public static void WriteEntry(Stream output, ArHeader header, Stream data)
         {
             output.WriteStruct(header);
             data.CopyTo(output);
             if (output.Position % 2 != 0)
+            {
                 output.WriteByte(0);
+            }
         }
     }
 }

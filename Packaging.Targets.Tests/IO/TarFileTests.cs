@@ -25,6 +25,7 @@ namespace Packaging.Targets.Tests.IO
             {
                 // Skip the debian version
                 arFile.Read();
+
                 // This is the tar file
                 arFile.Read();
 
@@ -51,9 +52,41 @@ namespace Packaging.Targets.Tests.IO
             }
         }
 
-        TarHeader CloneHeader(TarHeader header)
+        [Fact]
+        public void WriteTarFileTest()
         {
+            using (Stream original = File.OpenRead(@"IO/test.tar"))
+            using (Stream expected = File.OpenRead(@"IO/test.tar"))
+            using (Stream actual = new MemoryStream())
+            using (Stream output = new ValidatingCompositeStream(null, actual, expected))
+            {
+                var tar = new TarFile(original, true);
+                while (tar.Read())
+                {
+                    Stream data = new MemoryStream();
+                    if (tar.FileHeader.FileMode == LinuxFileMode.S_IFDIR)
+                    {
+                        tar.Skip();
+                    }
+                    else
+                    {
+                        data = tar.Open();
+                    }
 
+                    var clonedHeader = this.CloneHeader((TarHeader)tar.FileHeader);
+                    this.AssertCompareClonedHeader((TarHeader)tar.FileHeader, clonedHeader);
+                    using (data)
+                    {
+                        TarFileCreator.WriteEntry(output, this.CloneHeader(clonedHeader), data);
+                    }
+                }
+
+                TarFileCreator.WriteTrailer(output);
+            }
+        }
+
+        private TarHeader CloneHeader(TarHeader header)
+        {
             var clone = new TarHeader
             {
                 Checksum = header.Checksum,
@@ -79,15 +112,18 @@ namespace Packaging.Targets.Tests.IO
                 var attr = f.GetCustomAttribute<MarshalAsAttribute>();
                 if (attr?.SizeConst > 0)
                 {
-                    var v = (byte[]) f.GetValue(clone);
+                    var v = (byte[])f.GetValue(clone);
                     if (v.Length > attr.SizeConst)
+                    {
                         throw new Exception("Field " + f.Name + " size exceeded");
+                    }
                 }
             }
+
             return clone;
         }
 
-        void AssertCompareClonedHeader(TarHeader original, TarHeader clone)
+        private void AssertCompareClonedHeader(TarHeader original, TarHeader clone)
         {
             var ms = new MemoryStream();
             ms.WriteStruct(clone);
@@ -99,34 +135,13 @@ namespace Packaging.Targets.Tests.IO
                 var orig = f.GetValue(original);
                 var mod = f.GetValue(clone);
                 if (mod is byte[] modchars)
-                    Assert.True(modchars.SequenceEqual((byte[]) orig), $"Failed check for {f.Name}");
-                else
-                    Assert.True(orig.Equals(mod), $"Failed check for {f.Name}");
-            }
-        }
-        
-        [Fact]
-        public void WriteTarFileTest()
-        {
-            using (Stream original = File.OpenRead(@"IO/test.tar"))
-            using (Stream expected = File.OpenRead(@"IO/test.tar"))
-            using (Stream actual = new MemoryStream())
-            using (Stream output = new ValidatingCompositeStream(null, actual, expected))
-            {
-                var tar = new TarFile(original, true);
-                while (tar.Read())
                 {
-                    Stream data = new MemoryStream();
-                    if (tar.FileHeader.FileMode == LinuxFileMode.S_IFDIR)
-                        tar.Skip();
-                    else
-                        data = tar.Open();
-                    var clonedHeader = CloneHeader((TarHeader) tar.FileHeader);
-                    AssertCompareClonedHeader((TarHeader) tar.FileHeader, clonedHeader);
-                    using (data)
-                        TarFileCreator.WriteEntry(output, CloneHeader(clonedHeader), data);
+                    Assert.True(modchars.SequenceEqual((byte[])orig), $"Failed check for {f.Name}");
                 }
-                TarFileCreator.WriteTrailer(output);
+                else
+                {
+                    Assert.True(orig.Equals(mod), $"Failed check for {f.Name}");
+                }
             }
         }
     }

@@ -72,6 +72,30 @@ namespace Packaging.Targets.IO
         }
 
         /// <summary>
+        /// Gets the <see cref="Stream"/> which underpins this <see cref="ArchiveFile"/>.
+        /// </summary>
+        protected Stream Stream
+        {
+            get
+            {
+                this.EnsureNotDisposed();
+                return this.stream;
+            }
+        }
+
+        public static int PaddingSize(int multiple, int value)
+        {
+            if (value % multiple == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return multiple - value % multiple;
+            }
+        }
+
+        /// <summary>
         /// Returns a <see cref="Stream"/> which represents the content of the current entry in the <see cref="CpioFile"/>.
         /// </summary>
         /// <returns>
@@ -91,49 +115,6 @@ namespace Packaging.Targets.IO
             }
 
             this.disposed = true;
-        }
-
-        /// <summary>
-        /// Gets the <see cref="Stream"/> which underpins this <see cref="ArchiveFile"/>.
-        /// </summary>
-        protected Stream Stream
-        {
-            get
-            {
-                this.EnsureNotDisposed();
-                return this.stream;
-            }
-        }
-
-        /// <summary>
-        /// Throws a <see cref="ObjectDisposedException"/> if <see cref="Dispose"/> has been previously called.
-        /// </summary>
-        protected void EnsureNotDisposed()
-        {
-            if (this.disposed)
-            {
-                throw new ObjectDisposedException(this.GetType().Name);
-            }
-        }
-
-        /// <summary>
-        /// Aligns the current position.
-        /// </summary>
-        /// <param name="alignmentBase">
-        /// The value to which to align.
-        /// </param>
-        protected void Align(int alignmentBase)
-        {
-            var currentIndex =
-                (int) (EntryStream != null ? (EntryStream.Offset + EntryStream.Length) : Stream.Position);
-
-            if (Stream.CanSeek)
-                Stream.Seek(currentIndex + PaddingSize(alignmentBase, currentIndex), SeekOrigin.Begin);
-            else
-            {
-                byte[] buffer = new byte[PaddingSize(alignmentBase, currentIndex)];
-                Stream.Read(buffer, 0, buffer.Length);
-            }
         }
 
         /// <summary>
@@ -158,15 +139,36 @@ namespace Packaging.Targets.IO
             }
         }
 
-        public static int PaddingSize(int multiple, int value)
+        /// <summary>
+        /// Throws a <see cref="ObjectDisposedException"/> if <see cref="Dispose"/> has been previously called.
+        /// </summary>
+        protected void EnsureNotDisposed()
         {
-            if (value % multiple == 0)
+            if (this.disposed)
             {
-                return 0;
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+        }
+
+        /// <summary>
+        /// Aligns the current position.
+        /// </summary>
+        /// <param name="alignmentBase">
+        /// The value to which to align.
+        /// </param>
+        protected void Align(int alignmentBase)
+        {
+            var currentIndex =
+                (int)(this.EntryStream != null ? (this.EntryStream.Offset + this.EntryStream.Length) : this.Stream.Position);
+
+            if (this.Stream.CanSeek)
+            {
+                this.Stream.Seek(currentIndex + PaddingSize(alignmentBase, currentIndex), SeekOrigin.Begin);
             }
             else
             {
-                return multiple - value % multiple;
+                byte[] buffer = new byte[PaddingSize(alignmentBase, currentIndex)];
+                this.Stream.Read(buffer, 0, buffer.Length);
             }
         }
     }

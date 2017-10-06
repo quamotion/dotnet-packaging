@@ -69,6 +69,24 @@ namespace Packaging.Targets.Rpm
         /// <param name="release">
         /// The release version.
         /// </param>
+        /// <param name="createUser">
+        /// <see langword="true"/> to create a user account; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <param name="userName">
+        /// The name of the user account to create.
+        /// </param>
+        /// <param name="installService">
+        /// <see langword="true"/> to install a system service, otherwise, <see langword="false"/>.
+        /// </param>
+        /// <param name="serviceName">
+        /// The name of the system service to create.
+        /// </param>
+        /// <param name="prefix">
+        /// A prefix to use.
+        /// </param>
+        /// <param name="additionalDependencies">
+        /// Additional dependencies to add to the RPM package.
+        /// </param>
         /// <param name="additionalMetadata">
         /// Any additional metadata.
         /// </param>
@@ -142,7 +160,6 @@ namespace Packaging.Targets.Rpm
             metadata.SourceRpm = $"{name}-{version}-{release}.src.rpm";
 
             // Scripts which run before & after installation and removal.
-
             metadata.PreIn = string.Empty;
             metadata.PostIn = string.Empty;
             metadata.PreUn = string.Empty;
@@ -313,7 +330,7 @@ namespace Packaging.Targets.Rpm
                     VerifyFlags = RpmVerifyFlags.RPMVERIFY_ALL,
                     Device = 1,
                     Inode = (int)entry.Inode,
-                    Lang = "",
+                    Lang = string.Empty,
                     Color = this.analyzer.DetermineColor(entry),
                     Class = this.analyzer.DetermineClass(entry),
                     Requires = this.analyzer.DetermineRequires(entry),
@@ -373,7 +390,7 @@ namespace Packaging.Targets.Rpm
             Collection<PackageDependency> ldDependencies = new Collection<PackageDependency>()
             {
                 new PackageDependency("/sbin/ldconfig", RpmSense.RPMSENSE_INTERP | RpmSense.RPMSENSE_SCRIPT_POST, string.Empty),
-                new PackageDependency("/sbin/ldconfig", RpmSense.RPMSENSE_INTERP | RpmSense.RPMSENSE_SCRIPT_POSTUN,string.Empty)
+                new PackageDependency("/sbin/ldconfig", RpmSense.RPMSENSE_INTERP | RpmSense.RPMSENSE_SCRIPT_POSTUN, string.Empty)
             };
 
             var dependencies = metadata.Dependencies.ToList();
@@ -394,7 +411,7 @@ namespace Packaging.Targets.Rpm
             // The rtld(GNU_HASH) indicates that hashes are stored in the .gnu_hash instead of the .hash section
             // in the ELF file, so it is a file-level dependency that bubbles up
             // http://lists.rpm.org/pipermail/rpm-maint/2014-September/003764.html
-            //9:34 PM 10/6/2017
+            // 9:34 PM 10/6/2017
             // To work around it, we remove the rtld(GNU_HASH) dependency on the files, remove it as a dependency,
             // and add it back once we're done.
             //
@@ -420,10 +437,10 @@ namespace Packaging.Targets.Rpm
 
             Collection<PackageDependency> rpmDependencies = new Collection<PackageDependency>()
             {
-                new PackageDependency("rpmlib(CompressedFileNames)",RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "3.0.4-1"),
-                new PackageDependency("rpmlib(FileDigests)",RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "4.6.0-1"),
-                new PackageDependency("rpmlib(PayloadFilesHavePrefix)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB,"4.0-1"),
-                new PackageDependency("rtld(GNU_HASH)",RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
+                new PackageDependency("rpmlib(CompressedFileNames)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "3.0.4-1"),
+                new PackageDependency("rpmlib(FileDigests)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "4.6.0-1"),
+                new PackageDependency("rpmlib(PayloadFilesHavePrefix)", RpmSense.RPMSENSE_LESS | RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_RPMLIB, "4.0-1"),
+                new PackageDependency("rtld(GNU_HASH)", RpmSense.RPMSENSE_FIND_REQUIRES, string.Empty),
             };
 
             // Inject any additional dependencies the user may have specified.
@@ -466,7 +483,7 @@ namespace Packaging.Targets.Rpm
             var metadata = new RpmMetadata(package);
             metadata.ImmutableRegionSize = -1 * Marshal.SizeOf<IndexHeader>() * (package.Header.Records.Count + 1);
 
-            CalculateSectionOffsets(package.Header, k => (int)k);
+            this.CalculateSectionOffsets(package.Header, k => (int)k);
         }
 
         /// <summary>
@@ -478,9 +495,9 @@ namespace Packaging.Targets.Rpm
         public void CalculateSignatureOffsets(RpmPackage package)
         {
             var signature = new RpmSignature(package);
-            signature.ImmutableRegionSize = -1 * Marshal.SizeOf<IndexHeader>() * (package.Signature.Records.Count);
+            signature.ImmutableRegionSize = -1 * Marshal.SizeOf<IndexHeader>() * package.Signature.Records.Count;
 
-            CalculateSectionOffsets(package.Signature, k => (int)k);
+            this.CalculateSectionOffsets(package.Signature, k => (int)k);
         }
 
         /// <summary>
@@ -495,7 +512,7 @@ namespace Packaging.Targets.Rpm
         public MemoryStream GetHeaderStream(RpmPackage package)
         {
             MemoryStream stream = new MemoryStream();
-            WriteHeader(package, stream);
+            this.WriteHeader(package, stream);
             stream.Position = 0;
             return stream;
         }
@@ -526,7 +543,7 @@ namespace Packaging.Targets.Rpm
         public MemoryStream GetSignatureStream(RpmPackage package)
         {
             MemoryStream stream = new MemoryStream();
-            WriteSignature(package, stream);
+            this.WriteSignature(package, stream);
             stream.Position = 0;
             return stream;
         }
@@ -583,7 +600,6 @@ namespace Packaging.Targets.Rpm
             }
 
             // Verify the payload size (header + uncompressed payload)
-
             using (Stream payloadStream = RpmPayloadReader.GetDecompressedPayloadStream(package, compressedPayloadStream))
             {
                 signature.UncompressedPayloadSize = (int)payloadStream.Length;
@@ -632,6 +648,7 @@ namespace Packaging.Targets.Rpm
                         {
                             size += Encoding.UTF8.GetByteCount(value) + 1;
                         }
+
                         break;
 
                     case IndexType.RPM_STRING_TYPE:

@@ -24,7 +24,7 @@ namespace Packaging.Targets
         /// </summary>
         public ArchiveBuilder()
         {
-            fileAnayzer = new FileAnalyzer();
+            this.fileAnayzer = new FileAnalyzer();
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Packaging.Targets
                         entry.Sha256 = hasher.GetHashAndReset();
                     }
 
-                    entry.Type = GetArchiveEntryType(fileHeader);
+                    entry.Type = this.GetArchiveEntryType(fileHeader);
                 }
                 else if (entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
                 {
@@ -185,7 +185,7 @@ namespace Packaging.Targets
         public List<ArchiveEntry> FromDirectory(string directory, string prefix, ITaskItem[] metadata)
         {
             List<ArchiveEntry> value = new List<ArchiveEntry>();
-            AddDirectory(directory, string.Empty, prefix, value, metadata);
+            this.AddDirectory(directory, string.Empty, prefix, value, metadata);
             return value;
         }
 
@@ -213,11 +213,11 @@ namespace Packaging.Targets
             {
                 if (File.Exists(entry))
                 {
-                    AddFile(entry, relativePath + Path.GetFileName(entry), prefix, value, metadata);
+                    this.AddFile(entry, relativePath + Path.GetFileName(entry), prefix, value, metadata);
                 }
                 else
                 {
-                    AddDirectory(entry, relativePath + Path.GetFileName(entry) + "/", prefix + "/" + Path.GetFileName(entry), value, metadata);
+                    this.AddDirectory(entry, relativePath + Path.GetFileName(entry) + "/", prefix + "/" + Path.GetFileName(entry), value, metadata);
                 }
             }
         }
@@ -243,7 +243,7 @@ namespace Packaging.Targets
                 }
 
                 using (var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256))
-                using(var md5hasher = IncrementalHash.CreateHash(HashAlgorithmName.MD5))
+                using (var md5hasher = IncrementalHash.CreateHash(HashAlgorithmName.MD5))
                 {
                     int read;
 
@@ -272,7 +272,7 @@ namespace Packaging.Targets
                 }
 
                 // Only support ELF32 and ELF64 colors; otherwise default to BLACK.
-                ArchiveEntryType entryType = GetArchiveEntryType(fileHeader);
+                ArchiveEntryType entryType = this.GetArchiveEntryType(fileHeader);
 
                 var mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG;
 

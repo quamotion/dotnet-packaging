@@ -1,5 +1,6 @@
 ﻿namespace Packaging.Targets.Rpm
 {
+#pragma warning disable SA1300 // Element must begin with upper-case letter
     /// <summary>
     /// Specifies target instruction set architecture.
     /// </summary>
@@ -60,4 +61,5 @@
         /// </summary>
         RiscV = 0xF3
     }
+#pragma warning restore SA1300 // Element must begin with upper-case letter
 }

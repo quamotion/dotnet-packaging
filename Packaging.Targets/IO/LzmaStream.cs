@@ -56,6 +56,11 @@ namespace Packaging.Targets.IO
     internal struct LzmaStream
     {
         /// <summary>
+        /// Internal state is not visible to applications.
+        /// </summary>
+        public readonly IntPtr InternalState;
+
+        /// <summary>
         /// Pointer to the next input byte.
         /// </summary>
         public IntPtr NextIn;
@@ -93,11 +98,6 @@ namespace Packaging.Targets.IO
         /// the standard malloc() and free().
         /// </remarks>
         public IntPtr Allocator;
-
-        /// <summary>
-        /// Internal state is not visible to applications.
-        /// </summary>
-        public readonly IntPtr InternalState;
 
         /// <summary>
         /// Reserved space to allow possible future extensions without

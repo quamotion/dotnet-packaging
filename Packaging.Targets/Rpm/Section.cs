@@ -12,9 +12,6 @@ namespace Packaging.Targets.Rpm
         }
 
         public Dictionary<K, IndexRecord> Records
-        {
-            get;
-            set;
-        } = new Dictionary<K, IndexRecord>();
+        { get; set; } = new Dictionary<K, IndexRecord>();
     }
 }

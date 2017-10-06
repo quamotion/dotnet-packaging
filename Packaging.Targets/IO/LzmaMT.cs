@@ -2,6 +2,8 @@
 
 namespace Packaging.Targets.IO
 {
+#pragma warning disable SA1307 // Accessible fields must begin with upper-case letter
+#pragma warning disable SA1310 // Field names must not contain underscore
     /// <summary>
     /// Multithreading options
     /// </summary>
@@ -143,4 +145,6 @@ namespace Packaging.Targets.IO
         private readonly IntPtr reserved_ptr3;
         private readonly IntPtr reserved_ptr4;
     }
+#pragma warning restore SA1307 // Accessible fields must begin with upper-case letter
+#pragma warning restore SA1310 // Field names must not contain underscore
 }

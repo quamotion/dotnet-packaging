@@ -177,6 +177,7 @@ namespace Packaging.Targets.IO
                 this.EnsureNotDisposed();
                 return this.position;
             }
+
             set
             {
                 this.EnsureNotDisposed();

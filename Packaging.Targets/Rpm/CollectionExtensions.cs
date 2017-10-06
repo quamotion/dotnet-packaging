@@ -22,7 +22,7 @@ namespace Packaging.Targets.Rpm
         /// </param>
         public static void AddRange<T>(this Collection<T> collection, IEnumerable<T> values)
         {
-            foreach(var v in values)
+            foreach (var v in values)
             {
                 collection.Add(v);
             }
