@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace Packaging.Targets.IO
 {
@@ -12,6 +13,9 @@ namespace Packaging.Targets.IO
             wr.Flush();
         }
 
+        public static void WriteEntry(Stream output, string name, LinuxFileMode mode, string data)
+            => WriteEntry(output, name, mode, new MemoryStream(Encoding.UTF8.GetBytes(data)));
+        
         public static void WriteEntry(Stream output, string name, LinuxFileMode mode, Stream data)
         {
             var hdr = new ArHeader
