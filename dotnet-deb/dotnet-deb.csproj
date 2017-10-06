@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>netcoreapp1.0;netcoreapp2.0</TargetFrameworks>
+    <VersionPrefix>0.1.1</VersionPrefix>
+    <Authors>Frederik Carlier</Authors>
+    <Company>Quamotion</Company>
+    <Copyright>Copyright (c) Frederik Carlier and Contributors</Copyright>
+    <PackageLicenseUrl>https://github.com/qmfrederik/dotnet-packaging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/qmfrederik/dotnet-packaging/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/qmfrederik/dotnet-packaging/</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>dotnet cli packaging deb debian ubuntu mint installer</PackageTags>
+    <Description>Create Debian and Ubuntu installers (.deb files ) of your .NET Core projects straight from the command line.
+
+Once you've installed this package as a .NET CLI tool, run dotnet deb to generate a .deb file which contains the publish output of your .NET Project.
+
+See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet deb.</Description>
+    <Product>Packaging Tools for .NET CLI</Product>
+    <NugetPackageFolder Condition="$(NugetPackageFolder) == ''">$(USERPROFILE)\.nuget\packages</NugetPackageFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(NugetPackageFolder)\microsoft.extensions.commandlineutils\1.1.1\lib\netstandard1.3\Microsoft.Extensions.CommandLineUtils.dll" Link="Microsoft.Extensions.CommandLineUtils.dll">
+      <Pack>true</Pack>
+      <PackagePath>lib\$(TargetFramework)\</PackagePath>
+    </Content>
+
+    <!-- Required in the package root to run the cli tool always with bundled runtime -->
+    <Content Include="../prefercliruntime">
+      <PackagePath>prefercliruntime</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Include="..\dotnet-rpm\PackagingRunner.cs" Link="PackagingRunner.cs" />
+  </ItemGroup>
+</Project>
