@@ -73,11 +73,11 @@ namespace Packaging.Targets.Deb
             
             ArFileCreator.WriteMagic(targetStream);
             ArFileCreator.WriteEntry(targetStream, "debian-binary", ArFileMode, pkg.PackageFormatVersion + "\n");
-            WriteControl(targetStream, pkg);
+            WriteControl(targetStream, pkg, archiveEntries);
             ArFileCreator.WriteEntry(targetStream, "data.tar.xz", ArFileMode, tarXzStream);
         }
 
-        static void WriteControl(Stream targetStream, DebPackage pkg)
+        static void WriteControl(Stream targetStream, DebPackage pkg, List<ArchiveEntry> entries)
         {
             var controlTar = new MemoryStream();
             WriteControlEntry(controlTar, "./");
@@ -97,6 +97,12 @@ namespace Packaging.Targets.Deb
                 WriteControlEntry(controlTar, "./prerm", $"#!/bin/sh\n{pkg.PreRemoveScript}\n");
             if (string.IsNullOrWhiteSpace(pkg.PostRemoveScript))
                 WriteControlEntry(controlTar, "./postrm", $"#!/bin/sh\n{pkg.PostRemoveScript}\n");
+
+            var confFiles = entries
+                .Where(e => e.Mode.HasFlag(LinuxFileMode.S_IFREG) && e.TargetPath.StartsWith("/etc/"))
+                .Select(e => e.TargetPath).ToList();
+            if (confFiles.Any())
+                WriteControlEntry(controlTar, "./conffiles", string.Join("\n", confFiles) + "\n");
             
             TarFileCreator.WriteTrailer(controlTar);
             controlTar.Seek(0, SeekOrigin.Begin);
