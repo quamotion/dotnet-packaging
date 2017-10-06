@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace Packaging.Targets.IO
 {
@@ -100,6 +102,7 @@ namespace Packaging.Targets.IO
         public uint ComputeChecksum()
         {
             var other = this;
+            other.chksum = new byte[8];
             for (var c = 0; c < 8; c++)
                 other.chksum[c] = 32;
             var data = new byte[Marshal.SizeOf<TarHeader>()];
