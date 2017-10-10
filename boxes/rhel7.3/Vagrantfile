@@ -18,6 +18,14 @@ Vagrant.configure("2") do |config|
     wget ftp://195.220.108.108/linux/centos/7.3.1611/os/x86_64/Packages/libicu-50.1.2-15.el7.x86_64.rpm
     yum install -y libicu-50.1.2-15.el7.x86_64.rpm
 
+    wget http://ftp.tu-chemnitz.de/pub/linux/dag/redhat/el7/en/x86_64/rpmforge/RPMS/lzma-devel-4.32.7-1.el7.rf.x86_64.rpm
+    wget http://ftp.tu-chemnitz.de/pub/linux/dag/redhat/el7/en/x86_64/rpmforge/RPMS/lzma-libs-4.32.7-1.el7.rf.x86_64.rpm
+
+    yum install -y lzma-libs-4.32.7-1.el7.rf.x86_64.rpm
+    yum install -y lzma-devel-4.32.7-1.el7.rf.x86_64.rpm
+
+    ln -s /usr/lib64/liblzma.so.5 /usr/lib64/liblzma.so
+
     $HOME/dotnet/dotnet --version
   SHELL
 end

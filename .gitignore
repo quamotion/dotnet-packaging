@@ -4,3 +4,4 @@ obj/
 *.suo
 .vs/
 .idea/
+.vagrant/
