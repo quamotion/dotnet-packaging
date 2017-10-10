@@ -1,0 +1,23 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "iamseth/rhel-7.3"
+  config.vm.box_version = "1.0.0"
+
+  config.vm.provision "shell", inline: <<-SHELL
+    echo "vagrant:vagrant" | chpasswd
+    wget -nv -nc https://download.microsoft.com/download/1/B/4/1B4DE605-8378-47A5-B01B-2C79D6C55519/dotnet-sdk-2.0.0-linux-x64.tar.gz -O dotnet-sdk-2.0.0-linux-x64.tar.gz
+    mkdir -p $HOME/dotnet
+    tar zxf dotnet-sdk-2.0.0-linux-x64.tar.gz -C $HOME/dotnet
+    echo "export PATH=$PATH:$HOME/dotnet" >> ~/.bashrc
+
+    wget ftp://195.220.108.108/linux/centos/7.4.1708/os/x86_64/Packages/libunwind-1.2-2.el7.x86_64.rpm
+    yum install -y libunwind-1.2-2.el7.x86_64.rpm
+
+    wget ftp://195.220.108.108/linux/centos/7.3.1611/os/x86_64/Packages/libicu-50.1.2-15.el7.x86_64.rpm
+    yum install -y libicu-50.1.2-15.el7.x86_64.rpm
+
+    $HOME/dotnet/dotnet --version
+  SHELL
+end
