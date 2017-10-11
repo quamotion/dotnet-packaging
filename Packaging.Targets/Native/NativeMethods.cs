@@ -1,16 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
-namespace Packaging.Targets.IO
+namespace Packaging.Targets.Native
 {
-    internal static class SystemMethods
+    internal static class NativeMethods
     {
-        /// <summary>
-        /// The name of the <c>kernel32</c> library
-        /// </summary>
+        public const int RTLD_NOW = 0x002;
+
         private const string Kernel32 = "kernel32";
+        private const string Libdl = "libdl";
+
+        [DllImport(Kernel32, CharSet = CharSet.Ansi, BestFitMapping = false)]
+        public static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
 
         /// <summary>
         /// Loads the specified module into the address space of the calling process. The specified module may cause other modules to be loaded.
@@ -47,44 +48,10 @@ namespace Packaging.Targets.IO
         [DllImport(Kernel32, SetLastError = true)]
         public static extern IntPtr LoadLibrary(string dllToLoad);
 
-#pragma warning disable SA1300 // Element must begin with upper-case letter
-        /// <summary>
-        /// The function <see cref="dlopen"/> loads the dynamic library file named by the
-        /// null-terminated string filename.
-        /// </summary>
-        /// <param name="filename">
-        /// The path to the file to open.
-        /// </param>
-        /// <param name="flags">
-        /// A value of the <see cref="DlOpenFlags"/> enumeration specifying how the
-        /// dynamic library file is openend.
-        /// </param>
-        /// <returns>
-        /// Returns an opaque "handle" for the dynamic library.
-        /// </returns>
-        /// <remarks>
-        /// This method works on Linux only.
-        /// </remarks>
-        /// <seealso href="http://linux.die.net/man/3/dlopen"/>
-        [DllImport("libdl.so")]
-        public static extern IntPtr dlopen(string filename, DlOpenFlags flags);
+        [DllImport(Libdl)]
+        public static extern IntPtr dlsym(IntPtr handle, string symbol);
 
-        /// <summary>
-        /// The function <see cref="dlerror"/> returns a human readable string describing the most
-        /// recent error that occurred from <see cref="dlopen"/>, or <see cref="dlclose"/> since
-        /// the last call to <see cref="dlerror"/>. It returns <see cref="IntPtr.Zero"/> if no errors
-        /// have occurred since initialization or since it was last called.
-        /// </summary>
-        /// <returns>
-        /// A pointer to a human readable string describing the error, or <see cref="IntPtr.Zero"/>
-        /// if no error occurred.
-        /// </returns>
-        /// <remarks>
-        /// This method works on Linux only.
-        /// </remarks>
-        /// <seealso href="http://linux.die.net/man/3/dlopen"/>
-        [DllImport("libdl.so")]
-        public static extern IntPtr dlerror();
-#pragma warning restore SA1300 // Element must begin with upper-case letter
+        [DllImport(Libdl)]
+        public static extern IntPtr dlopen(string fileName, int flag);
     }
 }

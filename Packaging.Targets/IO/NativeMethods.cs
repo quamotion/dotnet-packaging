@@ -1,8 +1,8 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using FunctionLoader = Packaging.Targets.Native.FunctionLoader;
 
 namespace Packaging.Targets.IO
 {
@@ -14,7 +14,7 @@ namespace Packaging.Targets.IO
     /// </remarks>
     /// <seealso href="http://git.tukaani.org/?p=xz.git;a=blob;f=src/liblzma/api/lzma/index.h;h=dda60ec1c185c5c1f8475122ff35fbcf67f1bb6f;hb=446e4318fa79788e09299d5953b5dd428953d14b"/>
     /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/index.h"/>
-    public class NativeMethods
+    internal static class NativeMethods
     {
         /// <summary>
         /// The name of the lzma library.
@@ -24,45 +24,75 @@ namespace Packaging.Targets.IO
         /// </remarks>
         private const string LibraryName = @"lzma";
 
+        private static lzma_stream_decoder_delegate lzma_stream_decoder_ptr;
+        private static lzma_code_delegate lzma_code_ptr;
+        private static lzma_stream_footer_decode_delegate lzma_stream_footer_decode_ptr;
+        private static lzma_index_uncompressed_size_delegate lzma_index_uncompressed_size_ptr;
+        private static lzma_index_buffer_decode_delegate lzma_index_buffer_decode_ptr;
+        private static lzma_index_end_delegate lzma_index_end_ptr;
+        private static lzma_end_delegate lzma_end_ptr;
+        private static lzma_easy_encoder_delegate lzma_easy_encoder_ptr;
+        private static lzma_stream_encoder_mt_delegate lzma_stream_encoder_mt_ptr;
+        private static lzma_stream_buffer_bound_delegate lzma_stream_buffer_bound_ptr;
+        private static lzma_easy_buffer_encode_delegate lzma_easy_buffer_encode_ptr;
+
         static NativeMethods()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var libraryPath = Path.GetDirectoryName(typeof(NativeMethods).GetTypeInfo().Assembly.Location);
-                var lzmaPath = Path.Combine(libraryPath, "../../runtimes/win7-x64/native/lzma.dll");
-
                 if (RuntimeInformation.OSArchitecture != Architecture.X64)
                 {
                     throw new InvalidOperationException(".NET packaging only supports 64-bit Windows processes");
                 }
-
-                if (File.Exists(lzmaPath))
-                {
-                    IntPtr result = SystemMethods.LoadLibrary(lzmaPath);
-                    if (result == IntPtr.Zero)
-                    {
-                        var lastError = Marshal.GetLastWin32Error();
-                        throw new Win32Exception(lastError, $"Could not load the lzma.dll library at '{lzmaPath}'. The error code was {lastError}");
-                    }
-                }
             }
-            else
+
+            var libraryPath = Path.GetDirectoryName(typeof(NativeMethods).GetTypeInfo().Assembly.Location);
+            var lzmaWindowsPath = Path.GetFullPath(Path.Combine(libraryPath, "../../runtimes/win7-x64/native/lzma.dll"));
+
+            IntPtr library = FunctionLoader.LoadNativeLibrary(
+                new string[] { lzmaWindowsPath, "lzma.dll" }, // lzma.dll is used when running unit tests.
+                new string[] { "liblzma.so.5", "liblzma.so" },
+                new string[] { "liblzma.dylib" });
+
+            if (library == IntPtr.Zero)
             {
-                // Clear any value from dlerror
-                SystemMethods.dlerror();
-
-                // Attempt to load the libraries. If they are not found, throw an error.
-                IntPtr result = SystemMethods.dlopen($"liblzma.so", DlOpenFlags.RTLD_NOW);
-
-                if (result == IntPtr.Zero)
-                {
-                    var lastError = SystemMethods.dlerror();
-                    var errorMessage = Marshal.PtrToStringAnsi(lastError);
-
-                    throw new FileLoadException($"Could not load the lzma.so library. The error code was {errorMessage}. Make sure you've installed liblzma-dev or an equivalent package");
-                }
+                throw new FileLoadException("Could not load liblzma. On Linux, make sure you've installed liblzma-dev or an equivalent package.");
             }
+
+            lzma_stream_decoder_ptr = FunctionLoader.LoadFunctionDelegate<lzma_stream_decoder_delegate>(library, nameof(lzma_stream_decoder));
+            lzma_code_ptr = FunctionLoader.LoadFunctionDelegate<lzma_code_delegate>(library, nameof(lzma_code));
+            lzma_stream_footer_decode_ptr = FunctionLoader.LoadFunctionDelegate<lzma_stream_footer_decode_delegate>(library, nameof(lzma_stream_footer_decode));
+            lzma_index_uncompressed_size_ptr = FunctionLoader.LoadFunctionDelegate<lzma_index_uncompressed_size_delegate>(library, nameof(lzma_index_uncompressed_size));
+            lzma_index_buffer_decode_ptr = FunctionLoader.LoadFunctionDelegate<lzma_index_buffer_decode_delegate>(library, nameof(lzma_index_buffer_decode));
+            lzma_index_end_ptr = FunctionLoader.LoadFunctionDelegate<lzma_index_end_delegate>(library, nameof(lzma_index_end));
+            lzma_end_ptr = FunctionLoader.LoadFunctionDelegate<lzma_end_delegate>(library, nameof(lzma_end));
+            lzma_easy_encoder_ptr = FunctionLoader.LoadFunctionDelegate<lzma_easy_encoder_delegate>(library, nameof(lzma_easy_encoder));
+            lzma_stream_encoder_mt_ptr = FunctionLoader.LoadFunctionDelegate<lzma_stream_encoder_mt_delegate>(library, nameof(lzma_stream_encoder_mt));
+            lzma_stream_buffer_bound_ptr = FunctionLoader.LoadFunctionDelegate<lzma_stream_buffer_bound_delegate>(library, nameof(lzma_stream_buffer_bound));
+            lzma_easy_buffer_encode_ptr = FunctionLoader.LoadFunctionDelegate<lzma_easy_buffer_encode_delegate>(library, nameof(lzma_easy_buffer_encode));
         }
+
+        private delegate LzmaResult lzma_stream_decoder_delegate(ref LzmaStream stream, ulong memLimit, LzmaDecodeFlags flags);
+
+        private unsafe delegate LzmaResult lzma_easy_buffer_encode_delegate(uint preset, LzmaCheck check, void* allocator, byte[] @in, UIntPtr in_size, byte[] @out, UIntPtr* out_pos, UIntPtr out_size);
+
+        private delegate UIntPtr lzma_stream_buffer_bound_delegate(UIntPtr uncompressed_size);
+
+        private delegate LzmaResult lzma_stream_encoder_mt_delegate(ref LzmaStream stream, ref LzmaMT mt);
+
+        private delegate LzmaResult lzma_easy_encoder_delegate(ref LzmaStream stream, uint preset, LzmaCheck check);
+
+        private delegate void lzma_end_delegate(ref LzmaStream stream);
+
+        private delegate void lzma_index_end_delegate(IntPtr i, IntPtr allocator);
+
+        private delegate uint lzma_index_buffer_decode_delegate(ref IntPtr i, ref ulong memLimit, IntPtr allocator, byte[] indexBuffer, ref uint inPosition, ulong inSize);
+
+        private delegate ulong lzma_index_uncompressed_size_delegate(IntPtr i);
+
+        private delegate LzmaResult lzma_stream_footer_decode_delegate(ref LzmaStreamFlags options, byte[] inp);
+
+        private delegate LzmaResult lzma_code_delegate(ref LzmaStream stream, LzmaAction action);
 
         /// <summary>
         /// Initialize .xz Stream decoder
@@ -86,8 +116,7 @@ namespace Packaging.Targets.IO
         /// <see cref="LzmaResult.ProgError"/>.
         /// </returns>
         /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/container.h"/>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern LzmaResult lzma_stream_decoder(ref LzmaStream stream, ulong memLimit, LzmaDecodeFlags flags);
+        public static LzmaResult lzma_stream_decoder(ref LzmaStream stream, ulong memLimit, LzmaDecodeFlags flags) => lzma_stream_decoder_ptr(ref stream, memLimit, flags);
 
         /// <summary>
         /// Encode or decode data
@@ -114,9 +143,7 @@ namespace Packaging.Targets.IO
         /// out what <paramref name="action"/> values are supported by the coder.
         /// </para>
         /// </remarks>
-        /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/base.h"/>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern LzmaResult lzma_code(ref LzmaStream stream, LzmaAction action);
+        public static LzmaResult lzma_code(ref LzmaStream stream, LzmaAction action) => lzma_code_ptr(ref stream, action);
 
         /// <summary>
         /// Decode Stream Footer
@@ -143,15 +170,13 @@ namespace Packaging.Targets.IO
         /// uses <see cref="LzmaResult.DataError"/> in this situation.
         /// </remarks>
         /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/stream_flags.h"/>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern LzmaResult lzma_stream_footer_decode(ref LzmaStreamFlags options, byte[] inp);
+        public static LzmaResult lzma_stream_footer_decode(ref LzmaStreamFlags options, byte[] inp) => lzma_stream_footer_decode_ptr(ref options, inp);
 
         /// <summary>
         /// Get the uncompressed size of the file
         /// </summary>
         /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/index.h"/>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern ulong lzma_index_uncompressed_size(IntPtr i);
+        public static ulong lzma_index_uncompressed_size(IntPtr i) => lzma_index_uncompressed_size_ptr(i);
 
         /// <summary>
         /// Single-call .xz Index decoder
@@ -184,8 +209,8 @@ namespace Packaging.Targets.IO
         /// <see cref="LzmaResult.ProgError"/>.
         /// </returns>
         /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/index.h"/>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern uint lzma_index_buffer_decode(ref IntPtr i, ref ulong memLimit, IntPtr allocator, byte[] indexBuffer, ref uint inPosition, ulong inSize);
+        public static uint lzma_index_buffer_decode(ref IntPtr i, ref ulong memLimit, IntPtr allocator, byte[] indexBuffer, ref uint inPosition, ulong inSize)
+            => lzma_index_buffer_decode_ptr(ref i, ref memLimit, allocator, indexBuffer, ref inPosition, inSize);
 
         /// <summary>
         /// Deallocate lzma_index
@@ -200,8 +225,7 @@ namespace Packaging.Targets.IO
         /// If <paramref name="i"/> is <see cref="IntPtr.Zero"/>, this does nothing.
         /// </remarks>
         /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/index.h"/>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void lzma_index_end(IntPtr i, IntPtr allocator);
+        public static void lzma_index_end(IntPtr i, IntPtr allocator) => lzma_index_end_ptr(i, allocator);
 
         /// <summary>
         /// Free memory allocated for the coder data structures
@@ -217,8 +241,7 @@ namespace Packaging.Targets.IO
         /// application knows what it is doing.
         /// </remarks>
         /// <seealso href="https://github.com/nobled/xz/blob/master/src/liblzma/api/lzma/base.h"/>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void lzma_end(ref LzmaStream stream);
+        public static void lzma_end(ref LzmaStream stream) => lzma_end_ptr(ref stream);
 
         /// <summary>
         /// <para>
@@ -258,8 +281,7 @@ namespace Packaging.Targets.IO
         /// - LZMA_PROG_ERROR: One or more of the parameters have values that will never be valid. For example, strm == NULL.
         /// </para>
         /// </returns>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern LzmaResult lzma_easy_encoder(ref LzmaStream stream, uint preset, LzmaCheck check);
+        public static LzmaResult lzma_easy_encoder(ref LzmaStream stream, uint preset, LzmaCheck check) => lzma_easy_encoder_ptr(ref stream, preset, check);
 
         /// <summary>
         /// <para>
@@ -284,8 +306,7 @@ namespace Packaging.Targets.IO
         /// <returns>
         /// A <see cref="LzmaResult"/> value which indicates success or failure.
         /// </returns>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern LzmaResult lzma_stream_encoder_mt(ref LzmaStream stream, ref LzmaMT mt);
+        public static LzmaResult lzma_stream_encoder_mt(ref LzmaStream stream, ref LzmaMT mt) => lzma_stream_encoder_mt_ptr(ref stream, ref mt);
 
         /// <summary>
         /// <para>
@@ -310,8 +331,7 @@ namespace Packaging.Targets.IO
         /// <remarks>
         /// The limit calculated by this function applies only to single-call encoding. Multi-call encoding may (and probably will) have larger maximum expansion when encoding uncompressible data. Currently there is no function to calculate the maximum expansion of multi-call encoding.
         /// </remarks>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern UIntPtr lzma_stream_buffer_bound(UIntPtr uncompressed_size);
+        public static UIntPtr lzma_stream_buffer_bound(UIntPtr uncompressed_size) => lzma_stream_buffer_bound_ptr(uncompressed_size);
 
         /// <summary>
         /// Single-call .xz Stream encoding using a preset number.
@@ -363,7 +383,7 @@ namespace Packaging.Targets.IO
         /// <remarks>
         /// The maximum required output buffer size can be calculated with lzma_stream_buffer_bound()
         /// </remarks>
-        [DllImport(LibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        internal static unsafe extern LzmaResult lzma_easy_buffer_encode(uint preset, LzmaCheck check, void* allocator, byte[] @in, UIntPtr in_size, byte[] @out, UIntPtr* out_pos, UIntPtr out_size);
+        public static unsafe LzmaResult lzma_easy_buffer_encode(uint preset, LzmaCheck check, void* allocator, byte[] @in, UIntPtr in_size, byte[] @out, UIntPtr* out_pos, UIntPtr out_size)
+            => lzma_easy_buffer_encode_ptr(preset, check, allocator, @in, in_size, @out, out_pos, out_size);
     }
 }
