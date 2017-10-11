@@ -6,18 +6,20 @@
 
   <Target Name="CreatePackageProperties" DependsOnTargets="Publish">
     <PropertyGroup>
+
+      <!-- Use the Version as the PackageVersion, but default to 1.0.0 if an Version has not been set
+           and allow the user to override this. -->
+      <PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' != ''">$(Version)</PackageVersion>
+      <PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' == ''">1.0.0</PackageVersion>
+      
       <PackagePrefix Condition="'$(PackagePrefix)' == ''">$(TargetName)</PackagePrefix>
-      <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(AssemblyFileVersion).$(RuntimeIdentifier)</PackageName>
+      <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(PackageVersion).$(RuntimeIdentifier)</PackageName>
       <IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
       <PackagePath Condition="'$(PackagePath)' == ''">$(TargetDir)$(PackageName)</PackagePath>
       <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
       <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
       <PackageMaintainer Condition="'$(PackageMaintainer)' == ''">Anonymous &lt;noreply@example.com&gt;</PackageMaintainer>
       <PackageDescription Condition="'$(PackageDescription)' == ''">$(PackageName)</PackageDescription>
-                         
-      <!-- Use the AssemblyFileVersion as the PackageVersion, but default to 1.0.0.0 if an AssemblyFileVersion has not been set. -->
-      <PackageVersion Condition="'$(AssemblyFileVersion)' != ''">$(AssemblyFileVersion)</PackageVersion>
-      <PackageVersion Condition="'$(AssemblyFileVersion)' == ''">1.0.0.0</PackageVersion>
     </PropertyGroup>
   </Target>
 
