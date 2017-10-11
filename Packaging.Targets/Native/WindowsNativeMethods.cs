@@ -3,12 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace Packaging.Targets.Native
 {
-    internal static class NativeMethods
+    internal static class WindowsNativeMethods
     {
-        public const int RTLD_NOW = 0x002;
-
         private const string Kernel32 = "kernel32";
-        private const string Libdl = "libdl";
 
         [DllImport(Kernel32, CharSet = CharSet.Ansi, BestFitMapping = false)]
         public static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
@@ -47,11 +44,5 @@ namespace Packaging.Targets.Native
         /// <seealso href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms684175(v=vs.85).aspx"/>
         [DllImport(Kernel32, SetLastError = true)]
         public static extern IntPtr LoadLibrary(string dllToLoad);
-
-        [DllImport(Libdl)]
-        public static extern IntPtr dlsym(IntPtr handle, string symbol);
-
-        [DllImport(Libdl)]
-        public static extern IntPtr dlopen(string fileName, int flag);
     }
 }
