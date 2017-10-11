@@ -32,7 +32,7 @@ namespace Packaging.Targets.Native
             {
                 foreach (var name in linuxNames)
                 {
-                    lib = NativeMethods.dlopen(name, NativeMethods.RTLD_NOW);
+                    lib = LinuxNativeMethods.dlopen(name, LinuxNativeMethods.RTLD_NOW);
 
                     if (lib != IntPtr.Zero)
                     {
@@ -44,7 +44,7 @@ namespace Packaging.Targets.Native
             {
                 foreach (var name in osxNames)
                 {
-                    lib = NativeMethods.dlopen(name, NativeMethods.RTLD_NOW);
+                    lib = MacNativeMethods.dlopen(name, MacNativeMethods.RTLD_NOW);
 
                     if (lib != IntPtr.Zero)
                     {
@@ -56,7 +56,7 @@ namespace Packaging.Targets.Native
             {
                 foreach (var name in windowsNames)
                 {
-                    lib = NativeMethods.LoadLibrary(name);
+                    lib = WindowsNativeMethods.LoadLibrary(name);
 
                     if (lib != IntPtr.Zero)
                     {
@@ -109,15 +109,15 @@ namespace Packaging.Targets.Native
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return NativeMethods.dlsym(nativeLibraryHandle, functionName);
+                return LinuxNativeMethods.dlsym(nativeLibraryHandle, functionName);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                return NativeMethods.dlsym(nativeLibraryHandle, functionName);
+                return MacNativeMethods.dlsym(nativeLibraryHandle, functionName);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return NativeMethods.GetProcAddress(nativeLibraryHandle, functionName);
+                return WindowsNativeMethods.GetProcAddress(nativeLibraryHandle, functionName);
             }
             else
             {
