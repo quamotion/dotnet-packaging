@@ -113,6 +113,101 @@ namespace Packaging.Targets.Rpm
             PgpPrivateKey privateKey,
             Stream targetStream)
         {
+            this.CreatePackage(
+                archiveEntries,
+                payloadStream,
+                name,
+                version,
+                arch,
+                release,
+                createUser,
+                userName,
+                installService,
+                serviceName,
+                prefix,
+                additionalDependencies,
+                additionalMetadata,
+                new PackageSigner(privateKey),
+                targetStream);
+        }
+
+        /// <summary>
+        /// Creates a RPM Package.
+        /// </summary>
+        /// <param name="archiveEntries">
+        /// The archive entries which make up the RPM package.
+        /// </param>
+        /// <param name="payloadStream">
+        /// A <see cref="Stream"/> which contains the CPIO archive for the RPM package.
+        /// </param>
+        /// <param name="name">
+        /// The name of the package.
+        /// </param>
+        /// <param name="version">
+        /// The version of the software.
+        /// </param>
+        /// <param name="arch">
+        /// The architecture targetted by the package.
+        /// </param>
+        /// <param name="release">
+        /// The release version.
+        /// </param>
+        /// <param name="createUser">
+        /// <see langword="true"/> to create a user account; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <param name="userName">
+        /// The name of the user account to create.
+        /// </param>
+        /// <param name="installService">
+        /// <see langword="true"/> to install a system service, otherwise, <see langword="false"/>.
+        /// </param>
+        /// <param name="serviceName">
+        /// The name of the system service to create.
+        /// </param>
+        /// <param name="prefix">
+        /// A prefix to use.
+        /// </param>
+        /// <param name="additionalDependencies">
+        /// Additional dependencies to add to the RPM package.
+        /// </param>
+        /// <param name="additionalMetadata">
+        /// Any additional metadata.
+        /// </param>
+        /// <param name="signer">
+        /// The signer to use when signing the package.
+        /// </param>
+        /// <param name="targetStream">
+        /// The <see cref="Stream"/> to which to write the package.
+        /// </param>
+        /// <param name="includeVersionInName">
+        /// <see langword="true"/> to include the version number and release number
+        /// in the <see cref="RpmLead.Name"/>; <see langword="false"/> to only
+        /// use the package name.
+        /// </param>
+        /// <param name="payloadIsCompressed">
+        /// <see langword="true"/> if <paramref name="payloadStream"/> is already
+        /// compressed. In this case, the <paramref name="payloadStream"/> will be
+        /// copied "as is" to the resulting RPM package.
+        /// </param>
+        public void CreatePackage(
+            List<ArchiveEntry> archiveEntries,
+            Stream payloadStream,
+            string name,
+            string version,
+            string arch,
+            string release,
+            bool createUser,
+            string userName,
+            bool installService,
+            string serviceName,
+            string prefix,
+            IEnumerable<PackageDependency> additionalDependencies,
+            Action<RpmMetadata> additionalMetadata,
+            IPackageSigner signer,
+            Stream targetStream,
+            bool includeVersionInName = false,
+            bool payloadIsCompressed = false)
+        {
             // This routine goes roughly like:
             // 1. Calculate all the metadata, including a signature,
             //    but use an empty compressed payload to calculate
@@ -160,34 +255,34 @@ namespace Packaging.Targets.Rpm
             metadata.SourceRpm = $"{name}-{version}-{release}.src.rpm";
 
             // Scripts which run before & after installation and removal.
-            metadata.PreIn = string.Empty;
-            metadata.PostIn = string.Empty;
-            metadata.PreUn = string.Empty;
-            metadata.PostUn = string.Empty;
+            var preIn = string.Empty;
+            var postIn = string.Empty;
+            var preUn = string.Empty;
+            var postUn = string.Empty;
 
             if (createUser)
             {
                 // Add the user and group, under which the service runs.
                 // These users are never removed because UIDs are re-used on Linux.
-                metadata.PreIn += $"/usr/sbin/groupadd -r {userName} 2>/dev/null || :\n" +
+                preIn += $"/usr/sbin/groupadd -r {userName} 2>/dev/null || :\n" +
                     $"/usr/sbin/useradd -g {userName} -s /sbin/nologin -r -d {prefix} {userName} 2>/dev/null || :\n";
             }
 
             if (installService)
             {
                 // Install and activate the service.
-                metadata.PostIn +=
+                postIn +=
                     $"if [ $1 -eq 1 ] ; then \n" +
                     $"    systemctl enable --now {serviceName}.service >/dev/null 2>&1 || : \n" +
                     $"fi\n";
 
-                metadata.PreUn +=
+                preUn +=
                     $"if [ $1 -eq 0 ] ; then \n" +
                     $"    # Package removal, not upgrade \n" +
                     $"    systemctl --no-reload disable --now {serviceName}.service > /dev/null 2>&1 || : \n" +
                     $"fi\n";
 
-                metadata.PostUn +=
+                postUn +=
                     $"if [ $1 -ge 1 ] ; then \n" +
                     $"    # Package upgrade, not uninstall \n" +
                     $"    systemctl try-restart {serviceName}.service >/dev/null 2>&1 || : \n" +
@@ -197,14 +292,32 @@ namespace Packaging.Targets.Rpm
             // Remove all directories marked as such (these are usually directories which contain temporary files)
             foreach (var entryToRemove in archiveEntries.Where(e => e.RemoveOnUninstall))
             {
-                metadata.PreUn += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
+                preUn += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
             }
 
-            // All these actions are shell scripts.
-            metadata.PreInProg = "/bin/sh";
-            metadata.PostInProg = "/bin/sh";
-            metadata.PreUnProg = "/bin/sh";
-            metadata.PostUnProg = "/bin/sh";
+            if (!string.IsNullOrEmpty(preIn))
+            {
+                metadata.PreInProg = "/bin/sh";
+                metadata.PreIn = preIn;
+            }
+
+            if (!string.IsNullOrEmpty(postIn))
+            {
+                metadata.PostInProg = "/bin/sh";
+                metadata.PostIn = postIn;
+            }
+
+            if (!string.IsNullOrEmpty(preUn))
+            {
+                metadata.PreUnProg = "/bin/sh";
+                metadata.PreUn = preUn;
+            }
+
+            if (!string.IsNullOrEmpty(postUn))
+            {
+                metadata.PostUnProg = "/bin/sh";
+                metadata.PostUn = postUn;
+            }
 
             // Not providing these (or setting empty values) would cause rpmlint errors
             metadata.Description = $"{name} version {version}-{release}";
@@ -236,15 +349,16 @@ namespace Packaging.Targets.Rpm
                     dummyPayloadCompressor.Write(new byte[] { 0 }, 0, 1);
                 }
 
-                this.CalculateSignature(package, privateKey, dummyCompressedPayload);
+                this.CalculateSignature(package, signer, dummyCompressedPayload);
             }
 
             this.CalculateSignatureOffsets(package);
 
             // Write out all the data - includes the lead
             byte[] nameBytes = new byte[66];
+            var nameInLead = includeVersionInName ? $"{name}-{version}-{release}" : name;
 
-            Encoding.UTF8.GetBytes(name, 0, name.Length, nameBytes, 0);
+            Encoding.UTF8.GetBytes(nameInLead, 0, nameInLead.Length, nameBytes, 0);
 
             var lead = new RpmLead()
             {
@@ -270,10 +384,19 @@ namespace Packaging.Targets.Rpm
             // Write out the compressed payload
             int compressedPayloadOffset = (int)targetStream.Position;
 
-            using (XZOutputStream compressor = new XZOutputStream(targetStream, 1, XZOutputStream.DefaultPreset, leaveOpen: true))
+            // The user can choose to pass an already-comrpessed
+            // payload. In this case, no need to re-compress.
+            if (payloadIsCompressed)
             {
-                payloadStream.Position = 0;
-                payloadStream.CopyTo(compressor);
+                payloadStream.CopyTo(targetStream);
+            }
+            else
+            {
+                using (XZOutputStream compressor = new XZOutputStream(targetStream, 1, XZOutputStream.DefaultPreset, leaveOpen: true))
+                {
+                    payloadStream.Position = 0;
+                    payloadStream.CopyTo(compressor);
+                }
             }
 
             using (SubStream compressedPayloadStream = new SubStream(
@@ -283,7 +406,7 @@ namespace Packaging.Targets.Rpm
                 leaveParentOpen: true,
                 readOnly: true))
             {
-                this.CalculateSignature(package, privateKey, compressedPayloadStream);
+                this.CalculateSignature(package, signer, compressedPayloadStream);
                 this.CalculateSignatureOffsets(package);
             }
 
@@ -569,12 +692,29 @@ namespace Packaging.Targets.Rpm
         /// The package for whcih to calculate the signature.
         /// </param>
         /// <param name="privateKey">
-        /// The private key to use.
+        /// The private key to use when signing packages.
         /// </param>
         /// <param name="compressedPayloadStream">
         /// The compressed payload.
         /// </param>
         public void CalculateSignature(RpmPackage package, PgpPrivateKey privateKey, Stream compressedPayloadStream)
+        {
+            this.CalculateSignature(package, new PackageSigner(privateKey), compressedPayloadStream);
+        }
+
+        /// <summary>
+        /// Calculates the signature for this package.
+        /// </summary>
+        /// <param name="package">
+        /// The package for whcih to calculate the signature.
+        /// </param>
+        /// <param name="signer">
+        /// The signer to use.
+        /// </param>
+        /// <param name="compressedPayloadStream">
+        /// The compressed payload.
+        /// </param>
+        public void CalculateSignature(RpmPackage package, IPackageSigner signer, Stream compressedPayloadStream)
         {
             RpmSignature signature = new RpmSignature(package);
 
@@ -590,10 +730,10 @@ namespace Packaging.Targets.Rpm
                 // Verify the PGP signatures
                 // 3 for the header
                 headerStream.Position = 0;
-                signature.HeaderPgpSignature = PgpSigner.Sign(privateKey, headerStream);
+                signature.HeaderPgpSignature = signer.Sign(headerStream);
 
                 headerAndPayloadStream.Position = 0;
-                signature.HeaderAndPayloadPgpSignature = PgpSigner.Sign(privateKey, headerAndPayloadStream);
+                signature.HeaderAndPayloadPgpSignature = signer.Sign(headerAndPayloadStream);
 
                 // Verify the signature size (header + compressed payload)
                 signature.HeaderAndPayloadSize = (int)headerAndPayloadStream.Length;
