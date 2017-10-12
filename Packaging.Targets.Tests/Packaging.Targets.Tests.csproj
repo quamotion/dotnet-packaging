@@ -37,6 +37,12 @@
     <None Update="Rpm\libplist-2.0.1.151-1.1.x86_64.rpm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Rpm\RpmSigTag_Pgp.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Rpm\RpmSigTag_Rsa.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Rpm\tomcat-8.0.44-1.fc27.noarch.rpm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
