@@ -89,17 +89,25 @@ namespace Packaging.Targets.Native
         /// <returns>
         /// A new delegate which points to the native function.
         /// </returns>
-        public static T LoadFunctionDelegate<T>(IntPtr nativeLibraryHandle, string functionName)
+        public static T LoadFunctionDelegate<T>(IntPtr nativeLibraryHandle, string functionName, bool throwOnError = true)
+            where T : class
         {
             IntPtr ptr = LoadFunctionPointer(nativeLibraryHandle, functionName);
 
             if (ptr == IntPtr.Zero)
             {
+                if (throwOnError)
+                {
 #if NETSTANDARD2_0
-                throw new EntryPointNotFoundException($"Could not find the entrypoint for {functionName}");
+                    throw new EntryPointNotFoundException($"Could not find the entrypoint for {functionName}");
 #else
-                throw new Exception($"Could not find the entrypoint for {functionName}");
+                    throw new Exception($"Could not find the entrypoint for {functionName}");
 #endif
+                }
+                else
+                {
+                    return null;
+                }
             }
 
             return Marshal.GetDelegateForFunctionPointer<T>(ptr);
