@@ -99,6 +99,13 @@ namespace Packaging.Targets.Rpm
             {
                 return new List<SignatureTag>()
                 {
+                    SignatureTag.RPMTAG_HEADERSIGNATURES,
+                    SignatureTag.RPMSIGTAG_RSA,
+                    SignatureTag.RPMSIGTAG_SHA1,
+                    SignatureTag.RPMSIGTAG_SIZE,
+                    SignatureTag.RPMSIGTAG_PGP,
+                    SignatureTag.RPMSIGTAG_MD5,
+                    SignatureTag.RPMSIGTAG_PAYLOADSIZE
                 };
             }
         }
