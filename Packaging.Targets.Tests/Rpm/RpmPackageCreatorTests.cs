@@ -1,4 +1,5 @@
-﻿using Packaging.Targets.IO;
+﻿using Org.BouncyCastle.Bcpg.OpenPgp;
+using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -289,6 +290,94 @@ namespace Packaging.Targets.Tests.Rpm
                 var signature = new RpmSignature(package);
 
                 Assert.True(signature.Verify(publicKey));
+            }
+        }
+
+        /// <summary>
+        /// Tests the <see cref="RpmPackageCreator.CreatePackage(Stream, string, string, string, string, Action{RpmMetadata}, PgpPrivateKey, Stream)"/>
+        /// method. Mocks the signature and performs binary comparison of the results.
+        /// </summary>
+        [Fact]
+        public void CreatePackageBinaryTest()
+        {
+            var pgpSignatureData = File.ReadAllBytes("Rpm/RpmSigTag_Pgp.bin");
+            var rsaSignatureData = File.ReadAllBytes("Rpm/RpmSigTag_Rsa.bin");
+
+            var signer = new DummySigner();
+            signer.Add("D72D1E8A9326431472A1E39E1B7916AD07CCC31B", rsaSignatureData);
+            signer.Add("A0A33779FBBED565A15FA85BAFBD1473E00F1257", pgpSignatureData);
+            signer.Add("5E24172F773FEB67FC0BF4831BB4E8A75B4554EF", pgpSignatureData);
+
+            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (var targetStream = File.Open(@"RpmPackageCreatorTests_CreateBinaryTest.rpm", FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+            {
+                var originalPackage = RpmPackageReader.Read(stream);
+                List<ArchiveEntry> archive = null;
+
+                using (var decompressedPayloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
+                using (CpioFile cpio = new CpioFile(decompressedPayloadStream, leaveOpen: false))
+                {
+                    ArchiveBuilder builder = new ArchiveBuilder();
+                    archive = builder.FromCpio(cpio);
+                }
+
+                using (var compressedPayloadStream = RpmPayloadReader.GetCompressedPayloadStream(originalPackage))
+                {
+                    RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
+                    creator.CreatePackage(
+                        archive,
+                        compressedPayloadStream,
+                        "libplist",
+                        "2.0.1.151",
+                        "x86_64",
+                        "1.1",
+                        false,
+                        null,
+                        false,
+                        null,
+                        null,
+                        null,
+                        (metadata) => PlistMetadata.ApplyDefaultMetadata(metadata),
+                        signer,
+                        targetStream,
+                        includeVersionInName: true,
+                        payloadIsCompressed: true);
+                }
+            }
+
+            using (var originalStream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (var targetStream = File.Open(@"RpmPackageCreatorTests_CreateBinaryTest.rpm", FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                var originalPackage = RpmPackageReader.Read(originalStream);
+                var package = RpmPackageReader.Read(targetStream);
+
+                RpmDumper.Dump(originalPackage, "RpmPackageCreatorTests_CreateBinaryTest_original.txt");
+                RpmDumper.Dump(package, "RpmPackageCreatorTests_CreateBinaryTest_reconstructed.txt");
+
+                var metadata = new RpmMetadata(package);
+                var signature = new RpmSignature(package);
+
+                foreach (var record in originalPackage.Signature.Records)
+                {
+                    this.AssertTagEqual(record.Key, originalPackage, package);
+                }
+
+                originalStream.Position = 0;
+                targetStream.Position = 0;
+
+                int index = 0;
+                byte[] originalBuffer = new byte[1024];
+                byte[] targetBuffer = new byte[1024];
+
+                while (originalStream.Position < originalStream.Length)
+                {
+                    originalStream.Read(originalBuffer, 0, originalBuffer.Length);
+                    targetStream.Read(targetBuffer, 0, targetBuffer.Length);
+
+                    Assert.Equal(originalBuffer, targetBuffer);
+
+                    index += originalBuffer.Length;
+                }
             }
         }
 
