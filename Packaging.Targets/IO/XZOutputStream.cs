@@ -67,7 +67,7 @@ namespace Packaging.Targets.IO
             this.leaveOpen = leaveOpen;
 
             LzmaResult ret;
-            if (threads == 1)
+            if (threads == 1 || !NativeMethods.SupportsMultiThreading)
             {
                 ret = NativeMethods.lzma_easy_encoder(ref this.lzmaStream, preset, LzmaCheck.Crc64);
             }

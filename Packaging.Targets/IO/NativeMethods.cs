@@ -67,7 +67,7 @@ namespace Packaging.Targets.IO
             lzma_index_end_ptr = FunctionLoader.LoadFunctionDelegate<lzma_index_end_delegate>(library, nameof(lzma_index_end));
             lzma_end_ptr = FunctionLoader.LoadFunctionDelegate<lzma_end_delegate>(library, nameof(lzma_end));
             lzma_easy_encoder_ptr = FunctionLoader.LoadFunctionDelegate<lzma_easy_encoder_delegate>(library, nameof(lzma_easy_encoder));
-            lzma_stream_encoder_mt_ptr = FunctionLoader.LoadFunctionDelegate<lzma_stream_encoder_mt_delegate>(library, nameof(lzma_stream_encoder_mt));
+            lzma_stream_encoder_mt_ptr = FunctionLoader.LoadFunctionDelegate<lzma_stream_encoder_mt_delegate>(library, nameof(lzma_stream_encoder_mt), throwOnError: false);
             lzma_stream_buffer_bound_ptr = FunctionLoader.LoadFunctionDelegate<lzma_stream_buffer_bound_delegate>(library, nameof(lzma_stream_buffer_bound));
             lzma_easy_buffer_encode_ptr = FunctionLoader.LoadFunctionDelegate<lzma_easy_buffer_encode_delegate>(library, nameof(lzma_easy_buffer_encode));
         }
@@ -93,6 +93,14 @@ namespace Packaging.Targets.IO
         private delegate LzmaResult lzma_stream_footer_decode_delegate(ref LzmaStreamFlags options, byte[] inp);
 
         private delegate LzmaResult lzma_code_delegate(ref LzmaStream stream, LzmaAction action);
+
+        /// <summary>
+        /// Gets a value indicating whether the underlying native library supports multithreading.
+        /// </summary>
+        public static bool SupportsMultiThreading
+        {
+            get { return lzma_stream_encoder_mt_ptr != null; }
+        }
 
         /// <summary>
         /// Initialize .xz Stream decoder
@@ -306,7 +314,17 @@ namespace Packaging.Targets.IO
         /// <returns>
         /// A <see cref="LzmaResult"/> value which indicates success or failure.
         /// </returns>
-        public static LzmaResult lzma_stream_encoder_mt(ref LzmaStream stream, ref LzmaMT mt) => lzma_stream_encoder_mt_ptr(ref stream, ref mt);
+        public static LzmaResult lzma_stream_encoder_mt(ref LzmaStream stream, ref LzmaMT mt)
+        {
+            if (SupportsMultiThreading)
+            {
+                return lzma_stream_encoder_mt_ptr(ref stream, ref mt);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException("lzma_stream_encoder_mt is not supported on this platform. Check SupportsMultiThreading to see whether you can use this functionality.");
+            }
+        }
 
         /// <summary>
         /// <para>
