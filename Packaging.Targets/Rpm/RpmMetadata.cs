@@ -936,19 +936,7 @@ namespace Packaging.Targets.Rpm
         {
             if (!this.Package.Header.Records.ContainsKey(tag))
             {
-                this.Package.Header.Records.Add(
-                    tag,
-                    new IndexRecord()
-                    {
-                        Header = new IndexHeader()
-                        {
-                            Count = 0,
-                            Offset = -1,
-                            Tag = (uint)tag,
-                            Type = type
-                        },
-                        Value = default(T)
-                    });
+                return default(T);
             }
 
             var record = this.Package.Header.Records[tag];
@@ -968,27 +956,39 @@ namespace Packaging.Targets.Rpm
                 throw new ArgumentNullException(nameof(value));
             }
 
-            var collection = new Collection<T>(value);
-
-            IndexRecord record = new IndexRecord()
+            // We won't accept empty arrays; rather, we remove the key alltogether.
+            // This brings compatibility with newer versions of RPM
+            if (value.Length > 0)
             {
-                Header = new IndexHeader()
+                var collection = new Collection<T>(value);
+
+                IndexRecord record = new IndexRecord()
                 {
-                    Count = collection.Count,
-                    Offset = 0,
-                    Tag = (uint)tag,
-                    Type = type
-                },
-                Value = collection
-            };
+                    Header = new IndexHeader()
+                    {
+                        Count = collection.Count,
+                        Offset = 0,
+                        Tag = (uint)tag,
+                        Type = type
+                    },
+                    Value = collection
+                };
 
-            if (!this.Package.Header.Records.ContainsKey(tag))
-            {
-                this.Package.Header.Records.Add(tag, record);
+                if (!this.Package.Header.Records.ContainsKey(tag))
+                {
+                    this.Package.Header.Records.Add(tag, record);
+                }
+                else
+                {
+                    this.Package.Header.Records[tag] = record;
+                }
             }
             else
             {
-                this.Package.Header.Records[tag] = record;
+                if (this.Package.Header.Records.ContainsKey(tag))
+                {
+                    this.Package.Header.Records.Remove(tag);
+                }
             }
         }
 
