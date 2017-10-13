@@ -22,3 +22,11 @@ test_script:
   - cmd: dotnet vstest bin\Debug\netcoreapp2.0\Packaging.Targets.Tests.dll /logger:trx;LogFileName=testresults.trx
   - ps: '& (Join-Path $env:APPVEYOR_BUILD_FOLDER "appveyor-testresults.ps1")'
   - cmd: cd ..
+
+deploy:
+  provider: NuGet
+  on:
+    branch: master
+  api_key:
+    secure: PWTSvjALUGYuMrcnQX7RZxDW/M8WtIXfihQUek4xMjN2bQj73gudiusqIOVUEwdo
+  skip_symbols: true
