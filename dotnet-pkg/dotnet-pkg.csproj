@@ -10,12 +10,12 @@
     <PackageProjectUrl>https://github.com/qmfrederik/dotnet-packaging/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/qmfrederik/dotnet-packaging/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>dotnet cli packaging deb debian ubuntu mint installer</PackageTags>
-    <Description>Create Debian and Ubuntu installers (.deb files ) of your .NET Core projects straight from the command line.
+    <PackageTags>dotnet cli packaging pkg macOS installer</PackageTags>
+    <Description>Create macOS installers (.pkg files ) of your .NET Core projects straight from the command line.
 
-Once you've installed this package as a .NET CLI tool, run dotnet deb to generate a .deb file which contains the publish output of your .NET Project.
+Once you've installed this package as a .NET CLI tool, run dotnet pkg to generate a .pkg file which contains the publish output of your .NET Project.
 
-See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet deb.</Description>
+See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet pkg.</Description>
     <Product>Packaging Tools for .NET CLI</Product>
     <NugetPackageFolder Condition="$(NugetPackageFolder) == ''">$(USERPROFILE)\.nuget\packages</NugetPackageFolder>
   </PropertyGroup>
