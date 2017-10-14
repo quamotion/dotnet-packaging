@@ -31,6 +31,9 @@
     <None Update="IO\test.tar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Pkg\Sample.pkg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Rpm\dotnet_test-1.0-0.noarch.rpm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
