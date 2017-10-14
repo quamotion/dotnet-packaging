@@ -45,6 +45,9 @@ namespace Packaging.Targets.Pkg
                 select new FileEntry(file);
         }
 
+        /// <summary>
+        /// Gets the number of child entries.
+        /// </summary>
         public IEnumerable<FileEntry> Entries
         {
             get;
@@ -59,6 +62,9 @@ namespace Packaging.Targets.Pkg
             get { return (int)this.element.Attribute("id"); }
         }
 
+        /// <summary>
+        /// Gets the <see cref="FinderCreateTime"/> for this entry.
+        /// </summary>
         public FinderCreateTime FinderCreateTime
         {
             get
@@ -72,51 +78,81 @@ namespace Packaging.Targets.Pkg
             }
         }
 
+        /// <summary>
+        /// Gets the time at which the entry was created.
+        /// </summary>
         public DateTime CreateTime
         {
             get { return (DateTime)this.element.Element("ctime"); }
         }
 
+        /// <summary>
+        /// Gets the time at which the entry was last modified.
+        /// </summary>
         public DateTime ModifiedTime
         {
             get { return (DateTime)this.element.Element("mtime"); }
         }
 
+        /// <summary>
+        /// Gets the time at which the entry was archived.
+        /// </summary>
         public DateTime ArchivedTime
         {
             get { return (DateTime)this.element.Element("atime"); }
         }
 
+        /// <summary>
+        /// Gets the name of the group owning the entry.
+        /// </summary>
         public string Group
         {
             get { return (string)this.element.Element("group"); }
         }
 
+        /// <summary>
+        /// Gets the ID of the group owning the entry.
+        /// </summary>
         public int GroupId
         {
             get { return (int)this.element.Element("gid"); }
         }
 
+        /// <summary>
+        /// Gets the name of the user owning the entry.
+        /// </summary>
         public string User
         {
             get { return (string)this.element.Element("user"); }
         }
 
+        /// <summary>
+        /// Gets the ID of the user owning the entry.
+        /// </summary>
         public int UserId
         {
             get { return (int)this.element.Element("uid"); }
         }
 
+        /// <summary>
+        /// Gets the file mode of the entry.
+        /// </summary>
         public int Mode
         {
             get { return (int)this.element.Element("mode"); }
         }
 
+        /// <summary>
+        /// Gets the device number of the entry.
+        /// </summary>
         public int DeviceNumber
         {
             get { return (int)this.element.Element("deviceno"); }
         }
 
+        /// <summary>
+        /// Gets the inode number of the entry.
+        /// </summary>
         public int Inode
         {
             get { return (int)this.element.Element("inode"); }

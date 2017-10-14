@@ -31,6 +31,9 @@
     <None Update="IO\test.tar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Pkg\Bom">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Pkg\Sample.pkg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

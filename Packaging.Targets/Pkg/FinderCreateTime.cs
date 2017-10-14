@@ -7,6 +7,12 @@ namespace Packaging.Targets.Pkg
     {
         private readonly XElement element;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FinderCreateTime"/> class.
+        /// </summary>
+        /// <param name="element">
+        /// The underlying <see cref="XElement"/>.
+        /// </param>
         public FinderCreateTime(XElement element)
         {
             if (element == null)
@@ -17,6 +23,9 @@ namespace Packaging.Targets.Pkg
             this.element = element;
         }
 
+        /// <summary>
+        /// Gets the number of nano seconds since the reference time.
+        /// </summary>
         public long NanoSeconds
         {
             get
@@ -25,6 +34,9 @@ namespace Packaging.Targets.Pkg
             }
         }
 
+        /// <summary>
+        /// Gets the reference time.
+        /// </summary>
         public DateTime Time
         {
             get
