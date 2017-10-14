@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Packaging.Targets.IO;
+using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -23,7 +25,7 @@ namespace Packaging.Targets
         /// A new <typeparamref name="T"/> struct, with the data read
         /// from the stream.
         /// </returns>
-        public static T ReadStruct<T>(this Stream stream)
+        public static unsafe T ReadStruct<T>(this Stream stream)
             where T : struct
         {
             if (stream == null)
@@ -56,16 +58,9 @@ namespace Packaging.Targets
             // Convert from network byte order (big endian) to little endian.
             RespectEndianness<T>(data);
 
-            var pinnedData = GCHandle.Alloc(data, GCHandleType.Pinned);
-
-            try
+            fixed (byte* ptr = data)
             {
-                var ptr = pinnedData.AddrOfPinnedObject();
-                return Marshal.PtrToStructure<T>(ptr);
-            }
-            finally
-            {
-                pinnedData.Free();
+                return Marshal.PtrToStructure<T>((IntPtr)ptr);
             }
         }
 
@@ -157,8 +152,19 @@ namespace Packaging.Targets
 
         private static void RespectEndianness<T>(byte[] data)
         {
+            if (!IsLittleEndian<T>())
+            {
+                return;
+            }
+
             foreach (var field in typeof(T).GetTypeInfo().DeclaredFields)
             {
+                if (field.IsLiteral)
+                {
+                    // Consts do not participate in marshaling.
+                    continue;
+                }
+
                 int length = 0;
 
                 var type = field.FieldType;
@@ -176,6 +182,10 @@ namespace Packaging.Targets
                 {
                     length = 4;
                 }
+                else if (type == typeof(long) || type == typeof(ulong))
+                {
+                    length = 8;
+                }
 
                 if (length > 0)
                 {
@@ -183,6 +193,21 @@ namespace Packaging.Targets
                     Array.Reverse(data, offset, length);
                 }
             }
+        }
+
+        private static bool IsLittleEndian<T>()
+        {
+            // Default to little endian
+            var isLittleEndian = true;
+            var typeInfo = typeof(T).GetTypeInfo();
+
+            if (typeInfo.IsDefined(typeof(EndianAttribute), true))
+            {
+                var endianAttribute = (EndianAttribute)typeInfo.GetCustomAttributes(typeof(EndianAttribute), true).Single();
+                isLittleEndian = endianAttribute.IsLittleEndian;
+            }
+
+            return isLittleEndian;
         }
     }
 }
