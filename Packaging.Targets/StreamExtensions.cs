@@ -150,6 +150,21 @@ namespace Packaging.Targets
             stream.Write(data, 0, data.Length);
         }
 
+        public static int ReadInt32(this Stream stream)
+        {
+            byte[] data = new byte[4];
+            stream.Read(data, 0, 4);
+            return BitConverter.ToInt32(data, 0);
+        }
+
+        public static int ReadInt32BE(this Stream stream)
+        {
+            byte[] data = new byte[4];
+            stream.Read(data, 0, 4);
+            Array.Reverse(data);
+            return BitConverter.ToInt32(data, 0);
+        }
+
         private static void RespectEndianness<T>(byte[] data)
         {
             if (!IsLittleEndian<T>())
