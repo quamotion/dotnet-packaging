@@ -118,7 +118,7 @@ namespace Packaging.Targets.Deb
 
             if (string.IsNullOrWhiteSpace(pkg.PostInstallScript))
             {
-                WriteControlEntry(controlTar, "./preinst", $"#!/bin/sh\n{pkg.PostInstallScript}\n", execMode);
+                WriteControlEntry(controlTar, "./postinst", $"#!/bin/sh\n{pkg.PostInstallScript}\n", execMode);
             }
 
             if (string.IsNullOrWhiteSpace(pkg.PreRemoveScript))
