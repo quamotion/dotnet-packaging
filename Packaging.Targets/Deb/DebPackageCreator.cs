@@ -26,7 +26,7 @@ namespace Packaging.Targets.Deb
             bool installService,
             string serviceName,
             string prefix,
-            IEnumerable<PackageDependency> additionalDependencies,
+            IEnumerable<string> additionalDependencies,
             Action<DebPackage> additionalMetadata,
             Stream targetStream)
         {

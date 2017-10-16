@@ -112,28 +112,18 @@ namespace Packaging.Targets
                 tarStream.Position = 0;
 
                 // Prepare the list of dependencies
-                List<PackageDependency> dependencies = new List<PackageDependency>();
+                List<string> dependencies = new List<string>();
 
                 if (this.DebDependencies != null)
                 {
-                    var debDependencies = this.DebDependencies.Select(
-                        d => new PackageDependency
-                        {
-                            Name = d.ItemSpec,
-                            Version = d.GetVersion()
-                        }).ToArray();
+                    var debDependencies = this.DebDependencies.Select(d => d.ItemSpec).ToArray();
 
                     dependencies.AddRange(debDependencies);
                 }
 
                 if (this.DebDotNetDependencies != null)
                 {
-                    var debDotNetDependencies = this.DebDotNetDependencies.Select(
-                        d => new PackageDependency
-                        {
-                            Name = d.ItemSpec,
-                            Version = d.GetVersion()
-                        }).ToArray();
+                    var debDotNetDependencies = this.DebDotNetDependencies.Select(d => d.ItemSpec).ToArray();
 
                     dependencies.AddRange(debDotNetDependencies);
                 }

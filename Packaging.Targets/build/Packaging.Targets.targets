@@ -71,12 +71,12 @@
       <DebDotNetDependencies Include="libgcc1"/>
       <DebDotNetDependencies Include="libgssapi-krb5-2"/>
       <DebDotNetDependencies Include="liblttng-ust0"/>
-      <DebDotNetDependencies Include="libssl1.0.0 | libssl1.0.2"/>
+      <DebDotNetDependencies Include="libssl0.9.8 | libssl1.0.0 | libssl1.0.1 | libssl1.0.2"/>
       <DebDotNetDependencies Include="libstdc++6"/>
       <DebDotNetDependencies Include="libunwind8"/>
       <DebDotNetDependencies Include="libuuid1"/>
       <DebDotNetDependencies Include="zlib1g"/>
-      <DebDotNetDependencies Include="libicu52 | libicu53 | libicu54 | libicu55 | libicu56"/>
+      <DebDotNetDependencies Include="libicu52 | libicu53 | libicu54 | libicu55 | libicu56 | libicu57 | libicu58 | libicu59"/>
     </ItemGroup>
     
     <DebTask PublishDir="$(PublishDir)" 
