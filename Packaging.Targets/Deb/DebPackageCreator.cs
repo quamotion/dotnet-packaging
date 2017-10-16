@@ -26,6 +26,9 @@ namespace Packaging.Targets.Deb
             bool installService,
             string serviceName,
             string prefix,
+            string section,
+            string priority,
+            string homepage,
             IEnumerable<string> additionalDependencies,
             Action<DebPackage> additionalMetadata,
             Stream targetStream)
@@ -43,9 +46,25 @@ namespace Packaging.Targets.Deb
                     ["Version"] = version,
                     ["Architecture"] = arch,
                     ["Maintainer"] = maintainer,
-                    ["Description"] = description
+                    ["Description"] = description,
+                    ["Install-Size"] = (archiveEntries.Sum(e => e.FileSize) / 1024).ToString()
                 }
             };
+
+            if (!string.IsNullOrEmpty(section))
+            {
+                pkg.ControlFile["Section"] = section;
+            }
+
+            if (!string.IsNullOrEmpty(priority))
+            {
+                pkg.ControlFile["Priority"] = priority;
+            }
+
+            if (!string.IsNullOrEmpty(homepage))
+            {
+                pkg.ControlFile["Homepage"] = homepage;
+            }
 
             if (createUser)
             {

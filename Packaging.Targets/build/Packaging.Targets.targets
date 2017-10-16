@@ -61,6 +61,9 @@
       <PackageName>$(PackagePrefix)</PackageName>
       <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
       <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName >
+      <DebSection Condition="'$(Section)' == ''">misc</DebSection>
+      <DebPriority Condition="'$(DebPriority)' == ''">extra</DebPriority>
+      <DebHomepage Condition="'$(DebHomepage)' == ''">$(PackageProjectUrl)</DebHomepage>
     </PropertyGroup>
     
     <!-- Dependency list from https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/jessie/amd64/Dockerfile 
@@ -95,7 +98,10 @@
              Description="$(PackageDescription)"
              UserName="$(UserName)"
              InstallService="$(InstallService)"
-             ServiceName="$(ServiceName)"/>
+             ServiceName="$(ServiceName)"
+             Section="$(DebSection)"
+             Priority="$(DebPriority)"
+             Homepage="$(DebHomepage)"/>
   </Target>
 
   <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">
