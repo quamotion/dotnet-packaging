@@ -69,11 +69,8 @@ namespace Packaging.Targets.Deb
                 pkg.PostRemoveScript += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
             }
 
-            // Dependency list from https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/jessie/amd64/Dockerfile
-            string libicu = string.Join(" | ", Enumerable.Range(40, 60).Select(n => "libicu" + n));
-            string deps = "libc6, libcurl3, libgcc1, libgssapi-krb5-2, liblttng-ust0, libssl1.0.0, libstdc++6, libunwind8, libuuid1, zlib1g, " +
-                libicu;
-            
+            string deps = string.Empty;
+
             if (additionalDependencies != null)
             {
                 foreach (var dependency in additionalDependencies)

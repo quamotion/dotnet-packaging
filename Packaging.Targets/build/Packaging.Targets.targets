@@ -62,7 +62,23 @@
       <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
       <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName >
     </PropertyGroup>
-
+    
+    <!-- Dependency list from https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/jessie/amd64/Dockerfile 
+         and https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/stretch/amd64/Dockerfile -->
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == ''">
+      <DebDotNetDependencies Include="libc6"/>
+      <DebDotNetDependencies Include="libcurl3"/>
+      <DebDotNetDependencies Include="libgcc1"/>
+      <DebDotNetDependencies Include="libgssapi-krb5-2"/>
+      <DebDotNetDependencies Include="liblttng-ust0"/>
+      <DebDotNetDependencies Include="libssl1.0.0 | libssl1.0.2"/>
+      <DebDotNetDependencies Include="libstdc++6"/>
+      <DebDotNetDependencies Include="libunwind8"/>
+      <DebDotNetDependencies Include="libuuid1"/>
+      <DebDotNetDependencies Include="zlib1g"/>
+      <DebDotNetDependencies Include="libicu52 | libicu53 | libicu54 | libicu55 | libicu56"/>
+    </ItemGroup>
+    
     <DebTask PublishDir="$(PublishDir)" 
              DebPath="$(DebPath)"
              DebTarPath="$(DebTarPath)"
@@ -73,6 +89,7 @@
              Content="@(Content)"
              LinuxFolders="@(LinuxFolder)"
              DebDependencies="@(DebDependency)"
+             DebDotNetDependencies="@(DebDotNetDependencies)"
              CreateUser="$(CreateUser)"
              Maintainer="$(PackageMaintainer)"
              Description="$(PackageDescription)"

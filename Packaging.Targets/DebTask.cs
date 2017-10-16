@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -50,8 +51,14 @@ namespace Packaging.Targets
         public ITaskItem[] LinuxFolders { get; set; }
 
         /// <summary>
-        /// Gets or sets a list of RPM packages on which this RPM
-        /// package dpeends.
+        /// Gets or sets a list of Debian packages on which the version of .NET
+        /// Core embedded in this package depends.
+        /// </summary>
+        public ITaskItem[] DebDotNetDependencies { get; set; }
+
+        /// <summary>
+        /// Gets or sets a list of Debian packages on which this Debian
+        /// package depends.
         /// </summary>
         public ITaskItem[] DebDependencies { get; set; }
 
@@ -105,16 +112,30 @@ namespace Packaging.Targets
                 tarStream.Position = 0;
 
                 // Prepare the list of dependencies
-                PackageDependency[] dependencies = Array.Empty<PackageDependency>();
+                List<PackageDependency> dependencies = new List<PackageDependency>();
 
                 if (this.DebDependencies != null)
                 {
-                    dependencies = this.DebDependencies.Select(
+                    var debDependencies = this.DebDependencies.Select(
                         d => new PackageDependency
                         {
                             Name = d.ItemSpec,
                             Version = d.GetVersion()
                         }).ToArray();
+
+                    dependencies.AddRange(debDependencies);
+                }
+
+                if (this.DebDotNetDependencies != null)
+                {
+                    var debDotNetDependencies = this.DebDotNetDependencies.Select(
+                        d => new PackageDependency
+                        {
+                            Name = d.ItemSpec,
+                            Version = d.GetVersion()
+                        }).ToArray();
+
+                    dependencies.AddRange(debDotNetDependencies);
                 }
 
                 // XZOutputStream class has low quality (doesn't even know it's current position,
