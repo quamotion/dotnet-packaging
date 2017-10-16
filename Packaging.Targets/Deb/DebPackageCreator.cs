@@ -108,22 +108,22 @@ namespace Packaging.Targets.Deb
             var execMode = LinuxFileMode.S_IRUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IXUSR |
                            LinuxFileMode.S_IRGRP | LinuxFileMode.S_IROTH;
 
-            if (string.IsNullOrWhiteSpace(pkg.PreInstallScript))
+            if (!string.IsNullOrWhiteSpace(pkg.PreInstallScript))
             {
                 WriteControlEntry(controlTar, "./preinst", $"#!/bin/sh\n{pkg.PreInstallScript}\n", execMode);
             }
 
-            if (string.IsNullOrWhiteSpace(pkg.PostInstallScript))
+            if (!string.IsNullOrWhiteSpace(pkg.PostInstallScript))
             {
                 WriteControlEntry(controlTar, "./postinst", $"#!/bin/sh\n{pkg.PostInstallScript}\n", execMode);
             }
 
-            if (string.IsNullOrWhiteSpace(pkg.PreRemoveScript))
+            if (!string.IsNullOrWhiteSpace(pkg.PreRemoveScript))
             {
                 WriteControlEntry(controlTar, "./prerm", $"#!/bin/sh\n{pkg.PreRemoveScript}\n", execMode);
             }
 
-            if (string.IsNullOrWhiteSpace(pkg.PostRemoveScript))
+            if (!string.IsNullOrWhiteSpace(pkg.PostRemoveScript))
             {
                 WriteControlEntry(controlTar, "./postrm", $"#!/bin/sh\n{pkg.PostRemoveScript}\n", execMode);
             }
