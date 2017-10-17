@@ -80,7 +80,7 @@ namespace Packaging.Targets.Deb
         }
 
         private static void WriteControl(Stream targetStream, DebPackage pkg, List<ArchiveEntry> entries)
-        {costrution dependenc
+        {
             var controlTar = new MemoryStream();
             WriteControlEntry(controlTar, "./");
             WriteControlEntry(
