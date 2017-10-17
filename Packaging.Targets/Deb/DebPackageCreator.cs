@@ -69,17 +69,7 @@ namespace Packaging.Targets.Deb
                 pkg.PostRemoveScript += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
             }
 
-            string deps = string.Empty;
-
-            if (additionalDependencies != null)
-            {
-                foreach (var dependency in additionalDependencies)
-                {
-                    deps += ", " + dependency;
-                }
-            }
-
-            pkg.ControlFile["Depends"] = deps;
+            pkg.ControlFile["Depends"] = string.Join(",", additionalDependencies);
 
             additionalMetadata?.Invoke(pkg);
 
@@ -90,7 +80,7 @@ namespace Packaging.Targets.Deb
         }
 
         private static void WriteControl(Stream targetStream, DebPackage pkg, List<ArchiveEntry> entries)
-        {
+        {costrution dependenc
             var controlTar = new MemoryStream();
             WriteControlEntry(controlTar, "./");
             WriteControlEntry(
