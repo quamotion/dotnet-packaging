@@ -44,6 +44,12 @@ namespace Packaging.Targets
         [Required]
         public string Description { get; set; }
 
+        public string Section { get; set; }
+
+        public string Homepage { get; set; }
+
+        public string Priority { get; set; }
+
         /// <summary>
         /// Gets or sets a list of empty folders to create when
         /// installing this package.
@@ -152,6 +158,9 @@ namespace Packaging.Targets
                         this.InstallService,
                         this.ServiceName,
                         this.Prefix,
+                        this.Section,
+                        this.Priority,
+                        this.Homepage,
                         dependencies,
                         null,
                         targetStream);
