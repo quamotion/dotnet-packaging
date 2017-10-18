@@ -88,17 +88,7 @@ namespace Packaging.Targets.Deb
                 pkg.PostRemoveScript += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
             }
 
-            string deps = string.Empty;
-
-            if (additionalDependencies != null)
-            {
-                foreach (var dependency in additionalDependencies)
-                {
-                    deps += ", " + dependency;
-                }
-            }
-
-            pkg.ControlFile["Depends"] = deps;
+            pkg.ControlFile["Depends"] = string.Join(",", additionalDependencies);
 
             additionalMetadata?.Invoke(pkg);
 
