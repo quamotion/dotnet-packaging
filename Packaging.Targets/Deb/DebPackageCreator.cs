@@ -47,7 +47,7 @@ namespace Packaging.Targets.Deb
                     ["Architecture"] = arch,
                     ["Maintainer"] = maintainer,
                     ["Description"] = description,
-                    ["Install-Size"] = (archiveEntries.Sum(e => e.FileSize) / 1024).ToString()
+                    ["Installed-Size"] = (archiveEntries.Sum(e => e.FileSize) / 1024).ToString()
                 }
             };
 
