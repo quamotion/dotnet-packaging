@@ -80,6 +80,20 @@ namespace Packaging.Targets
         }
 
         /// <summary>
+        /// Gets the file mode of the file in the Linux filesystem.
+        /// </summary>
+        /// <param name="item">
+        /// The item for which to get the file mode.
+        /// </param>
+        /// <returns>
+        /// The file mode of the file on the Linux file system.
+        /// </returns>
+        public static string GetLinuxFileMode(this ITaskItem item)
+        {
+            return TryGetValue(item, "LinuxFileMode");
+        }
+
+        /// <summary>
         /// Gets the Linux owner of the file.
         /// </summary>
         /// <param name="item">

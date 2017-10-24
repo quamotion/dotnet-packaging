@@ -210,7 +210,7 @@ namespace Packaging.Targets
                 Inode = this.inode++
             };
 
-            // The other in which the files appear in the cpio archive is important; if this is not respected xzdio
+            // The order in which the files appear in the cpio archive is important; if this is not respected xzdio
             // will report errors like:
             // error: unpacking of archive failed on file ./usr/share/quamotion/mscorlib.dll: cpio: Archive file not in header
             var entries = Directory.GetFileSystemEntries(directory).OrderBy(e => Directory.Exists(e) ? e + "/" : e, StringComparer.Ordinal).ToArray();
@@ -310,6 +310,22 @@ namespace Packaging.Targets
 
                     linkTo = Encoding.UTF8.GetString(fileHeader, 0, stringEnd + 1);
                     hash = new byte[] { };
+                }
+
+                // If the user has chosen to override the file node, respect that
+                var overridenFileMode = fileMetadata?.GetLinuxFileMode();
+
+                if (overridenFileMode != null)
+                {
+                    // We expect the user to specify the file mode in its octal representation.
+                    try
+                    {
+                        mode = (LinuxFileMode)Convert.ToUInt32(overridenFileMode, 8);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Could not parse the file mode '{overridenFileMode}' for file '{name}'. Make sure to set the LinuxFileMode attriubute to an octal representation of a Unix file mode.");
+                    }
                 }
 
                 ArchiveEntry archiveEntry = new ArchiveEntry()
