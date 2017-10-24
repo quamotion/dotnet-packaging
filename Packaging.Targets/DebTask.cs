@@ -90,6 +90,42 @@ namespace Packaging.Targets
         /// </summary>
         public string ServiceName { get; set; }
 
+        /// <summary>
+        /// Gets or sets an additional pre-installation script to execute.
+        /// </summary>
+        /// <remarks>
+        /// This variable must contain the script itself, and not a path to a file
+        /// which contains the script.
+        /// </remarks>
+        public string PreInstallScript { get; set; }
+
+        /// <summary>
+        /// Gets or sets an additional post-installation script to execute.
+        /// </summary>
+        /// <remarks>
+        /// This variable must contain the script itself, and not a path to a file
+        /// which contains the script.
+        /// </remarks>
+        public string PostInstallScript { get; set; }
+
+        /// <summary>
+        /// Gets or sets an additional pre-removal script to execute.
+        /// </summary>
+        /// <remarks>
+        /// This variable must contain the script itself, and not a path to a file
+        /// which contains the script.
+        /// </remarks>
+        public string PreRemoveScript { get; set; }
+
+        /// <summary>
+        /// Gets or sets an additional post-removal script to execute.
+        /// </summary>
+        /// <remarks>
+        /// This variable must contain the script itself, and not a path to a file
+        /// which contains the script.
+        /// </remarks>
+        public string PostRemoveScript { get; set; }
+
         public override bool Execute()
         {
             this.Log.LogMessage(
@@ -145,9 +181,8 @@ namespace Packaging.Targets
 
                 using (var tarXzStream = File.Open(this.DebTarXzPath, FileMode.Open, FileAccess.Read, FileShare.None))
                 {
-                    DebPackageCreator.BuildDebPackage(
+                    var pkg = DebPackageCreator.BuildDebPackage(
                         archiveEntries,
-                        tarXzStream,
                         this.PackageName,
                         this.Description,
                         this.Maintainer,
@@ -161,9 +196,18 @@ namespace Packaging.Targets
                         this.Section,
                         this.Priority,
                         this.Homepage,
+                        this.PreInstallScript,
+                        this.PostInstallScript,
+                        this.PreRemoveScript,
+                        this.PostRemoveScript,
                         dependencies,
-                        null,
-                        targetStream);
+                        null);
+
+                    DebPackageCreator.WriteDebPackage(
+                        archiveEntries,
+                        tarXzStream,
+                        targetStream,
+                        pkg);
                 }
 
                 this.Log.LogMessage(

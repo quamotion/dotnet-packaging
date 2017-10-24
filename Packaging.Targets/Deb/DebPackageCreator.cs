@@ -13,9 +13,8 @@ namespace Packaging.Targets.Deb
         private const LinuxFileMode ArFileMode = LinuxFileMode.S_IRUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRGRP |
                                                  LinuxFileMode.S_IROTH | LinuxFileMode.S_IFREG;
 
-        public static void BuildDebPackage(
+        public static DebPackage BuildDebPackage(
             List<ArchiveEntry> archiveEntries,
-            Stream tarXzStream,
             string name,
             string description,
             string maintainer,
@@ -29,9 +28,12 @@ namespace Packaging.Targets.Deb
             string section,
             string priority,
             string homepage,
+            string preInstallScript,
+            string postInstallScript,
+            string preRemoveScript,
+            string postRemoveScript,
             IEnumerable<string> additionalDependencies,
-            Action<DebPackage> additionalMetadata,
-            Stream targetStream)
+            Action<DebPackage> additionalMetadata)
         {
             var pkg = new DebPackage
             {
@@ -77,9 +79,9 @@ namespace Packaging.Targets.Deb
             if (installService)
             {
                 // Install and activate the service.
-                pkg.PostInstallScript += $"systemctl reload";
-                pkg.PostInstallScript += $"systemctl enable --now {serviceName}.service";
-                pkg.PreRemoveScript += $"systemctl --no-reload disable --now {serviceName}.service";
+                pkg.PostInstallScript += $"systemctl reload\n";
+                pkg.PostInstallScript += $"systemctl enable --now {serviceName}.service\n";
+                pkg.PreRemoveScript += $"systemctl --no-reload disable --now {serviceName}.service\n";
             }
 
             // Remove all directories marked as such (these are usually directories which contain temporary files)
@@ -88,10 +90,62 @@ namespace Packaging.Targets.Deb
                 pkg.PostRemoveScript += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
             }
 
-            pkg.ControlFile["Depends"] = string.Join(",", additionalDependencies);
+            if (!string.IsNullOrEmpty(preInstallScript))
+            {
+                pkg.PreInstallScript += preInstallScript;
+
+                if (!preInstallScript.EndsWith("\n"))
+                {
+                    pkg.PreInstallScript += "\n";
+                }
+            }
+
+            if (!string.IsNullOrEmpty(postInstallScript))
+            {
+                pkg.PostInstallScript += postInstallScript;
+
+                if (!postInstallScript.EndsWith("\n"))
+                {
+                    pkg.PostInstallScript += "\n";
+                }
+            }
+
+            if (!string.IsNullOrEmpty(preRemoveScript))
+            {
+                pkg.PreRemoveScript += preRemoveScript;
+
+                if (!preRemoveScript.EndsWith("\n"))
+                {
+                    pkg.PreRemoveScript += "\n";
+                }
+            }
+
+            if (!string.IsNullOrEmpty(postRemoveScript))
+            {
+                pkg.PostRemoveScript += postRemoveScript;
+
+                if (!postRemoveScript.EndsWith("\n"))
+                {
+                    pkg.PostRemoveScript += "\n";
+                }
+            }
+
+            if (additionalDependencies != null)
+            {
+                pkg.ControlFile["Depends"] = string.Join(",", additionalDependencies);
+            }
 
             additionalMetadata?.Invoke(pkg);
 
+            return pkg;
+        }
+
+        public static void WriteDebPackage(
+            List<ArchiveEntry> archiveEntries,
+            Stream tarXzStream,
+            Stream targetStream,
+            DebPackage pkg)
+        {
             ArFileCreator.WriteMagic(targetStream);
             ArFileCreator.WriteEntry(targetStream, "debian-binary", ArFileMode, pkg.PackageFormatVersion + "\n");
             WriteControl(targetStream, pkg, archiveEntries);
