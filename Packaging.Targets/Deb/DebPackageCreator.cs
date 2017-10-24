@@ -132,7 +132,7 @@ namespace Packaging.Targets.Deb
 
             if (additionalDependencies != null)
             {
-                pkg.ControlFile["Depends"] = string.Join(",", additionalDependencies);
+                pkg.ControlFile["Depends"] = string.Join(", ", additionalDependencies);
             }
 
             additionalMetadata?.Invoke(pkg);

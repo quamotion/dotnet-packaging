@@ -144,5 +144,53 @@ echo 'Hello from pre remove'
 echo 'Hello from post remove'
 ", pkg.PostRemoveScript, ignoreLineEndingDifferences: true);
         }
+
+        /// <summary>
+        /// Tests the <see cref="DebPackageCreator.BuildDebPackage"/> method where dependencies are being used
+        /// </summary>
+        [Fact]
+        public void BuildDebPackageWithDependenciesTest()
+        {
+            List<ArchiveEntry> entries = new List<ArchiveEntry>();
+            var dependencies = new string[]
+            {
+                "libc6",
+                "libcurl3",
+                "libgcc1",
+                "libgssapi-krb5-2",
+                "liblttng-ust0",
+                "libssl0.9.8 | libssl1.0.0 | libssl1.0.1 | libssl1.0.2",
+                "libstdc++6",
+                "libunwind8",
+                "libuuid1",
+                "zlib1g",
+                "libicu52 | libicu53 | libicu54 | libicu55 | libicu56 | libicu57 | libicu58 | libicu59"
+            };
+
+            var pkg = DebPackageCreator.BuildDebPackage(
+                entries,
+                "demo",
+                "Demo Package",
+                "Demo User",
+                "1.0.0",
+                "x86-64",
+                createUser: false,
+                userName: null,
+                installService: false,
+                serviceName: null,
+                prefix: "/opt/local",
+                section: null,
+                priority: null,
+                homepage: null,
+                preInstallScript: null,
+                postInstallScript: null,
+                preRemoveScript: null,
+                postRemoveScript: null,
+                additionalDependencies: dependencies,
+                additionalMetadata: null);
+
+            Assert.NotNull(pkg.ControlFile);
+            Assert.Equal("libc6, libcurl3, libgcc1, libgssapi-krb5-2, liblttng-ust0, libssl0.9.8 | libssl1.0.0 | libssl1.0.1 | libssl1.0.2, libstdc++6, libunwind8, libuuid1, zlib1g, libicu52 | libicu53 | libicu54 | libicu55 | libicu56 | libicu57 | libicu58 | libicu59", pkg.ControlFile["Depends"]);
+        }
     }
 }
