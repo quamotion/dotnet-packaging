@@ -101,7 +101,11 @@
              ServiceName="$(ServiceName)"
              Section="$(DebSection)"
              Priority="$(DebPriority)"
-             Homepage="$(DebHomepage)"/>
+             Homepage="$(DebHomepage)"
+             PreInstallScript="$(PreInstallScript)"
+             PostInstallScript="$(PostInstallScript)"
+             PreRemoveScript="$(PreRemoveScript)"
+             PostRemoveScript="$(PostRemoveScript)"/>
   </Target>
 
   <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">
