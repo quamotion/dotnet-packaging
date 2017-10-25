@@ -8,7 +8,7 @@ deployment packages (such as `.zip` files, tarballs or installers) for .NET Core
 The following commands are already available:
 * `dotnet tarball` - Create a `.tar.gz` file for Linux and OS X
 * `dotnet rpm` - Create a CentOS/RedHat Linux installer
-* `dotnet zip` - Create a Chocolatey package
+* `dotnet zip` - Create a `.zip` file
 
 These commands are currently in development:
 * `dotnet deb` - Create a Ubuntu/Debian Linux installer
@@ -37,7 +37,7 @@ only add those you are going to use.
 
 ## Usage
 
-From the command line, run `dotnet rpm`, `dotnet zip` or `dotnet tarball` to create a `.rpm`, `.zip` or `.tar.gz` archive of the publish output of your project.
+From the command line, run `dotnet rpm`, `dotnet zip` or `dotnet tarball` to create a `.rpm`, `.zip` or `.tar.gz` archive of the published output of your project.
 
 All commands take the following command line arguments:
 
@@ -48,7 +48,7 @@ All commands take the following command line arguments:
 
 
 ### Note
-If you have multiple `.csproj` files in a signle directory, [.NET Core CLI tools don't work](https://github.com/dotnet/cli/issues/4808).
+If you have multiple `.csproj` files in a single directory, [.NET Core CLI tools don't work](https://github.com/dotnet/cli/issues/4808).
 If that's the case, you can still invoke the packaging tools manually:
 
 ```
