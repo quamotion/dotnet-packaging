@@ -292,7 +292,11 @@ namespace Packaging.Targets.Rpm
             // Remove all directories marked as such (these are usually directories which contain temporary files)
             foreach (var entryToRemove in archiveEntries.Where(e => e.RemoveOnUninstall))
             {
-                preUn += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
+                preUn +=
+                    $"if [ $1 -eq 0 ] ; then \n" +
+                    $"    # Package removal, not upgrade \n" +
+                    $"    /usr/bin/rm -rf {entryToRemove.TargetPath}\n" +
+                    $"fi\n";
             }
 
             if (!string.IsNullOrEmpty(preIn))
