@@ -158,7 +158,7 @@ namespace Packaging.Targets
 
                 if (this.RpmDependencies != null)
                 {
-                    this.RpmDependencies.Select(
+                    dependencies = this.RpmDependencies.Select(
                         d => new PackageDependency(
                             d.ItemSpec,
                             RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_GREATER,
