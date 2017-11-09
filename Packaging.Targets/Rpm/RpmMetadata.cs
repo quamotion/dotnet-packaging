@@ -153,6 +153,15 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
+        /// Gets or sets the sum of the sizes of the regular files in the package.
+        /// </summary>
+        public int ArchiveSize
+        {
+            get { return this.GetInt(IndexTag.RPMTAG_ARCHIVESIZE); }
+            set { this.SetInt(IndexTag.RPMTAG_ARCHIVESIZE, value); }
+        }
+
+        /// <summary>
         /// Gets or sets the name of the distribution for which the package was built.
         /// </summary>
         public string Distribution
@@ -168,6 +177,15 @@ namespace Packaging.Targets.Rpm
         {
             get { return this.GetString(IndexTag.RPMTAG_VENDOR); }
             set { this.SetString(IndexTag.RPMTAG_VENDOR, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the tool used to build the package.
+        /// </summary>
+        public string Packager
+        {
+            get { return this.GetString(IndexTag.RPMTAG_PACKAGER); }
+            set { this.SetString(IndexTag.RPMTAG_PACKAGER, value); }
         }
 
         /// <summary>
@@ -780,6 +798,26 @@ namespace Packaging.Targets.Rpm
             }
         }
 
+        public IEnumerable<PackageDependency> Requires
+        {
+            get
+            {
+                var flags = this.GetIntArray(IndexTag.RPMTAG_REQUIREFLAGS);
+                var names = this.GetStringArray(IndexTag.RPMTAG_REQUIRENAME);
+                var vers = this.GetStringArray(IndexTag.RPMTAG_REQUIREVERSION);
+
+                for (int i = 0; i < flags.Count; i++)
+                {
+                    yield return new PackageDependency()
+                    {
+                        Flags = (RpmSense)flags[i],
+                        Name = names[i],
+                        Version = vers[i]
+                    };
+                }
+            }
+        }
+
         protected char GetDependencyType(IndexTag tag)
         {
             switch (tag)
@@ -851,9 +889,26 @@ namespace Packaging.Targets.Rpm
 
         protected string GetLocalizedString(IndexTag tag)
         {
-            var localizedValues = this.GetValue<Collection<string>>(tag, IndexType.RPM_I18NSTRING_TYPE);
+            if (!this.Package.Header.Records.ContainsKey(tag))
+            {
+                return null;
+            }
 
-            return localizedValues.First();
+            var record = this.Package.Header.Records[tag];
+
+            switch (record.Header.Type)
+            {
+                case IndexType.RPM_I18NSTRING_TYPE:
+                    var localizedValues = this.GetValue<Collection<string>>(tag, IndexType.RPM_I18NSTRING_TYPE);
+                    return localizedValues.First();
+
+                case IndexType.RPM_STRING_TYPE:
+                    var value = this.GetValue<string>(tag, IndexType.RPM_STRING_TYPE);
+                    return value;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(tag));
+            }
         }
 
         protected void SetLocalizedString(IndexTag tag, string value)
