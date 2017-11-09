@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<otherdata xmlns="http://linux.duke.edu/metadata/other" packages="2">
+<package pkgid="0c318f3146cc6206d88746326d3ad86b5c53b358add9c80cabc8de5b47270e8b" name="libplist" arch="src">
+  <version epoch="0" ver="1.2" rel="1.el6"/>
+  <changelog author="Peter Robinson &lt;pbrobinson@gmail.com&gt; 0.12.0-0.1" date="1241956800">- Initial package</changelog>
+  <changelog author="Peter Robinson &lt;pbrobinson@gmail.com&gt; 0.12-1" date="1241956801">- Update to official tarball release, some review fixes</changelog>
+  <changelog author="Peter Robinson &lt;pbrobinson@gmail.com&gt; 0.12-2" date="1242043200">- Further review updates</changelog>
+  <changelog author="Peter Robinson &lt;pbrobinson@gmail.com&gt; 0.13-1" date="1242043201">- New upstream 0.13 release</changelog>
+  <changelog author="Fedora Release Engineering &lt;rel-eng@lists.fedoraproject.org&gt; - 0.13-2" date="1248436800">- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild</changelog>
+  <changelog author="Dennis Gregorovic &lt;dgregor@redhat.com&gt; - 0.13-2.1" date="1259582400">- Rebuilt for RHEL 6</changelog>
+  <changelog author="Bastien Nocera &lt;bnocera@redhat.com&gt; 1.2-1" date="1265889600">- Update to 1.2
+Related: rhbz#563926</changelog>
+</package>
+<package pkgid="d1f92321a84d0b8a3753ad7cf2004e8aed984b89a9c8c58a93ff61aeffcfefeb" name="libplist" arch="x86_64">
+  <version epoch="0" ver="1.2" rel="1.el6"/>
+  <changelog author="Peter Robinson &lt;pbrobinson@gmail.com&gt; 0.12.0-0.1" date="1241956800">- Initial package</changelog>
+  <changelog author="Peter Robinson &lt;pbrobinson@gmail.com&gt; 0.12-1" date="1241956801">- Update to official tarball release, some review fixes</changelog>
+  <changelog author="Peter Robinson &lt;pbrobinson@gmail.com&gt; 0.12-2" date="1242043200">- Further review updates</changelog>
+  <changelog author="Peter Robinson &lt;pbrobinson@gmail.com&gt; 0.13-1" date="1242043201">- New upstream 0.13 release</changelog>
+  <changelog author="Fedora Release Engineering &lt;rel-eng@lists.fedoraproject.org&gt; - 0.13-2" date="1248436800">- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild</changelog>
+  <changelog author="Dennis Gregorovic &lt;dgregor@redhat.com&gt; - 0.13-2.1" date="1259582400">- Rebuilt for RHEL 6</changelog>
+  <changelog author="Bastien Nocera &lt;bnocera@redhat.com&gt; 1.2-1" date="1265889600">- Update to 1.2
+Related: rhbz#563926</changelog>
+</package>
+</otherdata>

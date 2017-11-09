@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<filelists xmlns="http://linux.duke.edu/metadata/filelists" packages="2">
+<package pkgid="0c318f3146cc6206d88746326d3ad86b5c53b358add9c80cabc8de5b47270e8b" name="libplist" arch="src">
+  <version epoch="0" ver="1.2" rel="1.el6"/>
+  <file>libplist-1.2.tar.bz2</file>
+  <file>libplist.spec</file>
+</package>
+<package pkgid="d1f92321a84d0b8a3753ad7cf2004e8aed984b89a9c8c58a93ff61aeffcfefeb" name="libplist" arch="x86_64">
+  <version epoch="0" ver="1.2" rel="1.el6"/>
+  <file>/usr/bin/plutil</file>
+  <file>/usr/bin/plutil-1.2</file>
+  <file>/usr/lib64/libplist++.so.1</file>
+  <file>/usr/lib64/libplist++.so.1.1.2</file>
+  <file>/usr/lib64/libplist.so.1</file>
+  <file>/usr/lib64/libplist.so.1.1.2</file>
+  <file>/usr/share/doc/libplist-1.2/AUTHORS</file>
+  <file>/usr/share/doc/libplist-1.2/COPYING.LESSER</file>
+  <file>/usr/share/doc/libplist-1.2/README</file>
+  <file type="dir">/usr/share/doc/libplist-1.2</file>
+</package>
+</filelists>

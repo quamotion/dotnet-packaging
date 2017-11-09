@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common" xmlns:rpm="http://linux.duke.edu/metadata/rpm" packages="2">
+<package type="rpm">
+  <name>libplist</name>
+  <arch>src</arch>
+  <version epoch="0" ver="1.2" rel="1.el6"/>
+  <checksum type="sha256" pkgid="YES">0c318f3146cc6206d88746326d3ad86b5c53b358add9c80cabc8de5b47270e8b</checksum>
+  <summary>Library for manipulating Apple Binary and XML Property Lists</summary>
+  <description>libplist is a library for manipulating Apple Binary and XML Property Lists</description>
+  <packager>CentOS BuildSystem &lt;http://bugs.centos.org&gt;</packager>
+  <url>http://matt.colyer.name/projects/iphone-linux/</url>
+  <time file="1323184405" build="1282480066"/>
+  <size package="69327" installed="69879" archive="70264"/>
+  <location href="RPMS/libplist-1.2-1.el6.src.rpm"/>
+  <format>
+    <rpm:license>LGPLv2+</rpm:license>
+    <rpm:vendor>CentOS</rpm:vendor>
+    <rpm:group>System Environment/Libraries</rpm:group>
+    <rpm:buildhost>c6b6.bsys.dev.centos.org</rpm:buildhost>
+    <rpm:sourcerpm/>
+    <rpm:header-range start="1384" end="3632"/>
+    <rpm:requires>
+      <rpm:entry name="cmake"/>
+      <rpm:entry name="glib2-devel"/>
+      <rpm:entry name="libxml2-devel"/>
+      <rpm:entry name="python-devel"/>
+      <rpm:entry name="swig"/>
+    </rpm:requires>
+  </format>
+</package>
+<package type="rpm">
+  <name>libplist</name>
+  <arch>x86_64</arch>
+  <version epoch="0" ver="1.2" rel="1.el6"/>
+  <checksum type="sha256" pkgid="YES">d1f92321a84d0b8a3753ad7cf2004e8aed984b89a9c8c58a93ff61aeffcfefeb</checksum>
+  <summary>Library for manipulating Apple Binary and XML Property Lists</summary>
+  <description>libplist is a library for manipulating Apple Binary and XML Property Lists</description>
+  <packager>CentOS BuildSystem &lt;http://bugs.centos.org&gt;</packager>
+  <url>http://matt.colyer.name/projects/iphone-linux/</url>
+  <time file="1309667875" build="1282480092"/>
+  <size package="45616" installed="117171" archive="118764"/>
+  <location href="RPMS/libplist-1.2-1.el6.x86_64.rpm"/>
+  <format>
+    <rpm:license>LGPLv2+</rpm:license>
+    <rpm:vendor>CentOS</rpm:vendor>
+    <rpm:group>System Environment/Libraries</rpm:group>
+    <rpm:buildhost>c6b6.bsys.dev.centos.org</rpm:buildhost>
+    <rpm:sourcerpm>libplist-1.2-1.el6.src.rpm</rpm:sourcerpm>
+    <rpm:header-range start="1384" end="6036"/>
+    <rpm:provides>
+      <rpm:entry name="libplist" flags="EQ" epoch="0" ver="1.2" rel="1.el6"/>
+      <rpm:entry name="libplist(x86-64)" flags="EQ" epoch="0" ver="1.2" rel="1.el6"/>
+      <rpm:entry name="libplist++.so.1()(64bit)"/>
+      <rpm:entry name="libplist.so.1()(64bit)"/>
+    </rpm:provides>
+    <rpm:requires>
+      <rpm:entry name="/sbin/ldconfig"/>
+      <rpm:entry name="/sbin/ldconfig" pre="1"/>
+      <rpm:entry name="libc.so.6(GLIBC_2.4)(64bit)"/>
+      <rpm:entry name="libgcc_s.so.1()(64bit)"/>
+      <rpm:entry name="libgcc_s.so.1(GCC_3.0)(64bit)"/>
+      <rpm:entry name="libglib-2.0.so.0()(64bit)"/>
+      <rpm:entry name="libm.so.6()(64bit)"/>
+      <rpm:entry name="libstdc++.so.6()(64bit)"/>
+      <rpm:entry name="libstdc++.so.6(CXXABI_1.3)(64bit)"/>
+      <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4)(64bit)"/>
+      <rpm:entry name="libxml2.so.2()(64bit)"/>
+      <rpm:entry name="libxml2.so.2(LIBXML2_2.4.30)(64bit)"/>
+      <rpm:entry name="rtld(GNU_HASH)"/>
+    </rpm:requires>
+  <file>/usr/bin/plutil</file>
+  <file>/usr/bin/plutil-1.2</file>
+  </format>
+</package>
+</metadata>
