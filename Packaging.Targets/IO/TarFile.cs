@@ -52,7 +52,18 @@ namespace Packaging.Targets.IO
             // TODO: Validate Checksum
             this.EntryStream = new SubStream(this.Stream, this.Stream.Position, this.entryHeader.FileSize, leaveParentOpen: true);
 
-            return true;
+            if (this.entryHeader.TypeFlag == TarTypeFlag.LongName)
+            {
+                var longFileName = this.ReadAsUtf8String();
+                var read = this.Read();
+                this.FileName = longFileName;
+
+                return read;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }
