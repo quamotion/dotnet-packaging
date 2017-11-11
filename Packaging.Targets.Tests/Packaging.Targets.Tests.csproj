@@ -41,6 +41,9 @@
     <None Update="Deb\libplist3_1.12-3.1_amd64.deb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="IO\largefilename.tar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="IO\test.cpio">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
+using System.Text;
 
 namespace Packaging.Targets.IO
 {
@@ -55,14 +53,55 @@ namespace Packaging.Targets.IO
                 targetPath = "." + targetPath;
             }
 
+            // Handle long file names (> 99 characters). If this is the case, add a "././@LongLink" pseudo-entry
+            // which contains the full name.
+            if (targetPath.Length > 99)
+            {
+                // Must include a trailing \0
+                var nameLength = Encoding.UTF8.GetByteCount(targetPath);
+                byte[] entryName = new byte[nameLength + 1];
+
+                Encoding.UTF8.GetBytes(targetPath, 0, targetPath.Length, entryName, 0);
+
+                ArchiveEntry nameEntry = new ArchiveEntry()
+                {
+                    Mode = entry.Mode,
+                    Modified = entry.Modified,
+                    TargetPath = "././@LongLink",
+                    Owner = entry.Owner,
+                    Group = entry.Group
+                };
+
+                using (MemoryStream nameStream = new MemoryStream(entryName))
+                {
+                    WriteEntry(stream, nameEntry, nameStream);
+                }
+
+                targetPath = targetPath.Substring(0, 99);
+            }
+
             var isDir = entry.Mode.HasFlag(LinuxFileMode.S_IFDIR);
             var isLink = !isDir && !string.IsNullOrWhiteSpace(entry.LinkTo);
             var isFile = !isDir && !isLink;
-            var type = isFile
-                ? TarTypeFlag.RegType
-                : isDir
-                    ? TarTypeFlag.DirType
-                    : TarTypeFlag.LnkType;
+
+            TarTypeFlag type;
+
+            if (entry.TargetPath == "././@LongLink")
+            {
+                type = TarTypeFlag.LongName;
+            }
+            else if (isFile)
+            {
+                type = TarTypeFlag.RegType;
+            }
+            else if (isDir)
+            {
+                type = TarTypeFlag.DirType;
+            }
+            else
+            {
+                type = TarTypeFlag.LnkType;
+            }
 
             bool dispose = false;
             if (data == null)
@@ -82,7 +121,8 @@ namespace Packaging.Targets.IO
             {
                 var hdr = new TarHeader()
                 {
-                    FileMode = entry.Mode,
+                    // No need to set the file type, the tar header has a special field for that.
+                    FileMode = entry.Mode & LinuxFileMode.PermissionsMask,
                     DevMajor = null,
                     DevMinor = null,
                     FileName = targetPath,
