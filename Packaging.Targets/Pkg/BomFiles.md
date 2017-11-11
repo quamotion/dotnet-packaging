@@ -42,23 +42,23 @@ The index of this BOM file contains the following items:
 
 | Index  | Offset   | Length   | Type         | Description      |
 | ------ | -------- | -------- | ---------    | ---------------- |
-| `0x0`  | `0x00`   | `0x00`   | BOM Header   |                  |
-| `0x1`  | `0x33D5` | `0x1C`   | Variable     | BomInfo          |
-| `0x2`  | `0x1236` | `0x15`   | Variable     | Paths            |
-| `0x3`  | `0x236`  | `0x1000` | BomPaths     | Paths            |
-| `0x4`  | `0x21C`  | `0x15`   | Variable     | HLIndex          |
+| `0x0`  | `0x0000` | `0x0000` | BOM Header   |                  |
+| `0x1`  | `0x33D5` | `0x001C` | Variable     | BomInfo          |
+| `0x2`  | `0x1236` | `0x0015` | Variable     | Paths            |
+| `0x3`  | `0x0236` | `0x1000` | BomPaths     | Paths            |
+| `0x4`  | `0x021C` | `0x0015` | Variable     | HLIndex          |
 | `0x5`  | `0x1271` | `0x1000` | BomPaths     | HLIndex          |
-| `0x6`  | `0x200`  | `0xD`    | Variable     | VIndex           |
-| `0x7`  | `0x124B` | `0x15`   |              | VIndex           |
-| `0x8`  | `0x22A2` | `0x80`   | BomPaths     | VIndex           |
-| `0x9`  | `0x2271` | `0x15`   | Variable     | Size64           |
+| `0x6`  | `0x0200` | `0x000D` | Variable     | VIndex           |
+| `0x7`  | `0x124B` | `0x0015` |              | VIndex           |
+| `0x8`  | `0x22A2` | `0x0080` | BomPaths     | VIndex           |
+| `0x9`  | `0x2271` | `0x0015` | Variable     | Size64           |
 | `0xA`  | `0x235E` | `0x1000` | BomPaths     | Size64           |
-| `0xB`  | `0x335E` | `0x1F`   | BomPathInfo2 | `.`              |
-| `0xC`  | `0x1260` | `0x6`    | BomFile      | `.`              |
-| `0xD`  | `0x1266` | `0x8`    | BomPathInfo  | `.`              |
-| `0xE`  | `0x337D` | `0x1F`   | BomPathInfo2 | `Applications`   |
-| `0xF`  | `0x2286` | `0x11`   | BomFile      | `Applications`   |
-| `0x10` | `0x2297` | `0x8`    | BomPathInfo2 | `Applications`   |
-| `0x11` | `0x339C` | `0x23`   | BomPathInfo  | `hello.txt`      |
-| `0x12` | `0x33BF` | `0xE`    | BomFile      | `hello.txt`      |
-| `0x13` | `0x33CD` | `0x8`    | BomPathInfo2 | `hello.txt`      |
+| `0xB`  | `0x335E` | `0x001F` | BomPathInfo2 | `.`              |
+| `0xC`  | `0x1260` | `0x0006` | BomFile      | `.`              |
+| `0xD`  | `0x1266` | `0x0008` | BomPathInfo  | `.`              |
+| `0xE`  | `0x337D` | `0x001F` | BomPathInfo2 | `Applications`   |
+| `0xF`  | `0x2286` | `0x0011` | BomFile      | `Applications`   |
+| `0x10` | `0x2297` | `0x0008` | BomPathInfo2 | `Applications`   |
+| `0x11` | `0x339C` | `0x0023` | BomPathInfo  | `hello.txt`      |
+| `0x12` | `0x33BF` | `0x000E` | BomFile      | `hello.txt`      |
+| `0x13` | `0x33CD` | `0x0008` | BomPathInfo2 | `hello.txt`      |
