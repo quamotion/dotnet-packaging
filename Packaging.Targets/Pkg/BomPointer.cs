@@ -5,6 +5,25 @@
     /// </summary>
     internal struct BomPointer
     {
+        public BomPointer(uint address, uint length)
+        {
+            this.address = address;
+            this.length = length;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is BomPointer))
+            {
+                return false;
+            }
+
+            var other = (BomPointer)obj;
+
+            return other.address == this.address
+                && other.length == this.length;
+        }
+
         /// <summary>
         /// The start address of the section.
         /// </summary>

@@ -1,5 +1,8 @@
-﻿namespace Packaging.Targets.Pkg
+﻿using System.Runtime.InteropServices;
+
+namespace Packaging.Targets.Pkg
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct BomVIndex
     {
         /// <summary>
@@ -16,6 +19,6 @@
         /// <summary>
         /// The value of this field is always 0.
         /// </summary>
-        public uint unknown3;
+        public byte unknown3;
     }
 }

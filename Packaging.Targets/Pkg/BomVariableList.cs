@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Packaging.Targets.Pkg
 {
@@ -19,7 +20,7 @@ namespace Packaging.Targets.Pkg
         /// <summary>
         /// Gets a list of all variables.
         /// </summary>
-        public Collection<BomVariable> Variables
-        { get; } = new Collection<BomVariable>();
+        public Dictionary<string, BomVariable> Variables
+        { get; } = new Dictionary<string, BomVariable>();
     }
 }

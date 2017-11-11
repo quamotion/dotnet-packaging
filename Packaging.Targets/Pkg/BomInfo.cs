@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 
 namespace Packaging.Targets.Pkg
 {
@@ -21,5 +22,13 @@ namespace Packaging.Targets.Pkg
         /// </summary>
         public Collection<BomInfoEntry> Entries
         { get; } = new Collection<BomInfoEntry>();
+
+        public uint SerializedSize
+        {
+            get
+            {
+                return (uint)Marshal.SizeOf<BomInfoHeader>() + (uint)this.Entries.Count * (uint)Marshal.SizeOf<BomInfoEntry>();
+            }
+        }
     }
 }

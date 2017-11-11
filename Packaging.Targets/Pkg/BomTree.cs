@@ -1,8 +1,11 @@
-﻿namespace Packaging.Targets.Pkg
+﻿using System.Runtime.InteropServices;
+
+namespace Packaging.Targets.Pkg
 {
     /// <summary>
     /// The root entry for a tree of files.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct BomTree
     {
         /// <summary>
@@ -34,6 +37,6 @@
         /// <summary>
         /// The value of this field is reserved.
         /// </summary>
-        public uint reserved;
+        public byte reserved;
     }
 }
