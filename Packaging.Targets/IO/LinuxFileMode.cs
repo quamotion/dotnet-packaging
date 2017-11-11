@@ -102,7 +102,7 @@ namespace Packaging.Targets.IO
         /// <summary>
         /// The file is a Unix socket.
         /// </summary>
-        S_IFSOCK = 0xC000 // 0140000 in octal
+        S_IFSOCK = 0xC000, // 0140000 in octal
 
         /// <summary>
         /// A flag to get all permissions applied to this file.
