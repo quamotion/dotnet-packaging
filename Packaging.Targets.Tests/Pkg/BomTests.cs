@@ -19,10 +19,10 @@ namespace Packaging.Targets.Tests.Pkg
                 Assert.NotNull(bom.Variables);
 
                 Assert.NotNull(bom.BomInfo);
-                Assert.Equal(1, bom.BomInfo.Entries.Count);
+                Assert.Single(bom.BomInfo.Entries);
 
                 Assert.NotNull(bom.HLIndex);
-                Assert.Equal(0, bom.HLIndex.Count);
+                Assert.Empty(bom.HLIndex);
 
                 Assert.NotNull(bom.Paths);
                 Assert.Equal(3, bom.Paths.Count);
@@ -34,10 +34,10 @@ namespace Packaging.Targets.Tests.Pkg
                 Assert.Equal(2u, bom.Paths[2].parent);
 
                 Assert.NotNull(bom.Size64);
-                Assert.Equal(0, bom.Size64.Count);
+                Assert.Empty(bom.Size64);
 
                 Assert.NotNull(bom.VIndex);
-                Assert.Equal(0, bom.VIndex.Count);
+                Assert.Empty(bom.VIndex);
             }
         }
     }

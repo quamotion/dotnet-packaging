@@ -21,7 +21,7 @@
         public uint version;
 
         /// <summary>
-        /// The number of non-empty entries in the <see cref="Bom.blockTable"/>.
+        /// The number of non-empty entries in the <see cref="Bom.index"/>.
         /// </summary>
         public uint numberOfBlocks;
 

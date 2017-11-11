@@ -18,7 +18,7 @@
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Address: {this.address}, Length: {this.length}";
+            return $"Address: 0x{this.address:X}, Length: 0x{this.length:X}";
         }
     }
 }

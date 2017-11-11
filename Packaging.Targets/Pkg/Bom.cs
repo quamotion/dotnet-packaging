@@ -16,7 +16,7 @@ namespace Packaging.Targets.Pkg
     {
         private Stream stream;
         private BomHeader header;
-        private BomPointerList blockTable;
+        private BomPointerList index;
         private BomPointerList freeList;
 
         /// <summary>
@@ -44,13 +44,13 @@ namespace Packaging.Targets.Pkg
 
             // Read the block table and the free pointer list
             this.stream.Position = this.header.indexOffset;
-            this.blockTable = new BomPointerList();
-            this.blockTable.NumberOfPointers = this.stream.ReadInt32BE();
+            this.index = new BomPointerList();
+            this.index.NumberOfPointers = this.stream.ReadInt32BE();
 
-            for (int i = 0; i < this.blockTable.NumberOfPointers; i++)
+            for (int i = 0; i < this.index.NumberOfPointers; i++)
             {
                 var blockPointer = this.stream.ReadStruct<BomPointer>();
-                this.blockTable.Pointers.Add(blockPointer);
+                this.index.Pointers.Add(blockPointer);
             }
 
             this.freeList = new BomPointerList();
@@ -82,7 +82,7 @@ namespace Packaging.Targets.Pkg
 
             foreach (var variable in this.Variables.Variables)
             {
-                var pointer = this.blockTable.Pointers[(int)variable.index];
+                var pointer = this.index.Pointers[(int)variable.index];
                 this.stream.Seek((int)pointer.address, SeekOrigin.Begin);
 
                 switch (variable.name)
@@ -119,7 +119,7 @@ namespace Packaging.Targets.Pkg
                     case "VIndex":
                         BomVIndex vIndex = this.stream.ReadStruct<BomVIndex>();
 
-                        var vPtr = this.blockTable.Pointers[(int)vIndex.indexToVTree];
+                        var vPtr = this.index.Pointers[(int)vIndex.indexToVTree];
                         this.stream.Seek((int)vPtr.address, SeekOrigin.Begin);
                         var vTree = this.stream.ReadStruct<BomTree>();
                         this.ReadPaths(vTree, this.VIndex);
@@ -151,7 +151,7 @@ namespace Packaging.Targets.Pkg
 
         private void ReadPaths(BomTree tree, Collection<BomFile> files)
         {
-            var child = this.blockTable.Pointers[(int)tree.child];
+            var child = this.index.Pointers[(int)tree.child];
 
             this.ReadPaths(child, files);
         }
@@ -170,7 +170,7 @@ namespace Packaging.Targets.Pkg
 
             for (int i = 0; i < paths.Header.count; i++)
             {
-                var filePointer = this.blockTable.Pointers[(int)paths.Indices[i].index1];
+                var filePointer = this.index.Pointers[(int)paths.Indices[i].index1];
                 BomFile file = new BomFile();
 
                 this.stream.Seek(filePointer.address, SeekOrigin.Begin);
@@ -183,11 +183,11 @@ namespace Packaging.Targets.Pkg
                 file.name = Encoding.UTF8.GetString(nameBytes, 0, nameBytes.Length - 1);
                 files.Add(file);
 
-                var infoPointer = this.blockTable.Pointers[(int)paths.Indices[0].index0];
+                var infoPointer = this.index.Pointers[(int)paths.Indices[i].index0];
                 this.stream.Seek(infoPointer.address, SeekOrigin.Begin);
                 var info = this.stream.ReadStruct<BomPathInfo>();
 
-                var info2Pointer = this.blockTable.Pointers[(int)info.index];
+                var info2Pointer = this.index.Pointers[(int)info.index];
                 this.stream.Seek(info2Pointer.address, SeekOrigin.Begin);
 
                 var info2 = this.stream.ReadStruct<BomPathInfo2>();
@@ -195,13 +195,13 @@ namespace Packaging.Targets.Pkg
 
             if (paths.Header.isLeaf == 0)
             {
-                var childPtr = this.blockTable.Pointers[(int)paths.Indices[0].index0];
+                var childPtr = this.index.Pointers[(int)paths.Indices[0].index0];
                 this.ReadPaths(childPtr, files);
             }
 
             if (paths.Header.forward != 0)
             {
-                var siblingPtr = this.blockTable.Pointers[(int)paths.Header.forward];
+                var siblingPtr = this.index.Pointers[(int)paths.Header.forward];
                 this.ReadPaths(siblingPtr, files);
             }
         }

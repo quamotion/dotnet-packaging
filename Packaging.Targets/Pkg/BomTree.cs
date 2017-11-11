@@ -22,12 +22,12 @@
         public uint child;
 
         /// <summary>
-        /// The block size. Should alwasyb e 4096.
+        /// The block size. Should always be 4096.
         /// </summary>
         public uint blockSize;
 
         /// <summary>
-        /// The total number of pats in this tree, in al leaves combined.
+        /// The total number of paths in this tree, in all leaves combined.
         /// </summary>
         public uint pathCount;
 
