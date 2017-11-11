@@ -106,7 +106,6 @@ namespace Packaging.Targets.Tests.Deb
                         "./usr/share/doc/libmono-system-runtime-interopservices-runtimeinformation4.0-cil/",
                         "./usr/share/doc/libmono-system-runtime-interopservices-runtimeinformation4.0-cil/changelog.Debian.gz",
                         "./usr/share/doc/libmono-system-runtime-interopservices-runtimeinformation4.0-cil/copyright",
-                        "././@LongLink",
                         "./usr/lib/mono/4.5/System.Runtime.InteropServices.RuntimeInformation.dll"
                     },
                     fileNames);
