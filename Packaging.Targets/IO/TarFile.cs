@@ -25,6 +25,15 @@ namespace Packaging.Targets.IO
         {
         }
 
+        /// <summary>
+        /// Gets the link target of this file.
+        /// </summary>
+        public string LinkName
+        {
+            get;
+            private set;
+        }
+
         /// <inheritdoc/>
         public override bool Read()
         {
@@ -35,6 +44,7 @@ namespace Packaging.Targets.IO
             this.entryHeader = this.Stream.ReadStruct<TarHeader>();
             this.FileHeader = this.entryHeader;
             this.FileName = this.entryHeader.FileName;
+            this.LinkName = this.entryHeader.LinkName;
 
             // There are two empty blocks at the end of the file.
             if (string.IsNullOrEmpty(this.entryHeader.Magic))
@@ -52,7 +62,25 @@ namespace Packaging.Targets.IO
             // TODO: Validate Checksum
             this.EntryStream = new SubStream(this.Stream, this.Stream.Position, this.entryHeader.FileSize, leaveParentOpen: true);
 
-            return true;
+            if (this.entryHeader.TypeFlag == TarTypeFlag.LongName)
+            {
+                var longFileName = this.ReadAsUtf8String();
+                var read = this.Read();
+                this.FileName = longFileName;
+
+                return read;
+            }
+            else if (this.entryHeader.TypeFlag == TarTypeFlag.LongLink)
+            {
+                var longLinkName = this.ReadAsUtf8String();
+                var read = this.Read();
+                this.LinkName = longLinkName;
+                return read;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

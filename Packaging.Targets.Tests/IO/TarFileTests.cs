@@ -1,10 +1,11 @@
-﻿using System;
-using Packaging.Targets.IO;
+﻿using Packaging.Targets.IO;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using Xunit;
 
 namespace Packaging.Targets.Tests.IO
@@ -49,6 +50,56 @@ namespace Packaging.Targets.Tests.IO
                         }
                     }
                 }
+            }
+        }
+
+        [Fact]
+        public void WriteTarWithLongFilenameTest()
+        {
+            using (Stream expected = File.OpenRead(@"IO/largefilename.tar"))
+            using (Stream actual = new MemoryStream())
+            using (Stream output = new ValidatingCompositeStream(null, actual, expected))
+            {
+                var directories = new string[]
+                {
+                    "./",
+                    "./usr/",
+                    "./usr/lib/",
+                    "./usr/lib/mono/",
+                    "./usr/lib/mono/gac/",
+                    "./usr/lib/mono/gac/System.Runtime.InteropServices.RuntimeInformation/",
+                    "./usr/lib/mono/gac/System.Runtime.InteropServices.RuntimeInformation/4.0.0.0__b03f5f7f11d50a3a/",
+                };
+
+                foreach (var directory in directories)
+                {
+                    TarFileCreator.WriteEntry(
+                        output,
+                        new ArchiveEntry()
+                        {
+                            Mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
+                            TargetPath = directory,
+                            Group = "root",
+                            Owner = "root",
+                            Modified = new DateTimeOffset(2016, 12, 15, 10, 58, 56, TimeSpan.Zero)
+                        },
+                        null);
+                }
+
+                using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes("This file has a very long name.")))
+                {
+                    TarFileCreator.WriteEntry(
+                        output,
+                        new ArchiveEntry()
+                        {
+                            Mode = (LinuxFileMode)0x81FF,
+                            TargetPath = "./usr/lib/mono/gac/System.Runtime.InteropServices.RuntimeInformation/4.0.0.0__b03f5f7f11d50a3a/System.Runtime.InteropServices.RuntimeInformation.txt",
+                            Modified = new DateTimeOffset(2017, 11, 11, 12, 37, 58, TimeSpan.Zero)
+                        },
+                        stream);
+                }
+
+                TarFileCreator.WriteTrailer(output);
             }
         }
 

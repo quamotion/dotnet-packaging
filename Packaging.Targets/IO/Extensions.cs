@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace Packaging.Targets.IO
 {
@@ -6,9 +7,14 @@ namespace Packaging.Targets.IO
     {
         public static string ReadAsUtf8String(this TarFile file)
         {
-            using (var r = new StreamReader(file.Open()))
+            // Use Encoding.UTF8 on a byte array instead of a StreamReader to make sure
+            // we stop reading when we encounter a null (\0) character.
+            using (var stream = file.Open())
             {
-                return r.ReadToEnd();
+                byte[] data = new byte[stream.Length];
+                stream.Read(data, 0, data.Length);
+
+                return Encoding.UTF8.GetString(data);
             }
         }
     }
