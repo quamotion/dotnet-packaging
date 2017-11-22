@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -19,8 +20,59 @@ namespace Packaging.Targets.Pkg
         public Dictionary<object, BomPointer> Pointers
         { get; } = new Dictionary<object, BomPointer>();
 
+        public void Write(Stream stream)
+        {
+            if (this.Pointers.Count == 0)
+            {
+                throw new InvalidOperationException();
+            }
+
+            byte[] whitespace = new byte[0x1000];
+
+            // Write the header, and pad with whitepace to 0x200
+            stream.WriteStruct(this.bom.Header);
+            stream.Write(whitespace, 0, 0x200 - Marshal.SizeOf<BomHeader>());
+
+            // Write the value of the VIndex variable
+            stream.WriteStruct(
+                new BomVIndex()
+                {
+                    indexToVTree = (uint)this.bom.Index.Pointers.IndexOf(this.Pointers[this.bom.VIndex.BomTree]),
+                    unknown0 = 1,
+                    unknown2 = 0,
+                    unknown3 = 0,
+                });
+
+            // Not sure yet what this is
+            byte[] data = new byte[] { 0x6e, 0x66, 0x6f, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00 };
+            stream.Write(data, 0, data.Length);
+
+            // Write the value of the HLindex variable
+            var treeMagicArray = Encoding.ASCII.GetBytes("tree");
+            Array.Reverse(treeMagicArray);
+            var treeMagic = BitConverter.ToUInt32(treeMagicArray, 0);
+
+            stream.WriteStruct(
+                new BomTree()
+                {
+                    tree = treeMagic,
+                    version = 1,
+                    child = (uint)this.bom.Index.Pointers.IndexOf(this.Pointers[this.bom.HLIndex]),
+                    blockSize = 0x1000,
+                    pathCount = (uint)this.bom.HLIndex.Count
+                });
+
+            // Write the BomPaths tree
+
+        }
+
         public void AssignPointers()
         {
+            if (this.Pointers.Count > 0)
+            {
+                throw new InvalidOperationException();
+            }
+
             this.AssignPointer(this.bom.Header, 0x200);
             this.AssignPointer(this.bom.Variables.Variables["VIndex"], (uint)Marshal.SizeOf<BomVIndex>());
             this.AssignPointer(new object(), 0xF); // Unknown
@@ -28,7 +80,7 @@ namespace Packaging.Targets.Pkg
             this.AssignPointer(new object(), 0x5);
             this.AssignPointer(this.bom.Paths, 0x1000);
             this.AssignPointer(this.bom.Variables.Variables["Paths"], 0x15);
-            this.AssignPointer(this.bom.VIndexPointer, (uint)Marshal.SizeOf<BomTree>());
+            this.AssignPointer(this.bom.VIndex.BomTree, (uint)Marshal.SizeOf<BomTree>());
 
             // Top-level directory
             this.AssignPointer(this.bom.Paths[0], this.bom.Paths[0].SerializedSize);

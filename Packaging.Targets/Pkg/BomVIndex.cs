@@ -12,7 +12,7 @@ namespace Packaging.Targets.Pkg
         public uint indexToVTree;
 
         /// <summary>
-        /// The value of this field is always 2.
+        /// The value of this field is always 2 (or 0?).
         /// </summary>
         public uint unknown2;
 

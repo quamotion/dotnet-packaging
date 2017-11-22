@@ -85,20 +85,20 @@ namespace Packaging.Targets.Pkg
                 switch (variable.name)
                 {
                     case "Paths":
+                        this.Paths.BomTree = this.stream.ReadStruct<BomTree>();
                         this.ReadPaths(
-                            this.stream.ReadStruct<BomTree>(),
                             this.Paths);
                         break;
 
                     case "HLIndex":
+                        this.HLIndex.BomTree = this.stream.ReadStruct<BomTree>();
                         this.ReadPaths(
-                            this.stream.ReadStruct<BomTree>(),
                             this.HLIndex);
                         break;
 
                     case "Size64":
+                        this.Size64.BomTree = this.stream.ReadStruct<BomTree>();
                         this.ReadPaths(
-                            this.stream.ReadStruct<BomTree>(),
                             this.Size64);
                         break;
 
@@ -118,8 +118,8 @@ namespace Packaging.Targets.Pkg
 
                         var vPtr = this.Index.Pointers[(int)vIndex.indexToVTree];
                         this.stream.Seek((int)vPtr.address, SeekOrigin.Begin);
-                        var vTree = this.stream.ReadStruct<BomTree>();
-                        this.ReadPaths(vTree, this.VIndex);
+                        this.VIndex.BomTree = this.stream.ReadStruct<BomTree>();
+                        this.ReadPaths(this.VIndex);
                         break;
 
                     default:
@@ -143,29 +143,26 @@ namespace Packaging.Targets.Pkg
         public BomInfo BomInfo
         { get; private set; }
 
-        public Collection<BomFile> Paths
-        { get; } = new Collection<BomFile>();
+        public BomFileTree Paths
+        { get; } = new BomFileTree();
 
-        public Collection<BomFile> HLIndex
-        { get; } = new Collection<BomFile>();
+        public BomFileTree HLIndex
+        { get; } = new BomFileTree();
 
-        public Collection<BomFile> Size64
-        { get; } = new Collection<BomFile>();
+        public BomFileTree Size64
+        { get; } = new BomFileTree();
 
-        public object VIndexPointer
-        { get; } = new object();
+        public BomFileTree VIndex
+        { get; } = new BomFileTree();
 
-        public Collection<BomFile> VIndex
-        { get; } = new Collection<BomFile>();
-
-        private void ReadPaths(BomTree tree, Collection<BomFile> files)
+        private void ReadPaths(BomFileTree files)
         {
-            var child = this.Index.Pointers[(int)tree.child];
+            var child = this.Index.Pointers[(int)files.BomTree.child];
 
             this.ReadPaths(child, files);
         }
 
-        private void ReadPaths(BomPointer pointer, Collection<BomFile> files)
+        private void ReadPaths(BomPointer pointer, BomFileTree files)
         {
             this.stream.Seek(pointer.address, SeekOrigin.Begin);
             BomPaths paths = new BomPaths();

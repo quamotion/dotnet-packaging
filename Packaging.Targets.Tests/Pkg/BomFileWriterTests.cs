@@ -22,7 +22,7 @@ namespace Packaging.Targets.Tests.Pkg
                 Assert.Equal(new BomPointer(0x021C, 0x0015), writer.Pointers[bom.Variables.Variables["HLIndex"]]);
                 Assert.Equal(new BomPointer(0x0236, 0x1000), writer.Pointers[bom.Paths]);
                 Assert.Equal(new BomPointer(0x1236, 0x0015), writer.Pointers[bom.Variables.Variables["Paths"]]);
-                Assert.Equal(new BomPointer(0x124B, 0x0015), writer.Pointers[bom.VIndexPointer]);
+                Assert.Equal(new BomPointer(0x124B, 0x0015), writer.Pointers[bom.VIndex.BomTree]);
                 Assert.Equal(new BomPointer(0x1260, 0x0006), writer.Pointers[bom.Paths[0]]);
                 Assert.Equal(new BomPointer(0x1266, 0x0008), writer.Pointers[bom.Paths[0].PathInfoPointer]);
                 Assert.Equal(new BomPointer(0x1271, 0x1000), writer.Pointers[bom.HLIndex]);
@@ -39,6 +39,23 @@ namespace Packaging.Targets.Tests.Pkg
                 Assert.Equal(new BomPointer(0x33CD, 0x0008), writer.Pointers[bom.Paths[2].PathInfoPointer]);
                 Assert.Equal(new BomPointer(0x33D5, 0x001C), writer.Pointers[bom.BomInfo]);
                 Assert.Equal(new BomPointer(0x33F1, 0x5590), writer.Pointers[bom.Index]);
+            }
+        }
+
+        [Fact]
+        public void WriteFileTest()
+        {
+            using (Stream expected = File.OpenRead("Pkg/Bom"))
+            using (MemoryStream output = new MemoryStream())
+            using (ValidatingCompositeStream stream = new ValidatingCompositeStream(null, output, expected))
+            {
+                Bom bom = new Bom(expected);
+                expected.Position = 0;
+
+                BomFileWriter writer = new BomFileWriter(bom);
+                writer.AssignPointers();
+
+                writer.Write(stream);
             }
         }
     }
