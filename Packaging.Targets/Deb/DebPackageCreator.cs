@@ -79,7 +79,7 @@ namespace Packaging.Targets.Deb
             if (installService)
             {
                 // Install and activate the service.
-                pkg.PostInstallScript += $"systemctl reload\n";
+                pkg.PostInstallScript += $"systemctl daemon-reload\n";
                 pkg.PostInstallScript += $"systemctl enable --now {serviceName}.service\n";
                 pkg.PreRemoveScript += $"systemctl --no-reload disable --now {serviceName}.service\n";
             }

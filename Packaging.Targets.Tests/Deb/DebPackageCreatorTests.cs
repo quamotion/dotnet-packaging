@@ -132,7 +132,7 @@ namespace Packaging.Targets.Tests.Deb
 /usr/sbin/useradd -g demouser -s /sbin/nologin -r -d /opt/local demouser 2>/dev/null || :
 echo 'Hello from pre install'
 ", pkg.PreInstallScript, ignoreLineEndingDifferences: true);
-            Assert.Equal(@"systemctl reload
+            Assert.Equal(@"systemctl daemon-reload
 systemctl enable --now demoservice.service
 echo 'Hello from post install'
 ", pkg.PostInstallScript, ignoreLineEndingDifferences: true);
