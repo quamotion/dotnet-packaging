@@ -1,5 +1,6 @@
 # Packaging utilities for .NET Core
 
+[![NuGet](https://img.shields.io/nuget/v/Packaging.Targets.svg)](https://www.nuget.org/packages/Packaging.Targets)
 [![Build status](https://ci.appveyor.com/api/projects/status/ac3j676f9g8r0g15?svg=true)](https://ci.appveyor.com/project/qmfrederik/dotnet-packaging)
 
 This repository contains command-line extensions for the .NET Core CLI which make it easy to create
