@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -277,8 +279,20 @@ namespace Packaging.Targets
                     md5hash = md5hasher.GetHashAndReset();
                 }
 
-                // Only support ELF32 and ELF64 colors; otherwise default to BLACK.
-                ArchiveEntryType entryType = this.GetArchiveEntryType(fileHeader);
+                var entryType = this.GetArchiveEntryType(fileHeader);
+
+                // check whether this is a .NET assembly
+                if (entryType == ArchiveEntryType.None && File.Exists(fileName))
+                {
+                    try
+                    {
+                        var assemblyName = AssemblyLoadContext.GetAssemblyName(fileName);
+                        entryType = ArchiveEntryType.NetAssembly;
+                    }
+                    catch (BadImageFormatException)
+                    {
+                    }
+                }
 
                 var mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG;
 
@@ -322,7 +336,7 @@ namespace Packaging.Targets
                     {
                         mode = (LinuxFileMode)Convert.ToUInt32(overridenFileMode, 8);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         throw new Exception($"Could not parse the file mode '{overridenFileMode}' for file '{name}'. Make sure to set the LinuxFileMode attriubute to an octal representation of a Unix file mode.");
                     }
