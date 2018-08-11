@@ -242,8 +242,16 @@ namespace Packaging.Targets.Tests.Rpm
             var secretKeyRing = krgen.GenerateSecretKeyRing();
             var privateKey = secretKeyRing.GetSecretKey().ExtractPrivateKey("dotnet".ToCharArray());
             var publicKey = secretKeyRing.GetPublicKey();
+            const string preInstScript = "echo preinst\n";
+            const string postInstScript = "echo postinst\n";
+            const string preRemoveScript = "echo preremove\n";
+            const string postRemoveScript = "echo postremove\n";
+            const string nameString = "libplist";
+            const string versionString = "2.0.1.151";
+            const string releaseString = "1.1";
+            const string archString = "x86_64";
 
-            using (Stream stream = File.OpenRead(@"Rpm/libplist-2.0.1.151-1.1.x86_64.rpm"))
+            using (Stream stream = File.OpenRead($"Rpm/{nameString}-{versionString}-{releaseString}.{archString}.rpm"))
             using (var targetStream = File.Open(@"RpmPackageCreatorTests_CreateTest.rpm", FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
                 var originalPackage = RpmPackageReader.Read(stream);
@@ -266,14 +274,18 @@ namespace Packaging.Targets.Tests.Rpm
                     creator.CreatePackage(
                         archive,
                         payloadStream,
-                        "libplist",
-                        "2.0.1.151",
-                        "x86_64",
-                        "1.1",
+                        nameString,
+                        versionString,
+                        archString,
+                        releaseString,
                         false,
                         null,
                         false,
                         null,
+                        preInstScript,
+                        postInstScript,
+                        preRemoveScript,
+                        postRemoveScript,
                         null,
                         null,
                         (metadata) => PlistMetadata.ApplyDefaultMetadata(metadata),
@@ -287,6 +299,14 @@ namespace Packaging.Targets.Tests.Rpm
                 var package = RpmPackageReader.Read(targetStream);
 
                 var metadata = new RpmMetadata(package);
+                Assert.Equal(metadata.Version, versionString);
+                Assert.Equal(metadata.Name, nameString);
+                Assert.Equal(metadata.Arch, archString);
+                Assert.Equal(metadata.Release, releaseString);
+                Assert.StartsWith(preInstScript, metadata.PreIn);
+                Assert.StartsWith(postInstScript, metadata.PostIn);
+                Assert.StartsWith(preRemoveScript, metadata.PreUn);
+                Assert.StartsWith(postRemoveScript, metadata.PostUn);
                 var signature = new RpmSignature(package);
 
                 Assert.True(signature.Verify(publicKey));
@@ -334,6 +354,10 @@ namespace Packaging.Targets.Tests.Rpm
                         false,
                         null,
                         false,
+                        null,
+                        null,
+                        null,
+                        null,
                         null,
                         null,
                         null,

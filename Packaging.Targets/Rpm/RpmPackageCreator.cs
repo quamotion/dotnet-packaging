@@ -84,6 +84,18 @@ namespace Packaging.Targets.Rpm
         /// <param name="prefix">
         /// A prefix to use.
         /// </param>
+        /// <param name="preInstallScript">
+        /// Pre-Install script
+        /// </param>
+        /// <param name="postInstallScript">
+        /// Post-Install script
+        /// </param>
+        /// <param name="preRemoveScript">
+        /// Pre-Remove script
+        /// </param>
+        /// <param name="postRemoveScript">
+        /// Post-Remove script
+        /// </param>
         /// <param name="additionalDependencies">
         /// Additional dependencies to add to the RPM package.
         /// </param>
@@ -108,6 +120,10 @@ namespace Packaging.Targets.Rpm
             bool installService,
             string serviceName,
             string prefix,
+            string preInstallScript,
+            string postInstallScript,
+            string preRemoveScript,
+            string postRemoveScript,
             IEnumerable<PackageDependency> additionalDependencies,
             Action<RpmMetadata> additionalMetadata,
             PgpPrivateKey privateKey,
@@ -125,6 +141,10 @@ namespace Packaging.Targets.Rpm
                 installService,
                 serviceName,
                 prefix,
+                preInstallScript,
+                postInstallScript,
+                preRemoveScript,
+                postRemoveScript,
                 additionalDependencies,
                 additionalMetadata,
                 new PackageSigner(privateKey),
@@ -167,6 +187,18 @@ namespace Packaging.Targets.Rpm
         /// <param name="prefix">
         /// A prefix to use.
         /// </param>
+        /// <param name="preInstallScript">
+        /// Pre-Install script
+        /// </param>
+        /// <param name="postInstallScript">
+        /// Post-Install script
+        /// </param>
+        /// <param name="preRemoveScript">
+        /// Pre-Remove script
+        /// </param>
+        /// <param name="postRemoveScript">
+        /// Post-Remove script
+        /// </param>
         /// <param name="additionalDependencies">
         /// Additional dependencies to add to the RPM package.
         /// </param>
@@ -201,6 +233,10 @@ namespace Packaging.Targets.Rpm
             bool installService,
             string serviceName,
             string prefix,
+            string preInstallScript,
+            string postInstallScript,
+            string preRemoveScript,
+            string postRemoveScript,
             IEnumerable<PackageDependency> additionalDependencies,
             Action<RpmMetadata> additionalMetadata,
             IPackageSigner signer,
@@ -255,10 +291,10 @@ namespace Packaging.Targets.Rpm
             metadata.SourceRpm = $"{name}-{version}-{release}.src.rpm";
 
             // Scripts which run before & after installation and removal.
-            var preIn = string.Empty;
-            var postIn = string.Empty;
-            var preUn = string.Empty;
-            var postUn = string.Empty;
+            var preIn = preInstallScript ?? string.Empty;
+            var postIn = postInstallScript ?? string.Empty;
+            var preUn = preRemoveScript ?? string.Empty;
+            var postUn = postRemoveScript ?? string.Empty;
 
             if (createUser)
             {
