@@ -18,6 +18,16 @@
         /// <summary>
         /// The file is a 64-bit executable.
         /// </summary>
-        Executable64 = 2
+        Executable64 = 2,
+
+        /// <summary>
+        /// The file is a module (like a .NET assembly)
+        /// </summary>
+        NetAssembly = 3,
+
+        /// <summary>
+        /// This file is a documentation entry
+        /// </summary>
+        Doc = 4
     }
 }
