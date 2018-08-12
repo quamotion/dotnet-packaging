@@ -94,6 +94,26 @@ namespace Packaging.Targets
         }
 
         /// <summary>
+        /// Gets the file mode of the file in the Linux filesystem.
+        /// </summary>
+        /// <param name="item">
+        /// The item for which to get the file mode.
+        /// </param>
+        /// <returns>
+        /// The file mode of the file on the Linux file system.
+        /// </returns>
+        public static bool GetDocumentation(this ITaskItem item)
+        {
+            var docValue = TryGetValue(item, "Documentation");
+            if (docValue != null)
+            {
+                return docValue.ToLower().Equals("true");
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Gets the Linux owner of the file.
         /// </summary>
         /// <param name="item">

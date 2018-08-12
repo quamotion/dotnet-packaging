@@ -117,7 +117,7 @@ namespace Packaging.Targets.Tests.Rpm
                 {
                     ArchiveBuilder builder = new ArchiveBuilder(new PlistFileAnalyzer());
                     RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
-                    var entries = builder.FromCpio(cpio);
+                    var entries = builder.FromCpio(originalPackage, cpio);
                     var files = creator.CreateFiles(entries);
 
                     var metadata = new PublicRpmMetadata(package);
@@ -186,7 +186,7 @@ namespace Packaging.Targets.Tests.Rpm
                 {
                     ArchiveBuilder builder = new ArchiveBuilder(new PlistFileAnalyzer());
                     RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
-                    var entries = builder.FromCpio(cpio);
+                    var entries = builder.FromCpio(originalPackage, cpio);
                     var files = creator.CreateFiles(entries);
 
                     // Core routine to populate files and dependencies
