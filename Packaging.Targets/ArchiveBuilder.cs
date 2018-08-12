@@ -48,20 +48,23 @@ namespace Packaging.Targets
         /// <summary>
         /// Extracts the <see cref="ArchiveEntry"/> objects from a CPIO file.
         /// </summary>
+        /// <param name="rpmPackage"></param>
         /// <param name="file">
-        /// The CPIO file from which to extract the entries.
+        ///     The CPIO file from which to extract the entries.
         /// </param>
         /// <returns>
         /// A list of <see cref="ArchiveEntry"/> objects representing the data in the CPIO file.
         /// </returns>
-        public List<ArchiveEntry> FromCpio(CpioFile file)
+        public List<ArchiveEntry> FromCpio(RpmPackage rpmPackage, CpioFile file)
         {
             List<ArchiveEntry> value = new List<ArchiveEntry>();
             byte[] buffer = new byte[1024];
             byte[] fileHeader = null;
+            int currentEntry = -1;
 
             while (file.Read())
             {
+                currentEntry++;
                 fileHeader = null;
 
                 ArchiveEntry entry = new ArchiveEntry()
@@ -77,8 +80,39 @@ namespace Packaging.Targets
                     LinkTo = string.Empty,
                     Sha256 = Array.Empty<byte>(),
                     SourceFilename = null,
-                    IsAscii = true
+                    IsAscii = true,
+
                 };
+
+
+                var fileColor = (RpmFileColor)(rpmPackage.Header.Records[IndexTag.RPMTAG_FILECOLORS]?.Value as Collection<int>)?[currentEntry];
+                var fileFlag = (RpmFileFlags)(rpmPackage.Header.Records[IndexTag.RPMTAG_FILEFLAGS]?.Value as Collection<int>)?[currentEntry];
+                var fileClassIndex = (int)(rpmPackage.Header.Records[IndexTag.RPMTAG_FILECLASS]?.Value as Collection<int>)?[currentEntry];
+                var fileClass = (rpmPackage.Header.Records[IndexTag.RPMTAG_CLASSDICT]?.Value as Collection<string>)?[fileClassIndex];
+
+                entry.Group = (rpmPackage.Header.Records[IndexTag.RPMTAG_FILEGROUPNAME]?.Value as Collection<string>)?[currentEntry];
+                entry.Owner = (rpmPackage.Header.Records[IndexTag.RPMTAG_FILEUSERNAME]?.Value as Collection<string>)?[currentEntry];
+                entry.LinkTo = (rpmPackage.Header.Records[IndexTag.RPMTAG_FILELINKTOS]?.Value as Collection<string>)?[currentEntry];
+
+                if ((fileFlag & RpmFileFlags.RPMFILE_DOC) == RpmFileFlags.RPMFILE_DOC)
+                {
+                    entry.Type = ArchiveEntryType.Doc;
+                }
+
+                if ((fileColor & RpmFileColor.RPMFC_ELF32) == RpmFileColor.RPMFC_ELF32)
+                {
+                    entry.Type = ArchiveEntryType.Executable32;
+                }
+
+                if ((fileColor & RpmFileColor.RPMFC_ELF64) == RpmFileColor.RPMFC_ELF64)
+                {
+                    entry.Type = ArchiveEntryType.Executable64;
+                }
+
+                if (fileClass.Contains("mono"))
+                {
+                    entry.Type = ArchiveEntryType.NetAssembly;
+                }
 
                 if (entry.Mode.HasFlag(LinuxFileMode.S_IFREG) && !entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
                 {
@@ -108,8 +142,6 @@ namespace Packaging.Targets
 
                         entry.Sha256 = hasher.GetHashAndReset();
                     }
-
-                    entry.Type = this.GetArchiveEntryType(fileHeader);
                 }
                 else if (entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
                 {
@@ -279,37 +311,58 @@ namespace Packaging.Targets
                     md5hash = md5hasher.GetHashAndReset();
                 }
 
-                var entryType = this.GetArchiveEntryType(fileHeader);
-
-                // check whether this is a .NET assembly
-                if (entryType == ArchiveEntryType.None && File.Exists(fileName))
+                ArchiveEntryType entryType;
+                if (fileMetadata != null && fileMetadata.GetDocumentation())
                 {
-                    try
+                    entryType = ArchiveEntryType.Doc;
+                }
+                else
+                {
+                    // check whether it's an ELF file
+                    entryType = this.GetArchiveEntryType(fileHeader);
+
+                    // check whether this is a .NET assembly
+                    if (entryType == ArchiveEntryType.None && File.Exists(fileName))
                     {
-                        var assemblyName = AssemblyLoadContext.GetAssemblyName(fileName);
-                        entryType = ArchiveEntryType.NetAssembly;
-                    }
-                    catch (BadImageFormatException)
-                    {
+                        try
+                        {
+                            var assemblyName = AssemblyLoadContext.GetAssemblyName(fileName);
+                            entryType = ArchiveEntryType.NetAssembly;
+                        }
+                        catch (BadImageFormatException)
+                        {
+                        }
                     }
                 }
 
-                var mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG;
-
-                if (entryType == ArchiveEntryType.Executable32 || entryType == ArchiveEntryType.Executable64)
+                LinuxFileMode mode = 0;
+                if (fileMetadata.GetLinuxFileMode() != null)
                 {
-                    mode |= LinuxFileMode.S_IXOTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IXUSR;
+                    // allow for the file mode to use numbers or symbols per
+                    // our enum and bitwise or
+                    var smodes = fileMetadata.GetLinuxFileMode().Split('|', ' ');
+                    foreach (var s in smodes)
+                    {
+                        if (Enum.TryParse(s, out LinuxFileMode m))
+                        {
+                            mode |= m;
+                        }
+                    }
+                }
+                else
+                {
+                    mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR |
+                           LinuxFileMode.S_IFREG;
+                    if (entryType == ArchiveEntryType.Executable32 || entryType == ArchiveEntryType.Executable64)
+                    {
+                        mode |= LinuxFileMode.S_IXOTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IWUSR |
+                                LinuxFileMode.S_IXUSR;
+                    }
                 }
 
                 // If a Linux path has been specified, use that one, else, use the default one based on the prefix
                 // + current file name.
-                string name = fileMetadata?.GetLinuxPath();
-
-                if (name == null)
-                {
-                    name = prefix + "/" + fileName;
-                }
-
+                string name = fileMetadata?.GetLinuxPath() ?? prefix + "/" + fileName;
                 string linkTo = string.Empty;
 
                 if (mode.HasFlag(LinuxFileMode.S_IFLNK))

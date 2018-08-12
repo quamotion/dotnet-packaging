@@ -33,15 +33,7 @@ namespace Packaging.Targets.Rpm
         /// <inheritdoc/>
         public virtual RpmFileFlags DetermineFlags(ArchiveEntry entry)
         {
-            if (entry.Mode.HasFlag(LinuxFileMode.S_IFDIR))
-            {
-                return RpmFileFlags.None;
-            }
-            else if (entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
-            {
-                return RpmFileFlags.None;
-            }
-            else if (entry.Type == ArchiveEntryType.Doc)
+            if (entry.Type == ArchiveEntryType.Doc)
             {
                 return RpmFileFlags.RPMFILE_DOC;
             }

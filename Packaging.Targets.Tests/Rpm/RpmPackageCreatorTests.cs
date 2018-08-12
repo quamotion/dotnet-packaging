@@ -46,7 +46,7 @@ namespace Packaging.Targets.Tests.Rpm
 
                     RpmPackageCreator creator = new RpmPackageCreator(analyzer);
                     ArchiveBuilder builder = new ArchiveBuilder(analyzer);
-                    var entries = builder.FromCpio(cpio);
+                    var entries = builder.FromCpio(originalPackage, cpio);
                     var files = creator.CreateFiles(entries);
 
                     var originalMetadata = new RpmMetadata(originalPackage);
@@ -98,7 +98,7 @@ namespace Packaging.Targets.Tests.Rpm
                 {
                     ArchiveBuilder builder = new ArchiveBuilder(new PlistFileAnalyzer());
                     RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
-                    var entries = builder.FromCpio(cpio);
+                    var entries = builder.FromCpio(originalPackage, cpio);
                     var files = creator.CreateFiles(entries);
 
                     // Core routine to populate files and dependencies
@@ -151,7 +151,7 @@ namespace Packaging.Targets.Tests.Rpm
                 using (var cpio = new CpioFile(payloadStream, false))
                 {
                     ArchiveBuilder builder = new ArchiveBuilder(new PlistFileAnalyzer());
-                    var entries = builder.FromCpio(cpio);
+                    var entries = builder.FromCpio(originalPackage, cpio);
                     files = creator.CreateFiles(entries);
                 }
 
@@ -261,7 +261,7 @@ namespace Packaging.Targets.Tests.Rpm
                 using (CpioFile cpio = new CpioFile(decompressedPayloadStream, leaveOpen: false))
                 {
                     ArchiveBuilder builder = new ArchiveBuilder();
-                    archive = builder.FromCpio(cpio);
+                    archive = builder.FromCpio(originalPackage, cpio);
                 }
 
                 using (var decompressedPayloadStream = RpmPayloadReader.GetDecompressedPayloadStream(originalPackage))
@@ -338,7 +338,7 @@ namespace Packaging.Targets.Tests.Rpm
                 using (CpioFile cpio = new CpioFile(decompressedPayloadStream, leaveOpen: false))
                 {
                     ArchiveBuilder builder = new ArchiveBuilder();
-                    archive = builder.FromCpio(cpio);
+                    archive = builder.FromCpio(originalPackage, cpio);
                 }
 
                 using (var compressedPayloadStream = RpmPayloadReader.GetCompressedPayloadStream(originalPackage))
