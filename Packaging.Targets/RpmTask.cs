@@ -124,6 +124,42 @@ namespace Packaging.Targets
             set;
         }
 
+        /// <summary>
+        /// Gets or sets an additional pre-installation script to execute.
+        /// </summary>
+        /// <remarks>
+        /// This variable must contain the script itself, and not a path to a file
+        /// which contains the script.
+        /// </remarks>
+        public string PreInstallScript { get; set; }
+
+        /// <summary>
+        /// Gets or sets an additional post-installation script to execute.
+        /// </summary>
+        /// <remarks>
+        /// This variable must contain the script itself, and not a path to a file
+        /// which contains the script.
+        /// </remarks>
+        public string PostInstallScript { get; set; }
+
+        /// <summary>
+        /// Gets or sets an additional pre-removal script to execute.
+        /// </summary>
+        /// <remarks>
+        /// This variable must contain the script itself, and not a path to a file
+        /// which contains the script.
+        /// </remarks>
+        public string PreRemoveScript { get; set; }
+
+        /// <summary>
+        /// Gets or sets an additional post-removal script to execute.
+        /// </summary>
+        /// <remarks>
+        /// This variable must contain the script itself, and not a path to a file
+        /// which contains the script.
+        /// </remarks>
+        public string PostRemoveScript { get; set; }
+
         public override bool Execute()
         {
             this.Log.LogMessage(MessageImportance.Normal, "Creating RPM package '{0}' from folder '{1}'", this.RpmPath, this.PublishDir);
@@ -179,6 +215,10 @@ namespace Packaging.Targets
                     this.InstallService,
                     this.ServiceName,
                     this.Prefix,
+                    this.PreInstallScript,
+                    this.PostInstallScript,
+                    this.PreRemoveScript,
+                    this.PostRemoveScript,
                     dependencies,
                     null,
                     privateKey,
