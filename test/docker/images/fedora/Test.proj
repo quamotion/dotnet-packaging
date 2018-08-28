@@ -1,0 +1,23 @@
+<Project>
+  <!-- <Import Project="..\..\..\version.props" /> -->
+  <PropertyGroup>
+    <OutputType>None</OutputType>
+  </PropertyGroup>
+  <Target Name="PublishTestProjects">
+       <MSBuild Projects="../../testprojects/clifdd/src/clifdd.csproj;../../testprojects/cliscd/src/cliscd.csproj" 
+       Targets="Restore;Publish"
+       Properties="RuntimeIdentifier=fedora-x64" />
+  </Target>
+  <Target Name="Build">
+      <Exec Command="build.cmd $(BuildNumber) $(VersionPrefix) $(VersionSuffix) $(TargetFramework)" Condition="'$(OS)'=='Windows_NT'"/>
+      <Exec Command="bash ./build.sh $(BuildNumber) $(VersionPrefix) $(VersionSuffix) $(TargetFramework)" Condition="'$(OS)'=='Unix'"/>
+  </Target>
+  <Target Name="VSTest" DependsOnTargets="PublishTestProjects">
+      <Exec Command="test.cmd"  Condition="'$(OS)'=='Windows_NT'"/>
+      <Exec Command="bash ./test.sh" Condition="'$(OS)'=='Unix'"/>
+  </Target>
+  <Target Name="Clean">
+      <Exec Command="clean.cmd" Condition="'$(OS)'=='Windows_NT'"/>
+      <Exec Command="bash ./clean.sh" Condition="'$(OS)'=='Unix'"/>
+  </Target>
+</Project>

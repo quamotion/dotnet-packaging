@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <OutputType>None</OutputType>
+  </PropertyGroup>
+
+ <ItemGroup>
+    <ProjectsToBuild Include="**\*.proj" Exclude="$(MSBuildProjectFile)"/>
+  </ItemGroup>
+ <Target Name="Build">
+    <MSBuild Projects ="@(ProjectsToBuild)" ContinueOnError ="false" Targets="Build" />
+  </Target>
+  <Target Name="VSTest">
+      <MSBuild Projects ="@(ProjectsToBuild)" ContinueOnError ="false" Targets="VSTest"/>
+  </Target>
+  <Target Name="Clean">
+      <MSBuild Projects ="@(ProjectsToBuild)" ContinueOnError ="false" Targets="Clean"/>
+  </Target>
+</Project>

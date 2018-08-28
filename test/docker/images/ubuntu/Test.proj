@@ -1,0 +1,32 @@
+<Project>
+  <!-- <Import Project="..\..\..\version.props" />  -->
+  <PropertyGroup>
+    <OutputType>None</OutputType>
+  </PropertyGroup>
+  <Target Name="PublishTestProjects">
+       <MSBuild Projects="../../testprojects/clifdd/src/clifdd.csproj" 
+       Targets="PackageDebian"
+       Properties="RuntimeIdentifier=ubuntu.16.04-x64">
+          <Output TaskParameter="TargetOutputs" ItemName="FddPackage" /> 
+       </MSBuild>
+       <Message Text="@(FddPackage)"  Importance="high" />
+       <MSBuild Projects="../../testprojects/cliscd/src/cliscd.csproj" 
+       Targets="PackageDebian"
+       Properties="RuntimeIdentifier=ubuntu.16.04-x64">
+          <Output TaskParameter="TargetOutputs" ItemName="ScdPackage" /> 
+       </MSBuild>
+       <Message Text="@(ScdPackage)" Importance="high"/>
+  </Target>
+  <Target Name="Build" DependsOnTargets="PublishTestProjects">
+      <Exec Command="build.cmd &quot;@(FddPackage)&quot; &quot;@(ScdPackage)&quot;" Condition="'$(OS)'=='Windows_NT'"/>
+      <Exec Command="bash ./build.sh &quot;@(FddPackage)&quot; &quot;@(ScdPackage)&quot;" Condition="'$(OS)'=='Unix'"/>
+  </Target>
+  <Target Name="VSTest" DependsOnTargets="Build"> 
+      <Exec Command="test.cmd &quot;@(FddPackage)&quot; &quot;@(ScdPackage)&quot;"  Condition="'$(OS)'=='Windows_NT'"/>
+      <Exec Command="bash ./test.sh &quot;@(FddPackage)&quot; &quot;@(ScdPackage)&quot;" Condition="'$(OS)'=='Unix'"/>
+  </Target>
+  <Target Name="Clean">
+      <Exec Command="clean.cmd" Condition="'$(OS)'=='Windows_NT'"/>
+      <Exec Command="bash ./clean.sh" Condition="'$(OS)'=='Unix'"/>
+  </Target>
+</Project>
