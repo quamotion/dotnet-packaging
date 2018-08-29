@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 
 set _IMAGENAME=%1
 set _TESTNAME=%2

@@ -1,0 +1,23 @@
+installing /tests/packages/clifdd.0.2.0-preview.fedora-x64.rpm
+.
+..
+System.Globalization.Native.so
+System.IO.Compression.Native.so
+System.Native.so
+System.Net.Http.Native.so
+System.Net.Security.Native.so
+System.Security.Cryptography.Native.OpenSsl.so
+clifdd
+createdump
+libclrjit.so
+libcoreclr.so
+libcoreclrtraceptprovider.so
+libdbgshim.so
+libhostfxr.so
+libhostpolicy.so
+libmscordaccore.so
+libmscordbi.so
+libsos.so
+libsosplugin.so
+ls: cannot access '/etc/clifdd': No such file or directory
+ls: cannot access '/root/.clifdd': No such file or directory

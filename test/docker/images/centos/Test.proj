@@ -5,12 +5,12 @@
   </PropertyGroup>
   <Target Name="PublishTestProjects">
        <MSBuild Projects="../../testprojects/clifdd/clifdd.csproj" 
-       Targets="Restore;PackageRpm"
+       Targets="Clean;Restore;PackageRpm"
        Properties="RuntimeIdentifier=centos-x64">
           <Output TaskParameter="TargetOutputs" ItemName="FddPackage" /> 
        </MSBuild>
        <MSBuild Projects="../../testprojects/cliscd/cliscd.csproj" 
-       Targets="Restore;PackageRpm"
+       Targets="Clean;Restore;PackageRpm"
        Properties="RuntimeIdentifier=centos-x64">
           <Output TaskParameter="TargetOutputs" ItemName="ScdPackage" /> 
        </MSBuild>

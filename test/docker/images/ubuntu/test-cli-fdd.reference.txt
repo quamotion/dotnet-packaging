@@ -1,4 +1,6 @@
-installing /tests/packages/clifdd.1.0.0.ubuntu.16.04-x64.deb
+installing /tests/packages/clifdd.0.2.0-preview.ubuntu.16.04-x64.deb
+.
+..
 Microsoft.CSharp.dll
 Microsoft.VisualBasic.dll
 Microsoft.Win32.Primitives.dll

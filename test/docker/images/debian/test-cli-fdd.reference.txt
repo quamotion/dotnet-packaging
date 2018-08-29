@@ -1,4 +1,6 @@
-installing /tests/packages/cliscd.0.2.0-preview.ubuntu.16.04-x64.deb
+/tests/packages /
+/
+installing /tests/packages/clifdd.0.2.0-preview.debian.8-x64.deb
 .
 ..
 Microsoft.CSharp.dll
@@ -166,11 +168,11 @@ System.Xml.XmlSerializer.dll
 System.Xml.dll
 System.dll
 WindowsBase.dll
-cliscd
-cliscd.deps.json
-cliscd.dll
-cliscd.pdb
-cliscd.runtimeconfig.json
+clifdd
+clifdd.deps.json
+clifdd.dll
+clifdd.pdb
+clifdd.runtimeconfig.json
 createdump
 libclrjit.so
 libcoreclr.so
@@ -185,5 +187,5 @@ libsosplugin.so
 mscorlib.dll
 netstandard.dll
 sosdocsunix.txt
-ls: cannot access '/etc/cliscd': No such file or directory
-ls: cannot access '/root/.cliscd': No such file or directory
+ls: cannot access /etc/clifdd: No such file or directory
+ls: cannot access /root/.clifdd: No such file or directory
