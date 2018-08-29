@@ -15,7 +15,7 @@
   <Target Name="Clean">
       <MSBuild Projects ="@(ProjectsToBuild)" ContinueOnError ="false" Targets="Clean"/>
   </Target>
-   <Target Name="Restore">
+  <Target Name="Restore">
       <MSBuild Projects ="@(ProjectsToBuild)" ContinueOnError ="false" Targets="Restore"/>
   </Target>
 </Project>

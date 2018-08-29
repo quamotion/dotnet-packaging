@@ -4,7 +4,7 @@
   </PropertyGroup>
 
  <ItemGroup>
-    <ProjectsToBuild Include="*\*.proj" Exclude="$(MSBuildProjectFile)"/>
+    <ProjectsToBuild Include="*\*proj" Exclude="$(MSBuildProjectFile)"/>
   </ItemGroup>
  <Target Name="Build">
     <MSBuild Projects ="@(ProjectsToBuild)" ContinueOnError ="false" Targets="Build" />
