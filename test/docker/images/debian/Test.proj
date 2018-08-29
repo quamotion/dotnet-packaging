@@ -4,20 +4,29 @@
     <OutputType>None</OutputType>
   </PropertyGroup>
   <Target Name="PublishTestProjects">
-       <MSBuild Projects="../../testprojects/clifdd/src/clifdd.csproj;../../testprojects/cliscd/src/cliscd.csproj" 
-       Targets="Restore;Publish"
-       Properties="RuntimeIdentifier=debian.8-x64" />
+       <MSBuild Projects="../../testprojects/clifdd/clifdd.csproj" 
+       Targets="Restore;PackageDebian"
+       Properties="RuntimeIdentifier=debian.8-x64">
+          <Output TaskParameter="TargetOutputs" ItemName="FddPackage" /> 
+       </MSBuild>
+       <MSBuild Projects="../../testprojects/cliscd/cliscd.csproj" 
+       Targets="Restore;PackageDebian"
+       Properties="RuntimeIdentifier=debian.8-x64">
+          <Output TaskParameter="TargetOutputs" ItemName="ScdPackage" /> 
+       </MSBuild>
   </Target>
-  <Target Name="Build">
-      <Exec Command="build.cmd $(BuildNumber) $(VersionPrefix) $(VersionSuffix) $(TargetFramework)" Condition="'$(OS)'=='Windows_NT'"/>
-      <Exec Command="bash ./build.sh $(BuildNumber) $(VersionPrefix) $(VersionSuffix) $(TargetFramework)" Condition="'$(OS)'=='Unix'"/>
+  <Target Name="Build" DependsOnTargets="PublishTestProjects">
+      <Exec Command="build.cmd &quot;@(FddPackage)&quot; &quot;@(ScdPackage)&quot;" Condition="'$(OS)'=='Windows_NT'"/>
+      <Exec Command="bash ./build.sh &quot;@(FddPackage)&quot; &quot;@(ScdPackage)&quot;" Condition="'$(OS)'=='Unix'"/>
   </Target>
-  <Target Name="VSTest" DependsOnTargets="PublishTestProjects">
-      <Exec Command="test.cmd"  Condition="'$(OS)'=='Windows_NT'"/>
-      <Exec Command="bash ./test.sh" Condition="'$(OS)'=='Unix'"/>
+  <Target Name="VSTest" DependsOnTargets="Build"> 
+      <Exec Command="test.cmd &quot;@(FddPackage)&quot; &quot;@(ScdPackage)&quot;"  Condition="'$(OS)'=='Windows_NT'"/>
+      <Exec Command="bash ./test.sh &quot;@(FddPackage)&quot; &quot;@(ScdPackage)&quot;" Condition="'$(OS)'=='Unix'"/>
   </Target>
   <Target Name="Clean">
       <Exec Command="clean.cmd" Condition="'$(OS)'=='Windows_NT'"/>
       <Exec Command="bash ./clean.sh" Condition="'$(OS)'=='Unix'"/>
+  </Target>
+   <Target Name="Restore">
   </Target>
 </Project>
