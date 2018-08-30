@@ -8,4 +8,4 @@ git:
 script:
   - dotnet restore dotnet-packaging.sln
   - dotnet pack dotnet-packaging.sln -c Release
-  - dotnet test Packaging.Targets.Tests\Packaging.Targets.Tests.csproj
+  - dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj
