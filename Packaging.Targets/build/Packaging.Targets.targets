@@ -49,7 +49,11 @@
              CreateUser="$(CreateUser)"
              UserName="$(UserName)"
              InstallService="$(InstallService)"
-             ServiceName="$(ServiceName)"/>
+             ServiceName="$(ServiceName)"
+             PreInstallScript="$(PreInstallScript)"
+             PostInstallScript="$(PostInstallScript)"
+             PreRemoveScript="$(PreRemoveScript)"
+             PostRemoveScript="$(PostRemoveScript)"/>
   </Target>
 
   <Target Name="CreateDeb" DependsOnTargets="CreatePackageProperties">
