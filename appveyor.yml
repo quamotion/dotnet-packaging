@@ -6,7 +6,7 @@ before_build:
   - dotnet restore dotnet-packaging.sln
 
 build_script:
-  - dotnet pack dotnet-packaging.sln -c Release --version-suffix r%APPVEYOR_BUILD_NUMBER%
+  - dotnet pack dotnet-packaging.sln -c Release
 
 test_script:
   - cmd: cd %APPVEYOR_BUILD_FOLDER%\Packaging.Targets.Tests\
@@ -17,11 +17,11 @@ test_script:
   - cmd: cd ..
 
 artifacts:
-  - path: dotnet-tarball\bin\Release\dotnet-tarball.0.1.1-r$(APPVEYOR_BUILD_NUMBER).nupkg
-  - path: dotnet-zip\bin\Release\dotnet-zip.0.1.1-r$(APPVEYOR_BUILD_NUMBER).nupkg
-  - path: dotnet-rpm\bin\Release\dotnet-rpm.0.1.1-r$(APPVEYOR_BUILD_NUMBER).nupkg
-  - path: dotnet-deb\bin\Release\dotnet-deb.0.1.1-r$(APPVEYOR_BUILD_NUMBER).nupkg
-  - path: Packaging.Targets\bin\Release\Packaging.Targets.0.1.1-r$(APPVEYOR_BUILD_NUMBER).nupkg
+  - path: dotnet-tarball\bin\Release\dotnet-tarball.*.nupkg
+  - path: dotnet-zip\bin\Release\dotnet-zip.*.nupkg
+  - path: dotnet-rpm\bin\Release\dotnet-rpm.*.nupkg
+  - path: dotnet-deb\bin\Release\dotnet-deb.*.nupkg
+  - path: Packaging.Targets\bin\Release\Packaging.Targets.*.nupkg
 
 deploy:
   provider: NuGet
