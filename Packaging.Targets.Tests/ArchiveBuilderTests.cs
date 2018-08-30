@@ -95,7 +95,7 @@ namespace Packaging.Targets.Tests
             Assert.Equal(LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR, script.Mode);
             Assert.Equal("root", script.Owner);
             Assert.False(script.RemoveOnUninstall);
-            Assert.Equal("archive\\script.sh", script.SourceFilename);
+            Assert.Equal(Path.Combine("archive", "script.sh"), script.SourceFilename);
             Assert.Equal("/bin/script.sh", script.TargetPath);
             Assert.Equal("/bin/script.sh", script.TargetPathWithFinalSlash);
             Assert.Equal(ArchiveEntryType.None, script.Type);
