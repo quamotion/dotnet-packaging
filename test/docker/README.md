@@ -1,0 +1,1 @@
+This directory contains docker-based test projectsand verification scripts executed against various versions of Linux.
