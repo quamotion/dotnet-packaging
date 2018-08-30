@@ -17,7 +17,6 @@ Once you've installed this package as a .NET CLI tool, run dotnet rpm to generat
 
 See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet rpm.</Description>
     <Product>Packaging Tools for .NET CLI</Product>
-    <NugetPackageFolder Condition="$(NugetPackageFolder) == ''">$(USERPROFILE)\.nuget\packages</NugetPackageFolder>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +27,7 @@ See https://github.com/qmfrederik/dotnet-packaging/ for more information on how 
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="$(NugetPackageFolder)\microsoft.extensions.commandlineutils\1.1.1\lib\netstandard1.3\Microsoft.Extensions.CommandLineUtils.dll" Link="Microsoft.Extensions.CommandLineUtils.dll">
+    <Content Include="$(NuGetPackageRoot)\microsoft.extensions.commandlineutils\1.1.1\lib\netstandard1.3\Microsoft.Extensions.CommandLineUtils.dll" Link="Microsoft.Extensions.CommandLineUtils.dll">
       <Pack>true</Pack>
       <PackagePath>lib\$(TargetFramework)\</PackagePath>
     </Content>
