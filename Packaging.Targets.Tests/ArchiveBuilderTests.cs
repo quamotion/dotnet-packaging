@@ -32,7 +32,7 @@ namespace Packaging.Targets.Tests
             Assert.Equal(LinuxFileMode.S_IROTH |  LinuxFileMode.S_IRGRP |  LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG, readme.Mode);
             Assert.Equal("root", readme.Owner);
             Assert.False(readme.RemoveOnUninstall);
-            Assert.Equal("archive\\README.md", readme.SourceFilename);
+            Assert.Equal(Path.Combine("archive", "README.md"), readme.SourceFilename);
             Assert.Equal("/opt/demo/README.md", readme.TargetPath);
             Assert.Equal("/opt/demo/README.md", readme.TargetPathWithFinalSlash);
             Assert.Equal(ArchiveEntryType.None, readme.Type);
@@ -45,7 +45,7 @@ namespace Packaging.Targets.Tests
             Assert.Equal(LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG, script.Mode);
             Assert.Equal("root", script.Owner);
             Assert.False(script.RemoveOnUninstall);
-            Assert.Equal("archive\\script.sh", script.SourceFilename);
+            Assert.Equal(Path.Combine("archive", "script.sh"), script.SourceFilename);
             Assert.Equal("/opt/demo/script.sh", script.TargetPath);
             Assert.Equal("/opt/demo/script.sh", script.TargetPathWithFinalSlash);
             Assert.Equal(ArchiveEntryType.None, script.Type);
