@@ -1,0 +1,8 @@
+language: csharp
+mono: none
+dotnet: 2.1.400
+
+script:
+  - dotnet restore dotnet-packaging.sln
+  - dotnet pack dotnet-packaging.sln -c Release
+  - dotnet test Packaging.Targets.Tests\Packaging.Targets.Tests.csproj
