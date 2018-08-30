@@ -3,6 +3,7 @@ using Microsoft.Build.Utilities;
 using Packaging.Targets.IO;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace Packaging.Targets.Tests
@@ -79,7 +80,7 @@ namespace Packaging.Targets.Tests
             Assert.Equal(LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG, readme.Mode);
             Assert.Equal("root", readme.Owner);
             Assert.False(readme.RemoveOnUninstall);
-            Assert.Equal("archive\\README.md", readme.SourceFilename);
+            Assert.Equal(Path.Combine("archive", "README.md"), readme.SourceFilename);
             Assert.Equal("/opt/demo/README.md", readme.TargetPath);
             Assert.Equal("/opt/demo/README.md", readme.TargetPathWithFinalSlash);
             Assert.Equal(ArchiveEntryType.None, readme.Type);
