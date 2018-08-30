@@ -1,6 +1,7 @@
 image: Visual Studio 2017
 
 version: '0.1.{build}'
+skip_branch_with_pr: true
 
 before_build:
   - dotnet restore dotnet-packaging.sln
