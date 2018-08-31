@@ -24,7 +24,13 @@ test_script:
 
   - cmd: cd %APPVEYOR_BUILD_FOLDER%/demo/cliscd/
   - cmd: dotnet restore
+
+  # Test on Debian 8
   - cmd: dotnet deb -c Release -r debian.8-x64 -f netcoreapp2.1
+  - cmd: copy bin\Release\netcoreapp2.1\debian.8-x64\cliscd.1.0.0.debian.8-x64.deb debian.8-x64\
+  - cmd: docker build -t clisc:debian.8-x64 debian.8-x64
+  - cmd: docker run clisc:debian.8-x64
+
   - cmd: dotnet deb -c Release -r ubuntu.16.10-x64 -f netcoreapp2.1
   - cmd: dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.1
   - cmd: dotnet rpm -c Release -r opensuse-x64 -f netcoreapp2.1
