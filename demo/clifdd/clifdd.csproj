@@ -21,7 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Packaging.Targets" Version="0.0.0" />
+    <PackageReference Include="Packaging.Targets" Version="$(PackagingNuGetVersion)" />
+    <DotNetCliToolReference Include="dotnet-rpm" Version="$(PackagingNuGetVersion)" />
+    <DotNetCliToolReference Include="dotnet-deb" Version="$(PackagingNuGetVersion)" />
   </ItemGroup>
 
   <PropertyGroup>

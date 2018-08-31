@@ -17,10 +17,21 @@ test_script:
   - ps: '& (Join-Path $env:APPVEYOR_BUILD_FOLDER "appveyor-testresults.ps1")'
   - cmd: cd ..
 
-  - cmd: cd demo/aspnetcore
+  - cmd: cd %APPVEYOR_BUILD_FOLDER%/demo/aspnetcore
   - cmd: dotnet restore
   - cmd: dotnet rpm -c Release -r rhel.7-x64 -f netcoreapp2.0
   - cmd: dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.0
+
+  - cmd: cd %APPVEYOR_BUILD_FOLDER%/demo/cliscd/
+  - cmd: dotnet restore
+  - cmd: dotnet deb -c Release -r debian.8-x64 -f netcoreapp2.1
+  - cmd: dotnet deb -c Release -r ubuntu.16.10-x64 -f netcoreapp2.1
+  - cmd: dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.1
+  - cmd: dotnet rpm -c Release -r opensuse-x64 -f netcoreapp2.1
+  - cmd: dotnet rpm -c Release -r ol-x64 -f netcoreapp2.1
+  - cmd: dotnet rpm -c Release -r rhel-x64 -f netcoreapp2.1
+  - cmd: dotnet rpm -c Release -r fedora-x64 -f netcoreapp2.1
+  - cmd: dotnet rpm -c Release -r centos-x64 -f netcoreapp2.1
 
 artifacts:
   - path: dotnet-tarball\bin\Release\dotnet-tarball.*.nupkg
