@@ -36,12 +36,14 @@ script:
   - dotnet rpm -c Release -r opensuse.42.3-x64 -f netcoreapp2.1
   - cp bin/Release/netcoreapp2.1/opensuse.42.3-x64/cliscd.1.0.0.opensuse.42.3-x64.rpm opensuse.42.3-x64/
   - sudo docker build -t clisc:opensuse.42.3-x64 opensuse.42.3-x64
-#  - sudo docker run clisc:opensuse.42.3-x64
+  # Missing libicu dependencies
+  #  - sudo docker run clisc:opensuse.42.3-x64
 
   - dotnet rpm -c Release -r ol.7-x64 -f netcoreapp2.1
   - cp bin/Release/netcoreapp2.1/ol.7-x64/cliscd.1.0.0.ol.7-x64.rpm ol.7-x64
   - sudo docker build -t clisc:ol.7-x64 ol.7-x64
-  - sudo docker run clisc:ol.7-x64
+  # Missing libicu dependencies
+  #  - sudo docker run clisc:ol.7-x64
 
   - dotnet rpm -c Release -r rhel-x64 -f netcoreapp2.1
 
