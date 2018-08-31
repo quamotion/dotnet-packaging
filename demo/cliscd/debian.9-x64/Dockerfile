@@ -1,6 +1,6 @@
-FROM debian:8
+FROM debian:9
 
-ENV rid=debian.8-x64
+ENV rid=debian.9-x64
 COPY cliscd.1.0.0.$rid.deb /pkg/
 COPY reference.txt /pkg/
 
