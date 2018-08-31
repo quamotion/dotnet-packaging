@@ -100,4 +100,20 @@
   <ItemGroup>
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
+
+  <Target Name="WriteProperties" AfterTargets="Pack">
+    <ItemGroup>
+      <Line Include="line01"><Text>&lt;!-- This file is auto-generated. Do not edit manually --&gt;</Text></Line>
+      <Line Include="line01"><Text>&lt;Project&gt;</Text></Line>
+      <Line Include="line02"><Text>  &lt;PropertyGroup&gt;</Text></Line>
+      <Line Include="line03"><Text>    &lt;PackagingNuGetVersion&gt;$(NuGetPackageVersion)&lt;/PackagingNuGetVersion&gt;</Text></Line>
+      <Line Include="line04"><Text>  &lt;/PropertyGroup&gt;</Text></Line>
+      <Line Include="line05"><Text>&lt;/Project&gt;</Text></Line>
+      <LineText Include="%(Line.Text)" />
+    </ItemGroup>
+    <WriteLinesToFile
+       File="../demo/Directory.Build.props"
+       Lines="@(LineText)"
+      Overwrite="true" />
+  </Target>
 </Project>
