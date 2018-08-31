@@ -33,10 +33,22 @@ script:
   - sudo docker build -t clisc:ubuntu.16.04-x64 ubuntu.16.04-x64
   - sudo docker run clisc:ubuntu.16.04-x64
 
-  - dotnet rpm -c Release -r opensuse-x64 -f netcoreapp2.1
-  - dotnet rpm -c Release -r ol-x64 -f netcoreapp2.1
+  - dotnet rpm -c Release -r opensuse.42.3-x64 -f netcoreapp2.1
+  - cp bin/Release/netcoreapp2.1/opensuse.42.3-x64/cliscd.1.0.0.opensuse.42.3-x64.rpm opensuse.42.3-x64/
+  - sudo docker build -t opensuse.42.3-x64 opensuse.42.3-x64
+  - sudo docker run clisc:opensuse.42.3-x64
+
+  - dotnet rpm -c Release -r ol.7-x64 -f netcoreapp2.1
+  - cp bin/Release/netcoreapp2.1/ol.7-x64/cliscd.1.0.0.ol.7-x64.rpm ol.7-x64
+  - sudo docker build -t clisc:ol.7-x64 ol.7-x64
+#  - sudo docker run clisc:ol.7-x64
+
   - dotnet rpm -c Release -r rhel-x64 -f netcoreapp2.1
-  - dotnet rpm -c Release -r fedora-x64 -f netcoreapp2.1
+
+  - dotnet rpm -c Release -r fedora.28-x64 -f netcoreapp2.1
+  - cp bin/Release/netcoreapp2.1/fedora.28-x64/cliscd.1.0.0.fedora.28-x64.rpm fedora.28-x64
+  - sudo docker build -t clisc:fedora.28-x64 fedora.28-x64
+#  - sudo docker run clisc:fedora.28-x64
 
   - dotnet rpm -c Release -r centos.7-x64 -f netcoreapp2.1
   - cp bin/Release/netcoreapp2.1/centos.7-x64/cliscd.1.0.0.centos.7-x64.rpm centos.7-x64
