@@ -29,6 +29,10 @@ script:
   - sudo docker run clisc:ubuntu.18.04-x64
 
   - dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.1
+  - cp bin/Release/netcoreapp2.1/ubuntu.16.04-x64/cliscd.1.0.0.ubuntu.16.04-x64.deb ubuntu.16.04-x64/
+  - sudo docker build -t clisc:ubuntu.16.04-x64 ubuntu.16.04-x64
+  - sudo docker run clisc:ubuntu.16.04-x64
+
   - dotnet rpm -c Release -r opensuse-x64 -f netcoreapp2.1
   - dotnet rpm -c Release -r ol-x64 -f netcoreapp2.1
   - dotnet rpm -c Release -r rhel-x64 -f netcoreapp2.1
