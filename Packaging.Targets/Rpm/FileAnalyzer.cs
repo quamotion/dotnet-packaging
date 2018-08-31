@@ -43,9 +43,7 @@ namespace Packaging.Targets.Rpm
             {
                 return RpmFileFlags.None;
             }
-            else if (!entry.Mode.HasFlag(LinuxFileMode.S_IXGRP)
-                    && !entry.Mode.HasFlag(LinuxFileMode.S_IXOTH)
-                    && !entry.Mode.HasFlag(LinuxFileMode.S_IXUSR))
+            else if (entry.TargetPath.StartsWith("/usr/share/doc"))
             {
                 return RpmFileFlags.RPMFILE_DOC;
             }
