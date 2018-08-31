@@ -5,3 +5,9 @@ obj/
 .vs/
 .idea/
 .vagrant/
+*.deb
+*.rpm
+*.msi
+*.pkg
+*.zip
+*.tar.gz

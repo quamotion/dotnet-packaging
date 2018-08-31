@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RuntimeIdentifiers>win7-x64;win7-x86;win10-x64;win10-x86;osx-x64;debian.8-x64;ubuntu.16.10-x64;ubuntu.16.04-x64;opensuse-x64;ol-x64;rhel-x64;fedora-x64;centos-x64</RuntimeIdentifiers>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="clifdd.machine.config">
+      <LinuxFolder>/etc/clifdd</LinuxFolder>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="clifdd.user.config">
+      <LinuxFolder>~/.clifdd</LinuxFolder>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="readme.txt">
+      <Documentation>true</Documentation>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Packaging.Targets" Version="$(PackagingNuGetVersion)" />
+    <DotNetCliToolReference Include="dotnet-rpm" Version="$(PackagingNuGetVersion)" />
+    <DotNetCliToolReference Include="dotnet-deb" Version="$(PackagingNuGetVersion)" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PostInstallScript>
+    </PostInstallScript>
+    <PostRemoveScript>
+    </PostRemoveScript>
+  </PropertyGroup>
+
+  <Target Name="PackageZip" DependsOnTargets="CreateZip" Outputs="$(ZipPath)"/>
+  <Target Name="PackageTarball" DependsOnTargets="CreateTarball" Outputs="$(TarballPath)"/>
+  <Target Name="PackageDebian" DependsOnTargets="CreateDeb" Outputs="$(DebPath)"/>
+  <Target Name="PackageRpm" DependsOnTargets="CreateRpm" Outputs="$(RpmPath)"/>
+</Project>
