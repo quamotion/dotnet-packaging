@@ -31,7 +31,7 @@ test_script:
 #  - cmd: docker build -t clisc:debian.8-x64 debian.8-x64
 #  - cmd: docker run clisc:debian.8-x64
 
-  - cmd: dotnet deb -c Release -r ubuntu.16.10-x64 -f netcoreapp2.1
+  - cmd: dotnet deb -c Release -r ubuntu.18.04-x64 -f netcoreapp2.1
   - cmd: dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.1
   - cmd: dotnet rpm -c Release -r opensuse-x64 -f netcoreapp2.1
   - cmd: dotnet rpm -c Release -r ol-x64 -f netcoreapp2.1
