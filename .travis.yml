@@ -35,7 +35,7 @@ script:
 
   - dotnet rpm -c Release -r opensuse.42.3-x64 -f netcoreapp2.1
   - cp bin/Release/netcoreapp2.1/opensuse.42.3-x64/cliscd.1.0.0.opensuse.42.3-x64.rpm opensuse.42.3-x64/
-  - sudo docker build -t opensuse.42.3-x64 opensuse.42.3-x64
+  - sudo docker build -t clisc:opensuse.42.3-x64 opensuse.42.3-x64
   - sudo docker run clisc:opensuse.42.3-x64
 
   - dotnet rpm -c Release -r ol.7-x64 -f netcoreapp2.1
