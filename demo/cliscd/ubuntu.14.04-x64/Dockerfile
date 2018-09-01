@@ -1,6 +1,6 @@
-FROM debian:8
+FROM ubuntu:14.04
 
-ENV rid=debian.8-x64
+ENV rid=ubuntu.14.04-x64
 COPY cliscd.1.0.0.$rid.deb /pkg/
 COPY reference.txt /pkg/
 

@@ -2,6 +2,20 @@ language: csharp
 mono: none
 dotnet: 2.1.400
 
+env:
+  - RUNTIME=centos.7-x64
+  - RUNTIME=ol.7-x64
+  - RUNTIME=fedora.27-x64
+  - RUNTIME=fedora.28-x64
+  - RUNTIME=debian.8-x64
+  - RUNTIME=debian.9-x64
+  - RUNTIME=ubuntu.14.04-x64
+  - RUNTIME=ubuntu.16.04-x64
+  - RUNTIME=ubuntu.18.04-x64
+  - RUNTIME=opensuse.42.3-x64
+
+sudo: required
+
 git:
   depth: false
 
@@ -12,47 +26,10 @@ script:
 
   - cd $TRAVIS_BUILD_DIR/demo/aspnetcore
   - dotnet restore
-  - dotnet rpm -c Release -r rhel.7-x64 -f netcoreapp2.0
-  - dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.0
+  - if [ "$RUNTIME" = "rhel.7-x64" ]; then dotnet rpm -c Release -r rhel.7-x64 -f netcoreapp2.0; fi
+  - if [ "$RUNTIME" = "ubuntu.16.04-x64" ]; then dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.0; fi
 
   - cd $TRAVIS_BUILD_DIR/demo/cliscd/
   - dotnet restore
 
-  - dotnet deb -c Release -r debian.8-x64 -f netcoreapp2.1
-  - cp bin/Release/netcoreapp2.1/debian.8-x64/cliscd.1.0.0.debian.8-x64.deb debian.8-x64/
-  - sudo docker build -t clisc:debian.8-x64 debian.8-x64
-  - sudo docker run clisc:debian.8-x64
-
-  - dotnet deb -c Release -r ubuntu.18.04-x64 -f netcoreapp2.1
-  - cp bin/Release/netcoreapp2.1/ubuntu.18.04-x64/cliscd.1.0.0.ubuntu.18.04-x64.deb ubuntu.18.04-x64/
-  - sudo docker build -t clisc:ubuntu.18.04-x64 ubuntu.18.04-x64
-  - sudo docker run clisc:ubuntu.18.04-x64
-
-  - dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.1
-  - cp bin/Release/netcoreapp2.1/ubuntu.16.04-x64/cliscd.1.0.0.ubuntu.16.04-x64.deb ubuntu.16.04-x64/
-  - sudo docker build -t clisc:ubuntu.16.04-x64 ubuntu.16.04-x64
-  - sudo docker run clisc:ubuntu.16.04-x64
-
-  - dotnet rpm -c Release -r opensuse.42.3-x64 -f netcoreapp2.1
-  - cp bin/Release/netcoreapp2.1/opensuse.42.3-x64/cliscd.1.0.0.opensuse.42.3-x64.rpm opensuse.42.3-x64/
-  - sudo docker build -t clisc:opensuse.42.3-x64 opensuse.42.3-x64
-  # Missing libicu dependencies
-  #  - sudo docker run clisc:opensuse.42.3-x64
-
-  - dotnet rpm -c Release -r ol.7-x64 -f netcoreapp2.1
-  - cp bin/Release/netcoreapp2.1/ol.7-x64/cliscd.1.0.0.ol.7-x64.rpm ol.7-x64
-  - sudo docker build -t clisc:ol.7-x64 ol.7-x64
-  # Missing libicu dependencies
-  #  - sudo docker run clisc:ol.7-x64
-
-  - dotnet rpm -c Release -r rhel-x64 -f netcoreapp2.1
-
-  - dotnet rpm -c Release -r fedora.28-x64 -f netcoreapp2.1
-  - cp bin/Release/netcoreapp2.1/fedora.28-x64/cliscd.1.0.0.fedora.28-x64.rpm fedora.28-x64
-  - sudo docker build -t clisc:fedora.28-x64 fedora.28-x64
-  - sudo docker run clisc:fedora.28-x64
-
-  - dotnet rpm -c Release -r centos.7-x64 -f netcoreapp2.1
-  - cp bin/Release/netcoreapp2.1/centos.7-x64/cliscd.1.0.0.centos.7-x64.rpm centos.7-x64
-  - sudo docker build -t clisc:centos.7-x64 centos.7-x64
-  - sudo docker run clisc:centos.7-x64
+  - ./run-tests.sh -r $RUNTIME

@@ -71,7 +71,8 @@
     </PropertyGroup>
     
     <!-- Dependency list from https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/jessie/amd64/Dockerfile 
-         and https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/stretch/amd64/Dockerfile -->
+         and https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/stretch/amd64/Dockerfile,
+         See also https://github.com/dotnet/core-setup/blob/master/src/pkg/packaging/deb/dotnet-runtime-deps-debian_config_debian.9-x64.json  -->
     <ItemGroup Condition="'@(DebDotNetDependencies)' == ''">
       <DebDotNetDependencies Include="libc6"/>
       <DebDotNetDependencies Include="libcurl3"/>

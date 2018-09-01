@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RuntimeIdentifiers>win7-x64;win7-x86;win10-x64;win10-x86;osx-x64;debian.8-x64;ubuntu.18.04-x64;ubuntu.16.04-x64;opensuse.42.3-x64;ol.7-x64;rhel-x64;fedora.28-x64;centos.7-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win7-x64;win7-x86;win10-x64;win10-x86;osx-x64;debian.8-x64;debian.9-x64;ubuntu.18.04-x64;ubuntu.16.04-x64;ubuntu.14.04-x64;opensuse.42.3-x64;ol.7-x64;rhel-x64;fedora.27-x64;fedora.28-x64;centos.7-x64</RuntimeIdentifiers>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
   </PropertyGroup>
@@ -28,11 +28,18 @@
   </ItemGroup>
 
   <!-- Fedora, CentOS, and RHEL dependencies -->
-  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('rhel')) OR $(RuntimeIdentifier.StartsWith('fedora'))">
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('rhel')) OR $(RuntimeIdentifier.StartsWith('fedora')) OR $(RuntimeIdentifier.StartsWith('ol'))">
     <RpmDependency Include="libstdc++" Version="" />
     <RpmDependency Include="libunwind" Version="" />
     <RpmDependency Include="libicu" Version="" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('rhel')) OR $(RuntimeIdentifier.StartsWith('fedora'))">
     <RpmDependency Include="compat-openssl10" Version="" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('ol'))">
+    <RpmDependency Include="openssl-libs" Version="" />
   </ItemGroup>
 
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('centos'))">
@@ -46,18 +53,10 @@
     <RpmDependency Include="libuuid" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('debian')) OR $(RuntimeIdentifier.StartsWith('ubuntu')) OR $(RuntimeIdentifier.StartsWith('linuxmint'))">
-    <!-- <DebDependency Include="lttng-ust" Version=""/> -->
-    <DebDependency Include="libcurl3" Version="" />
-    <DebDependency Include="libssl1.0.0" Version="" />
-    <DebDependency Include="libkrb5-3" Version="" />
-    <DebDependency Include="zlib1g" Version="" />
-    <DebDependency Include="libicu52" Version="" Condition="'$(RuntimeIdentifier)'=='debian.8' OR '$(RuntimeIdentifier)'=='ubuntu.14'" />
-    <DebDependency Include="libicu55" Version="" Condition="'$(RuntimeIdentifier)'=='ubuntu.16'" />
-    <DebDependency Include="libicu57" Version="" Condition="'$(RuntimeIdentifier)'=='debian.9' OR '$(RuntimeIdentifier)'=='ubuntu.17' OR '$(RuntimeIdentifier)'=='linuxmint.17'" />
-    <DebDependency Include="libicu60" Version="" Condition="'$(RuntimeIdentifier)'=='debian.10' OR '$(RuntimeIdentifier)'=='ubuntu.18' OR '$(RuntimeIdentifier)'=='linuxmint.18'" />
-    <DebDependency Include="libunwind8" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
-    <DebDependency Include="libuuid1" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('opensuse'))">
+    <RpmDependency Include="libopenssl1_0_0" Version="" />
+    <RpmDependency Include="libicu52_1" Version="" />
+    <RpmDependency Include="krb5" Version="" />
   </ItemGroup>
 
   <PropertyGroup>

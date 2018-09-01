@@ -1,11 +1,12 @@
-FROM debian:8
+FROM fedora:27
 
-ENV rid=debian.8-x64
-COPY cliscd.1.0.0.$rid.deb /pkg/
+ENV rid=fedora.27-x64
+
+COPY cliscd.1.0.0.$rid.rpm /pkg/
 COPY reference.txt /pkg/
 
-RUN apt-get update \
-&& dpkg -i /pkg/cliscd.1.0.0.$rid.deb || apt-get install -f -y
+RUN yum update -y \
+&& yum install -y /pkg/cliscd.1.0.0.$rid.rpm
 
 RUN ls -a /usr/share/cliscd >> ~/testoutput.log 2>&1 || exit 0
 RUN ls -a /etc/cliscd >> ~/testoutput.log 2>&1 || exit 0
