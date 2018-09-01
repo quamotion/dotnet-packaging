@@ -53,6 +53,12 @@
     <RpmDependency Include="libuuid" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
   </ItemGroup>
 
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('opensuse'))">
+    <RpmDependency Include="libopenssl1_0_0" Version="" />
+    <RpmDependency Include="libicu52_1" Version="" />
+    <RpmDependency Include="krb5" Version="" />
+  </ItemGroup>
+
   <PropertyGroup>
     <PostInstallScript>
     </PostInstallScript>
