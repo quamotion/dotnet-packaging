@@ -26,8 +26,8 @@ script:
 
   - cd $TRAVIS_BUILD_DIR/demo/aspnetcore
   - dotnet restore
-  - dotnet rpm -c Release -r rhel.7-x64 -f netcoreapp2.0
-  - dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.0
+  - if [ "$RUNTIME" = "rhel.7-x64" ]; then dotnet rpm -c Release -r rhel.7-x64 -f netcoreapp2.0; fi
+  - if [ "$RUNTIME" = "ubuntu.16.04-x64" ]; then dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.0; fi
 
   - cd $TRAVIS_BUILD_DIR/demo/cliscd/
   - dotnet restore
