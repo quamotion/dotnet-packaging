@@ -2,6 +2,8 @@ language: csharp
 mono: none
 dotnet: 2.1.400
 
+sudo: required
+
 git:
   depth: false
 
