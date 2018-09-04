@@ -18,16 +18,15 @@
     <LinuxFolder Include="/var/log/quamotion" Group="quamotion" Owner="quamotion" RemoveOnUninstall="true" />
     <LinuxFolder Include="/var/run/quamotion" Group="quamotion" Owner="quamotion" RemoveOnUninstall="true" />
     <LinuxFolder Include="/var/lib/quamotion" Group="quamotion" Owner="quamotion" RemoveOnUninstall="true" />
+    <LinuxFolder Include="/etc/quamotion" Group="quamotion" Owner="quamotion" RemoveOnUninstall="true" />
   </ItemGroup>
   
   <ItemGroup>
-    <Content Include="cliscd.machine.config">
-      <LinuxPath>/etc/clifdd/cliscd.machine.config</LinuxPath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="cliscd.machine.config" CopyToPublishDirectory="PreserveNewest">
+      <LinuxPath>/etc/quamotion/cliscd.machine.config</LinuxPath>
     </Content>
-    <Content Include="cliscd.user.config">
+    <Content Include="cliscd.user.config" CopyToPublishDirectory="PreserveNewest">
       <LinuxPath>/home/quamotion/.cliscd/cliscd.user.config</LinuxPath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="readme.txt">
       <Documentation>true</Documentation>

@@ -19,7 +19,7 @@ namespace cliscd
         [Fact]
         public void MachineFileExists()
         {
-            Assert.True(File.Exists("/etc/clifdd/cliscd.machine.config"));
+            Assert.True(File.Exists("/etc/quamotion/cliscd.machine.config"));
         }
 
         [Fact]
@@ -32,6 +32,7 @@ namespace cliscd
         [InlineData("/var/log/quamotion")]
         [InlineData("/var/run/quamotion")]
         [InlineData("/var/lib/quamotion")]
+        [InlineData("/etc/quamotion")]
         public void LinuxFolderExists(string path)
         {
             Assert.True(Directory.Exists(path));
