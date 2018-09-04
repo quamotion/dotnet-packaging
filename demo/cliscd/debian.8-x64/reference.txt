@@ -4,6 +4,7 @@ Microsoft.CSharp.dll
 Microsoft.VisualBasic.dll
 Microsoft.Win32.Primitives.dll
 Microsoft.Win32.Registry.dll
+Mono.Posix.NETStandard.dll
 SOS.NETCore.dll
 System.AppContext.dll
 System.Buffers.dll
@@ -171,6 +172,7 @@ cliscd.dll
 cliscd.pdb
 cliscd.runtimeconfig.json
 createdump
+libMonoPosixHelper.so
 libclrjit.so
 libcoreclr.so
 libcoreclrtraceptprovider.so
@@ -184,5 +186,10 @@ libsosplugin.so
 mscorlib.dll
 netstandard.dll
 sosdocsunix.txt
+xunit.abstractions.dll
+xunit.assert.dll
+xunit.core.dll
+xunit.execution.dotnet.dll
+xunit.runner.utility.netcoreapp10.dll
 ls: cannot access /etc/cliscd: No such file or directory
 ls: cannot access /root/.cliscd: No such file or directory
