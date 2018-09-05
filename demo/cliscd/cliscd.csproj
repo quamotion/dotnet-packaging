@@ -1,20 +1,32 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RuntimeIdentifiers>win7-x64;win7-x86;win10-x64;win10-x86;osx-x64;debian.8-x64;debian.9-x64;ubuntu.18.04-x64;ubuntu.16.04-x64;ubuntu.14.04-x64;opensuse.42.3-x64;ol.7-x64;rhel-x64;fedora.27-x64;fedora.28-x64;centos.7-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win7-x64;win10-x64;osx-x64;debian.8-x64;debian.9-x64;ubuntu.18.04-x64;ubuntu.16.04-x64;ubuntu.14.04-x64;opensuse.42.3-x64;ol.7-x64;rhel-x64;fedora.27-x64;fedora.28-x64;centos.7-x64</RuntimeIdentifiers>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Create a Linux user named 'quamotion' -->
+    <CreateUser>true</CreateUser>
+    <UserName>quamotion</UserName>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Content Include="cliscd.machine.config">
-      <LinuxFolder>/etc/clifdd</LinuxFolder>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <!-- Create a couple of folders we may user -->
+    <LinuxFolder Include="/var/log/quamotion" Group="quamotion" Owner="quamotion" RemoveOnUninstall="true" />
+    <LinuxFolder Include="/var/run/quamotion" Group="quamotion" Owner="quamotion" RemoveOnUninstall="true" />
+    <LinuxFolder Include="/var/lib/quamotion" Group="quamotion" Owner="quamotion" RemoveOnUninstall="true" />
+    <LinuxFolder Include="/etc/quamotion" Group="quamotion" Owner="quamotion" RemoveOnUninstall="true" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="cliscd.machine.config" CopyToPublishDirectory="PreserveNewest">
+      <LinuxPath>/etc/quamotion/cliscd.machine.config</LinuxPath>
     </Content>
-    <Content Include="cliscd.user.config">
-      <LinuxFolder>~/.clifdd</LinuxFolder>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="cliscd.user.config" CopyToPublishDirectory="PreserveNewest">
+      <LinuxPath>/home/quamotion/.cliscd/cliscd.user.config</LinuxPath>
     </Content>
     <Content Include="readme.txt">
       <Documentation>true</Documentation>
@@ -23,6 +35,9 @@
 
   <ItemGroup>
     <PackageReference Include="Packaging.Targets" Version="$(PackagingNuGetVersion)" />
+    <PackageReference Include="xunit.runner.utility" Version="2.4.0" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
     <DotNetCliToolReference Include="dotnet-rpm" Version="$(PackagingNuGetVersion)" />
     <DotNetCliToolReference Include="dotnet-deb" Version="$(PackagingNuGetVersion)" />
   </ItemGroup>
