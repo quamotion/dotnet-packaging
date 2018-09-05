@@ -21,21 +21,28 @@ namespace CliScd
             string testAssembly = typeof(Program).Assembly.Location;
             var typeName = args.Length == 2 ? args[1] : null;
 
-            using (var runner = AssemblyRunner.WithoutAppDomain(testAssembly))
+            try
             {
-                runner.OnDiscoveryComplete = OnDiscoveryComplete;
-                runner.OnExecutionComplete = OnExecutionComplete;
-                runner.OnTestFailed = OnTestFailed;
-                runner.OnTestSkipped = OnTestSkipped;
+                using (var runner = AssemblyRunner.WithoutAppDomain(testAssembly))
+                {
+                    runner.OnDiscoveryComplete = OnDiscoveryComplete;
+                    runner.OnExecutionComplete = OnExecutionComplete;
+                    runner.OnTestFailed = OnTestFailed;
+                    runner.OnTestSkipped = OnTestSkipped;
 
-                Console.WriteLine("Discovering...");
-                runner.Start(typeName);
+                    Console.WriteLine("Discovering...");
+                    runner.Start(typeName);
 
-                finished.WaitOne();
-                finished.Dispose();
-
-                return result;
+                    finished.WaitOne();
+                    finished.Dispose();
+                }
             }
+            catch (InvalidOperationException)
+            {
+                // Swallow
+            }
+
+            return result;
         }
 
         static void OnDiscoveryComplete(DiscoveryCompleteInfo info)
