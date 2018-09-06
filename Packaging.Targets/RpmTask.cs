@@ -45,7 +45,6 @@ namespace Packaging.Targets
             set;
         }
 
-        [Required]
         public string Release
         {
             get;
@@ -209,7 +208,7 @@ namespace Packaging.Targets
                     this.PackageName,
                     this.Version,
                     "x86_64",
-                    this.Release,
+                    string.IsNullOrWhiteSpace(this.Release) ? "0" : this.Release,
                     this.CreateUser,
                     this.UserName,
                     this.InstallService,
