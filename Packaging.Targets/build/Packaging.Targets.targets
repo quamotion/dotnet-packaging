@@ -28,7 +28,7 @@
       <RpmPath Condition="'$(RpmPath)' == ''">$(PackagePath).rpm</RpmPath>
       <CpioPath>$(IntermediatePackagePath).cpio</CpioPath>
       <Prefix Condition="'$(Prefix)' == ''">/usr/share/$(PackagePrefix)</Prefix>
-      <Release>0</Release>
+      <Release Condition="'$(Release)' == ''">0</Release>
       <PackageName>$(PackagePrefix)</PackageName>
       <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
       <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName >
