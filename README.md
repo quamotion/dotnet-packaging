@@ -33,7 +33,7 @@ only add those you are going to use.
     <DotNetCliToolReference Include="dotnet-tarball" Version="0.1.1-*" />
     <DotNetCliToolReference Include="dotnet-zip" Version="0.1.1-*" />
     <DotNetCliToolReference Include="dotnet-rpm" Version="0.1.1-*" />
-  <ItemGroup>
+  </ItemGroup>
 ```
 
 ## Usage
