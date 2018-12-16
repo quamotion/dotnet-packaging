@@ -42,3 +42,18 @@ dotnet $format -c Release -r $rid -f netcoreapp2.1
 cp bin/Release/netcoreapp2.1/$rid/cliscd.1.0.0.$rid.$format $rid
 sudo docker build -t clisc:$rid $rid
 sudo docker run clisc:$rid
+
+if [[ $format == deb ]]
+then
+    sudo docker run clisc:$rid /usr/bin/apt-get remove -y cliscd
+fi
+
+if [[ $format == rpm ]]
+then
+    if [[ $rid == opensuse* ]]
+    then
+        sudo docker run clisc:$rid /usr/bin/zypper -n rm cliscd
+    else
+        sudo docker run clisc:$rid /usr/bin/rpm -e cliscd
+    fi
+fi
