@@ -87,7 +87,7 @@ namespace Packaging.Targets.Deb
             // Remove all directories marked as such (these are usually directories which contain temporary files)
             foreach (var entryToRemove in archiveEntries.Where(e => e.RemoveOnUninstall))
             {
-                pkg.PostRemoveScript += $"/usr/bin/rm -rf {entryToRemove.TargetPath}\n";
+                pkg.PostRemoveScript += $"/bin/rm -rf {entryToRemove.TargetPath}\n";
             }
 
             if (!string.IsNullOrEmpty(preInstallScript))
