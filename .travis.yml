@@ -2,6 +2,10 @@ language: csharp
 mono: none
 dotnet: 2.1.400
 
+branches:
+  only:
+    master
+
 env:
   - RUNTIME=centos.7-x64
   - RUNTIME=ol.7-x64
