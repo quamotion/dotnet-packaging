@@ -21,7 +21,7 @@ See https://github.com/qmfrederik/dotnet-packaging/ for more information on how 
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
-    <PackageReference Include="NerdBank.GitVersioning" Version="2.2.13">
+    <PackageReference Include="NerdBank.GitVersioning" Version="2.3.38">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>

@@ -22,7 +22,7 @@
     <RpmDependency Include="libicu" Version="50.1.2" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="2.2.13" PrivateAssets="all" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="2.3.38" PrivateAssets="all" />
     <PackageReference Include="Packaging.Targets" Version="$(PackagingNuGetVersion)" />
     <DotNetCliToolReference Include="dotnet-tarball" Version="$(PackagingNuGetVersion)" />
     <DotNetCliToolReference Include="dotnet-zip" Version="$(PackagingNuGetVersion)" />
