@@ -139,8 +139,8 @@ echo 'Hello from post install'
             Assert.Equal(@"systemctl --no-reload disable --now demoservice.service
 echo 'Hello from pre remove'
 ", pkg.PreRemoveScript, ignoreLineEndingDifferences: true);
-            Assert.Equal(@"/usr/bin/rm -rf /usr/bin/demo
-/usr/bin/rm -rf /opt/local/test
+            Assert.Equal(@"/bin/rm -rf /usr/bin/demo
+/bin/rm -rf /opt/local/test
 echo 'Hello from post remove'
 ", pkg.PostRemoveScript, ignoreLineEndingDifferences: true);
         }
