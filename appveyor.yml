@@ -36,5 +36,5 @@ deploy:
   on:
     branch: master
   api_key:
-    secure: PWTSvjALUGYuMrcnQX7RZxDW/M8WtIXfihQUek4xMjN2bQj73gudiusqIOVUEwdo
+    secure: BFOZBsR25Gez8A7QnyJdKckE3JIiCfc9v70k8eMHOz/fmlbgiouG/oSv3izNejOd
   skip_symbols: true
