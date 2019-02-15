@@ -10,15 +10,13 @@ The following commands are already available:
 * `dotnet tarball` - Create a `.tar.gz` file for Linux and OS X
 * `dotnet rpm` - Create a CentOS/RedHat Linux installer
 * `dotnet zip` - Create a `.zip` file
-
-These commands are currently in development:
 * `dotnet deb` - Create a Ubuntu/Debian Linux installer
 
-And finally these are up next:
+And these are up next:
 
+* `dotnet pkg` - Create a macOS installer
 * `dotnet choco` - Create a Chocolatey package
 * `dotnet msi` - Create a Windows Installer (msi) package
-* `dotnet pkg` - Create a macOS installer
 
 Did we miss anything? Feel free to file a feature request, or send a PR!
 
@@ -33,6 +31,7 @@ only add those you are going to use.
     <DotNetCliToolReference Include="dotnet-tarball" Version="0.1.1-*" />
     <DotNetCliToolReference Include="dotnet-zip" Version="0.1.1-*" />
     <DotNetCliToolReference Include="dotnet-rpm" Version="0.1.1-*" />
+    <DotNetCliToolReference Include="dotnet-deb" Version="0.1.1-*" />
   </ItemGroup>
 ```
 
