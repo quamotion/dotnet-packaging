@@ -27,11 +27,11 @@ only add those you are going to use.
 
 ```xml
   <ItemGroup>
-    <PackageReference Include="Packaging.Targets" Version="0.1.1-*" />
-    <DotNetCliToolReference Include="dotnet-tarball" Version="0.1.1-*" />
-    <DotNetCliToolReference Include="dotnet-zip" Version="0.1.1-*" />
-    <DotNetCliToolReference Include="dotnet-rpm" Version="0.1.1-*" />
-    <DotNetCliToolReference Include="dotnet-deb" Version="0.1.1-*" />
+    <PackageReference Include="Packaging.Targets" Version="0.1.56" />
+    <DotNetCliToolReference Include="dotnet-tarball" Version="0.1.56" />
+    <DotNetCliToolReference Include="dotnet-zip" Version="0.1.56*" />
+    <DotNetCliToolReference Include="dotnet-rpm" Version="0.1.56*" />
+    <DotNetCliToolReference Include="dotnet-deb" Version="0.1.56" />
   </ItemGroup>
 ```
 
