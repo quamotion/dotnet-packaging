@@ -125,6 +125,33 @@ namespace Packaging.Targets
         }
 
         /// <summary>
+        /// Gets or sets the package vendor.
+        /// </summary>
+        public string Vendor
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the package description.
+        /// </summary>
+        public string Description
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the package URL.
+        /// </summary>
+        public string Url
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets an additional pre-installation script to execute.
         /// </summary>
         /// <remarks>
@@ -214,6 +241,9 @@ namespace Packaging.Targets
                     this.UserName,
                     this.InstallService,
                     this.ServiceName,
+                    this.Vendor,
+                    this.Description,
+                    this.Url,
                     this.Prefix,
                     this.PreInstallScript,
                     this.PostInstallScript,

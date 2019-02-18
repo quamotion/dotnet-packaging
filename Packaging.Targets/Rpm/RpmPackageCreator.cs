@@ -81,6 +81,15 @@ namespace Packaging.Targets.Rpm
         /// <param name="serviceName">
         /// The name of the system service to create.
         /// </param>
+        /// <param name="vendor">
+        /// The package vendor.
+        /// </param>
+        /// <param name="description">
+        /// The package description.
+        /// </param>
+        /// <param name="url">
+        /// The package URL.
+        /// </param>
         /// <param name="prefix">
         /// A prefix to use.
         /// </param>
@@ -119,6 +128,9 @@ namespace Packaging.Targets.Rpm
             string userName,
             bool installService,
             string serviceName,
+            string vendor,
+            string description,
+            string url,
             string prefix,
             string preInstallScript,
             string postInstallScript,
@@ -140,6 +152,9 @@ namespace Packaging.Targets.Rpm
                 userName,
                 installService,
                 serviceName,
+                vendor,
+                description,
+                url,
                 prefix,
                 preInstallScript,
                 postInstallScript,
@@ -183,6 +198,15 @@ namespace Packaging.Targets.Rpm
         /// </param>
         /// <param name="serviceName">
         /// The name of the system service to create.
+        /// </param>
+        /// <param name="vendor">
+        /// The package vendor.
+        /// </param>
+        /// <param name="description">
+        /// The package description.
+        /// </param>
+        /// <param name="url">
+        /// The package URL.
         /// </param>
         /// <param name="prefix">
         /// A prefix to use.
@@ -232,6 +256,9 @@ namespace Packaging.Targets.Rpm
             string userName,
             bool installService,
             string serviceName,
+            string vendor,
+            string description,
+            string url,
             string prefix,
             string preInstallScript,
             string postInstallScript,
@@ -360,14 +387,16 @@ namespace Packaging.Targets.Rpm
             }
 
             // Not providing these (or setting empty values) would cause rpmlint errors
-            metadata.Description = $"{name} version {version}-{release}";
+            metadata.Description = string.IsNullOrEmpty(description)
+                ? $"{name} version {version}-{release}"
+                : description;
             metadata.Summary = $"{name} version {version}-{release}";
             metadata.License = $"{name} License";
 
             metadata.Distribution = string.Empty;
             metadata.DistUrl = string.Empty;
-            metadata.Url = string.Empty;
-            metadata.Vendor = string.Empty;
+            metadata.Url = url ?? string.Empty;
+            metadata.Vendor = vendor ?? string.Empty;
 
             metadata.ChangelogEntries = new Collection<ChangelogEntry>()
             {

@@ -31,8 +31,11 @@
       <Release Condition="'$(Release)' == ''">0</Release>
       <PackageName>$(PackagePrefix)</PackageName>
       <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
-      <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName >
-    </PropertyGroup>
+      <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName>
+      <RpmVendor Condition="'$(RpmVendor)' == ''">$(Authors)</RpmVendor>
+      <RpmDescription Condition="'$(RpmDescription)' == ''">$(PackageDescription)</RpmDescription>
+      <RpmUrl Condition="'$(RpmUrl)' == ''">$(PackageProjectUrl)</RpmUrl>
+  </PropertyGroup>
 
     <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
 
@@ -50,6 +53,9 @@
              UserName="$(UserName)"
              InstallService="$(InstallService)"
              ServiceName="$(ServiceName)"
+             Vendor="$(RpmVendor)"
+             Description="$(RpmDescription)"
+             Url="$(RpmUrl)"
              PreInstallScript="$(PreInstallScript)"
              PostInstallScript="$(PostInstallScript)"
              PreRemoveScript="$(PreRemoveScript)"

@@ -18,7 +18,6 @@ namespace Packaging.Targets.Tests.Rpm
             metadata.BuildHost = "lamb11";
             metadata.BuildTime = new DateTimeOffset(2017, 04, 21, 20, 56, 28, TimeSpan.Zero);
             metadata.Cookie = "lamb11 1492808188";
-            metadata.Description = "libplist is a library for manipulating Apple Binary and XML Property Lists";
             metadata.Distribution = "home:qmfrederik / CentOS_7";
             metadata.DistUrl = "obs://build.opensuse.org/home:qmfrederik/CentOS_7/adfeea138cd469466e6fa13a3c88fb8f-libplist";
             metadata.FileDigetsAlgo = PgpHashAlgo.PGPHASHALGO_SHA256;
@@ -36,8 +35,6 @@ namespace Packaging.Targets.Tests.Rpm
             metadata.SourcePkgId = new byte[] { 0x45, 0xc0, 0x86, 0x80, 0x77, 0x4e, 0xf4, 0xc0, 0x37, 0xf1, 0x1e, 0xb1, 0xd3, 0x47, 0xf0, 0xbf };
             metadata.SourceRpm = "libplist-2.0.1.151-1.1.src.rpm";
             metadata.Summary = "Library for manipulating Apple Binary and XML Property Lists";
-            metadata.Url = "http://www.libimobiledevice.org/";
-            metadata.Vendor = "obs://build.opensuse.org/home:qmfrederik";
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
             Collection<ChangelogEntry> changeLogEntries = new Collection<ChangelogEntry>()
                     {
