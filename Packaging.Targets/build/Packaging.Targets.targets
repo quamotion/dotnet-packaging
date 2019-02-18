@@ -19,7 +19,8 @@
       <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
       <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
       <PackageMaintainer Condition="'$(PackageMaintainer)' == ''">Anonymous &lt;noreply@example.com&gt;</PackageMaintainer>
-      <PackageDescription Condition="'$(PackageDescription)' == ''">$(PackageName)</PackageDescription>
+      <PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' != ''">$(Description)</PackageDescription>
+      <PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' == ''">$(PackageName) version $(PackageVersion) - $(Release)</PackageDescription>
     </PropertyGroup>
   </Target>
 
