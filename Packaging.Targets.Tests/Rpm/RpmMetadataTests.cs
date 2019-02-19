@@ -205,6 +205,9 @@ namespace Packaging.Targets.Tests.Rpm
 
                     PlistMetadata.ApplyDefaultMetadata(metadata);
 
+                    metadata.Vendor = "obs://build.opensuse.org/home:qmfrederik";
+                    metadata.Description = "libplist is a library for manipulating Apple Binary and XML Property Lists";
+                    metadata.Url = "http://www.libimobiledevice.org/";
                     metadata.Size = 0x26e6d;
                     metadata.ImmutableRegionSize = -976;
 

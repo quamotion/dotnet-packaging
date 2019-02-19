@@ -18,8 +18,10 @@
       <PackagePath Condition="'$(PackagePath)' == ''">$(TargetDir)$(PackageName)</PackagePath>
       <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
       <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
-      <PackageMaintainer Condition="'$(PackageMaintainer)' == ''">Anonymous &lt;noreply@example.com&gt;</PackageMaintainer>
-      <PackageDescription Condition="'$(PackageDescription)' == ''">$(PackageName)</PackageDescription>
+      <PackageMaintainer Condition="'$(PackageMaintainer)' == '' AND '$(Authors)' != ''">$(Authors)</PackageMaintainer>
+      <PackageMaintainer Condition="'$(PackageMaintainer)' == '' AND '$(Authors)' == ''">Anonymous &lt;noreply@example.com&gt;</PackageMaintainer>
+      <PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' != ''">$(Description)</PackageDescription>
+      <PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' == ''">$(PackageName) version $(PackageVersion) - $(Release)</PackageDescription>
     </PropertyGroup>
   </Target>
 
@@ -31,8 +33,11 @@
       <Release Condition="'$(Release)' == ''">0</Release>
       <PackageName>$(PackagePrefix)</PackageName>
       <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
-      <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName >
-    </PropertyGroup>
+      <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName>
+      <RpmVendor Condition="'$(RpmVendor)' == ''">$(Authors)</RpmVendor>
+      <RpmDescription Condition="'$(RpmDescription)' == ''">$(PackageDescription)</RpmDescription>
+      <RpmUrl Condition="'$(RpmUrl)' == ''">$(PackageProjectUrl)</RpmUrl>
+  </PropertyGroup>
 
     <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
 
@@ -50,6 +55,9 @@
              UserName="$(UserName)"
              InstallService="$(InstallService)"
              ServiceName="$(ServiceName)"
+             Vendor="$(RpmVendor)"
+             Description="$(RpmDescription)"
+             Url="$(RpmUrl)"
              PreInstallScript="$(PreInstallScript)"
              PostInstallScript="$(PostInstallScript)"
              PreRemoveScript="$(PreRemoveScript)"
