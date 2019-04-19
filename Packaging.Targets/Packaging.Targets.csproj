@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.5;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <VersionPrefix>0.1.1</VersionPrefix>
     <Authors>Frederik Carlier</Authors>
     <Company>Quamotion</Company>
@@ -53,10 +53,6 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
-    <PackageReference Include="System.Globalization.Extensions" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-  </ItemGroup>
   <ItemGroup>
     <Content Include="build\*.*">
       <Pack>true</Pack>
@@ -66,18 +62,10 @@
     <!-- SharpZipLib -->
     <Content Include="$(NuGetPackageRoot)\sharpziplib.netstandard\0.86.0.1\lib\netstandard1.3\SharpZipLib.NETStandard.dll" Link="SharpZipLib.NETStandard.dll">
       <Pack>true</Pack>
-      <PackagePath>tools\netstandard1.5\</PackagePath>
-    </Content>
-    <Content Include="$(NuGetPackageRoot)\sharpziplib.netstandard\0.86.0.1\lib\netstandard1.3\SharpZipLib.NETStandard.dll" Link="SharpZipLib.NETStandard.dll">
-      <Pack>true</Pack>
       <PackagePath>tools\netstandard2.0\</PackagePath>
     </Content>
 
     <!-- Bouncy Castle-->
-    <Content Include="$(NuGetPackageRoot)\portable.bouncycastle\1.8.1.3\lib\netstandard1.3\BouncyCastle.Crypto.dll" Link="BouncyCastle.Crypto.dll">
-      <Pack>true</Pack>
-      <PackagePath>tools\netstandard1.5\</PackagePath>
-    </Content>
     <Content Include="$(NuGetPackageRoot)\portable.bouncycastle\1.8.1.3\lib\netstandard2.0\BouncyCastle.Crypto.dll" Link="BouncyCastle.Crypto.dll">
       <Pack>true</Pack>
       <PackagePath>tools\netstandard2.0\</PackagePath>

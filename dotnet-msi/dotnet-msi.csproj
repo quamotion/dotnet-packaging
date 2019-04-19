@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.0;netcoreapp2.0</TargetFrameworks>
     <VersionPrefix>0.1.1</VersionPrefix>
     <Authors>Frederik Carlier</Authors>
     <Company>Quamotion</Company>
@@ -10,24 +10,22 @@
     <PackageProjectUrl>https://github.com/qmfrederik/dotnet-packaging/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/qmfrederik/dotnet-packaging/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>dotnet cli packaging zip archive</PackageTags>
-    <Description>Create .zip files of your .NET Core projects straight from the command line.
+    <PackageTags>dotnet cli packaging deb debian ubuntu mint installer</PackageTags>
+    <Description>Create Debian and Ubuntu installers (.deb files ) of your .NET Core projects straight from the command line.
 
-Once you've installed this package as a .NET CLI tool, run dotnet zip to generate a .zip file which contains the publish output of your .NET Project.
+Once you've installed this package as a .NET CLI tool, run dotnet deb to generate a .deb file which contains the publish output of your .NET Project.
 
-See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet tarball.</Description>
+See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet deb.</Description>
     <Product>Packaging Tools for .NET CLI</Product>
+    <NugetPackageFolder Condition="$(NugetPackageFolder) == ''">$(USERPROFILE)\.nuget\packages</NugetPackageFolder>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
-    <PackageReference Include="NerdBank.GitVersioning" Version="2.3.38">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="$(NuGetPackageRoot)\mcmaster.extensions.commandlineutils\2.3.4\lib\netstandard2.0\McMaster.Extensions.CommandLineUtils.dll" Link="McMaster.Extensions.CommandLineUtils.dll">
+    <Content Include="$(NugetPackageFolder)\microsoft.extensions.commandlineutils\1.1.1\lib\netstandard1.3\Microsoft.Extensions.CommandLineUtils.dll" Link="Microsoft.Extensions.CommandLineUtils.dll">
       <Pack>true</Pack>
       <PackagePath>lib\$(TargetFramework)\</PackagePath>
     </Content>

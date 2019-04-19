@@ -182,14 +182,16 @@ namespace Packaging.Targets.Rpm
 
             if (value == null)
             {
-                throw new ArgumentNullException(nameof(value));
+                stream.WriteByte(0x00);
             }
+            else
+            {
+                var length = Encoding.UTF8.GetByteCount(value) + 1;
+                byte[] data = new byte[length];
+                Encoding.UTF8.GetBytes(value, 0, value.Length, data, 0);
 
-            var length = Encoding.UTF8.GetByteCount(value) + 1;
-            byte[] data = new byte[length];
-            Encoding.UTF8.GetBytes(value, 0, value.Length, data, 0);
-
-            stream.Write(data, 0, data.Length);
+                stream.Write(data, 0, data.Length);
+            }
         }
     }
 }
