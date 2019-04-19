@@ -855,7 +855,14 @@ namespace Packaging.Targets.Rpm
                     case IndexType.RPM_STRING_ARRAY_TYPE:
                         foreach (var value in (IEnumerable<string>)record.Value.Value)
                         {
-                            size += Encoding.UTF8.GetByteCount(value) + 1;
+                            if (value != null)
+                            {
+                                size += Encoding.UTF8.GetByteCount(value) + 1;
+                            }
+                            else
+                            {
+                                size += 1;
+                            }
                         }
 
                         break;
