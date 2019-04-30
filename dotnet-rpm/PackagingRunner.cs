@@ -41,18 +41,28 @@ namespace Dotnet.Packaging
               CommandOptionType.SingleValue);
 
             commandLineApplication.HelpOption("-? | -h | --help");
+            commandLineApplication.FullName = $"dotnet {this.outputName}";
+            commandLineApplication.LongVersionGetter = () => ThisAssembly.AssemblyInformationalVersion;
+
+            commandLineApplication.ExtendedHelpText = $"{Environment.NewLine}See https://github.com/qmfrederik/dotnet-packaging for more information";
 
             commandLineApplication.OnExecute(() =>
             {
+                Console.WriteLine($"dotnet {this.outputName} ({ThisAssembly.AssemblyInformationalVersion})");
+
                 if (!framework.HasValue())
                 {
                     Console.WriteLine("You must specify a target framework.");
+                    commandLineApplication.ShowHint();
+
                     return -1;
                 }
 
                 if (!runtime.HasValue())
                 {
                     Console.WriteLine("You must specify a target runtime.");
+                    commandLineApplication.ShowHint();
+
                     return -1;
                 }
 
