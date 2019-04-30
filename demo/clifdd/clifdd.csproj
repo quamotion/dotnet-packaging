@@ -22,8 +22,6 @@
 
   <ItemGroup>
     <PackageReference Include="Packaging.Targets" Version="$(PackagingNuGetVersion)" />
-    <DotNetCliToolReference Include="dotnet-rpm" Version="$(PackagingNuGetVersion)" />
-    <DotNetCliToolReference Include="dotnet-deb" Version="$(PackagingNuGetVersion)" />
   </ItemGroup>
 
   <PropertyGroup>
