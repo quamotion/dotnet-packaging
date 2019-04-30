@@ -18,7 +18,7 @@ Once you've installed this package as a .NET CLI tool, run dotnet rpm to generat
 See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet rpm.</Description>
     <Product>Packaging Tools for .NET CLI</Product>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>rpm</ToolCommandName>
+    <ToolCommandName>dotnet-rpm</ToolCommandName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,18 +26,5 @@ See https://github.com/qmfrederik/dotnet-packaging/ for more information on how 
     <PackageReference Include="NerdBank.GitVersioning" Version="2.3.38">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="$(NuGetPackageRoot)\mcmaster.extensions.commandlineutils\2.3.4\lib\netstandard2.0\McMaster.Extensions.CommandLineUtils.dll" Link="McMaster.Extensions.CommandLineUtils.dll">
-      <Pack>true</Pack>
-      <PackagePath>lib\$(TargetFramework)\</PackagePath>
-    </Content>
-
-    <!-- Required in the package root to run the cli tool always with bundled runtime -->
-    <Content Include="../prefercliruntime">
-      <PackagePath>prefercliruntime</PackagePath>
-      <Pack>true</Pack>
-    </Content>
   </ItemGroup>
 </Project>
