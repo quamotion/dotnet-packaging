@@ -98,10 +98,16 @@
       <Line Include="line04"><Text>  &lt;/PropertyGroup&gt;</Text></Line>
       <Line Include="line05"><Text>&lt;/Project&gt;</Text></Line>
       <LineText Include="%(Line.Text)" />
+      <PlainTextLine Include="line01"><Text>$(NuGetPackageVersion)</Text></PlainTextLine>
+      <PlainTextLineText Include="%(PlainTextLine.Text)" />
     </ItemGroup>
     <WriteLinesToFile
        File="../demo/Directory.Build.props"
        Lines="@(LineText)"
+      Overwrite="true" />
+    <WriteLinesToFile
+       File="../demo/version.txt"
+       Lines="@(PlainTextLineText)"
       Overwrite="true" />
   </Target>
 </Project>

@@ -29,10 +29,13 @@ script:
   - dotnet pack dotnet-packaging.sln -c Release
   - dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj
 
-  - dotnet tool install --global --add-source dotnet-tarball/bin/Release/ dotnet-tarball
-  - dotnet tool install --global --add-source dotnet-zip/bin/Release/ dotnet-zip
-  - dotnet tool install --global --add-source dotnet-rpm/bin/Release/ dotnet-rpm
-  - dotnet tool install --global --add-source dotnet-deb/bin/Release/ dotnet-deb
+  - export NuGetPackageVersion=$(cat demo/version.txt)
+  - export PATH=$PATH:$HOME/.dotnet/tools
+
+  - dotnet tool install --global --add-source dotnet-tarball/bin/Release/ dotnet-tarball --version $NuGetPackageVersion
+  - dotnet tool install --global --add-source dotnet-zip/bin/Release/ dotnet-zip --version $NuGetPackageVersion
+  - dotnet tool install --global --add-source dotnet-rpm/bin/Release/ dotnet-rpm --version $NuGetPackageVersion
+  - dotnet tool install --global --add-source dotnet-deb/bin/Release/ dotnet-deb --version $NuGetPackageVersion
 
   - cd $TRAVIS_BUILD_DIR/demo/aspnetcore
   - dotnet restore
