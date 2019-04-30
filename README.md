@@ -22,17 +22,21 @@ Did we miss anything? Feel free to file a feature request, or send a PR!
 
 ## Installation
 
-Add the following entry to your `.csproj` file, under the `Project` node. You do not need to add all `dotnet-*` entries;
-only add those you are going to use.
+First, add the following entry to your `.csproj` file, under the `Project` node.
 
 ```xml
   <ItemGroup>
     <PackageReference Include="Packaging.Targets" Version="0.1.56" />
-    <DotNetCliToolReference Include="dotnet-tarball" Version="0.1.56" />
-    <DotNetCliToolReference Include="dotnet-zip" Version="0.1.56*" />
-    <DotNetCliToolReference Include="dotnet-rpm" Version="0.1.56*" />
-    <DotNetCliToolReference Include="dotnet-deb" Version="0.1.56" />
   </ItemGroup>
+```
+
+Then, install the .NET Packaging tools:
+
+```bash
+dotnet tool install --global dotnet-zip
+dotnet tool install --global dotnet-tarball
+dotnet tool install --global dotnet-rpm
+dotnet tool install --global dotnet-deb
 ```
 
 ## Usage
@@ -48,8 +52,7 @@ All commands take the following command line arguments:
 
 
 ### Note
-If you have multiple `.csproj` files in a single directory, [.NET Core CLI tools don't work](https://github.com/dotnet/cli/issues/4808).
-If that's the case, you can still invoke the packaging tools manually:
+You can invoke the packaging tools manually, using a MSBuild target instead of using the a .NET Core CLI tool:
 
 ```
 dotnet msbuild [your-project].csproj /t:CreateZip /p:TargetFramework=netcoreapp1.1 /p:RuntimeIdentifier=win7-x64 /p:Configuration=Release

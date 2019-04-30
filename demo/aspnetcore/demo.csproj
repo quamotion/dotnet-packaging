@@ -24,10 +24,6 @@
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="2.3.38" PrivateAssets="all" />
     <PackageReference Include="Packaging.Targets" Version="$(PackagingNuGetVersion)" />
-    <DotNetCliToolReference Include="dotnet-tarball" Version="$(PackagingNuGetVersion)" />
-    <DotNetCliToolReference Include="dotnet-zip" Version="$(PackagingNuGetVersion)" />
-    <DotNetCliToolReference Include="dotnet-rpm" Version="$(PackagingNuGetVersion)" />
-    <DotNetCliToolReference Include="dotnet-deb" Version="$(PackagingNuGetVersion)" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.6" />

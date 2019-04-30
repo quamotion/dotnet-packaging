@@ -17,6 +17,13 @@ test_script:
   - ps: '& (Join-Path $env:APPVEYOR_BUILD_FOLDER "appveyor-testresults.ps1")'
   - cmd: cd ..
 
+  - cmd: set /p NuGetPackageVersion=<demo\version.txt
+
+  - cmd: dotnet tool install --global --add-source dotnet-tarball\bin\Release\ dotnet-tarball --version %NuGetPackageVersion%
+  - cmd: dotnet tool install --global --add-source dotnet-zip\bin\Release\ dotnet-zip --version %NuGetPackageVersion%
+  - cmd: dotnet tool install --global --add-source dotnet-rpm\bin\Release\ dotnet-rpm --version %NuGetPackageVersion%
+  - cmd: dotnet tool install --global --add-source dotnet-deb\bin\Release\ dotnet-deb --version %NuGetPackageVersion%
+
   - cmd: cd %APPVEYOR_BUILD_FOLDER%/demo/aspnetcore
   - cmd: dotnet restore
   - cmd: dotnet rpm -c Release -r rhel.7-x64 -f netcoreapp2.1

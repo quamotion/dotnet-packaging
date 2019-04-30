@@ -29,6 +29,14 @@ script:
   - dotnet pack dotnet-packaging.sln -c Release
   - dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj
 
+  - export NuGetPackageVersion=$(cat demo/version.txt)
+  - export PATH=$PATH:$HOME/.dotnet/tools
+
+  - dotnet tool install --global --add-source dotnet-tarball/bin/Release/ dotnet-tarball --version $NuGetPackageVersion
+  - dotnet tool install --global --add-source dotnet-zip/bin/Release/ dotnet-zip --version $NuGetPackageVersion
+  - dotnet tool install --global --add-source dotnet-rpm/bin/Release/ dotnet-rpm --version $NuGetPackageVersion
+  - dotnet tool install --global --add-source dotnet-deb/bin/Release/ dotnet-deb --version $NuGetPackageVersion
+
   - cd $TRAVIS_BUILD_DIR/demo/aspnetcore
   - dotnet restore
   - if [ "$RUNTIME" = "rhel.7-x64" ]; then dotnet rpm -c Release -r rhel.7-x64 -f netcoreapp2.1; fi
