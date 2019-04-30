@@ -17,6 +17,8 @@ Once you've installed this package as a .NET CLI tool, run dotnet zip to generat
 
 See https://github.com/qmfrederik/dotnet-packaging/ for more information on how to use dotnet tarball.</Description>
     <Product>Packaging Tools for .NET CLI</Product>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>zip</ToolCommandName>
   </PropertyGroup>
 
   <ItemGroup>
