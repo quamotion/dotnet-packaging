@@ -35,9 +35,9 @@ namespace Dotnet.Packaging
               $"Required. Target configuration of the {outputName}. The default for most projects is 'Debug'.",
               CommandOptionType.SingleValue);
 
-            CommandOption versionSuffix = commandLineApplication.Option(
-              "---version-suffix <version-suffix>",
-              "Defines the value for the $(VersionSuffix) property in the project.",
+            CommandOption version = commandLineApplication.Option(
+              "-v | --version <version>",
+              "Defines the version of the package. The default is 1.0.0.",
               CommandOptionType.SingleValue);
 
             commandLineApplication.HelpOption("-? | -h | --help");
@@ -76,9 +76,9 @@ namespace Dotnet.Packaging
                     msbuildArguments.Append($"/p:Configuration={configuration.Value()} ");
                 }
 
-                if (versionSuffix.HasValue())
+                if (version.HasValue())
                 {
-                    msbuildArguments.Append($"/p:VersionSuffix={versionSuffix.Value()} ");
+                    msbuildArguments.Append($"/p:Version={version.Value()} ");
                 }
 
                 var psi = new ProcessStartInfo

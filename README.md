@@ -48,7 +48,7 @@ All commands take the following command line arguments:
 * `-r`, `--runtime`: Required. The target runtime has to be specified in the project file. For example, `win7-x64` or `ubuntu.16.10-x64`.
 * `-f`, `--framework`: Required. The target framework has to be specified in the project file. For example, `netcoreapp1.1` or `net462`.
 * `-c`, `--configuration`: Target configuration. The default for most projects is 'Debug'.
-*  `---version-suffix`: Defines the value for the `$(VersionSuffix)` property in the project.
+* `-v`, `--version`: Defines the version of the package. The default is 1.0.0.
 
 
 ### Note
