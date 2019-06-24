@@ -1,4 +1,4 @@
-﻿using Packaging.Targets.Deb;
+using Packaging.Targets.Deb;
 using Packaging.Targets.IO;
 using System;
 using System.Collections.Generic;
@@ -155,7 +155,7 @@ echo 'Hello from post remove'
             var dependencies = new string[]
             {
                 "libc6",
-                "libcurl3",
+                "libcurl3 | libcurl4",
                 "libgcc1",
                 "libgssapi-krb5-2",
                 "liblttng-ust0",
@@ -190,7 +190,7 @@ echo 'Hello from post remove'
                 additionalMetadata: null);
 
             Assert.NotNull(pkg.ControlFile);
-            Assert.Equal("libc6, libcurl3, libgcc1, libgssapi-krb5-2, liblttng-ust0, libssl0.9.8 | libssl1.0.0 | libssl1.0.1 | libssl1.0.2, libstdc++6, libunwind8, libuuid1, zlib1g, libicu52 | libicu53 | libicu54 | libicu55 | libicu56 | libicu57 | libicu58 | libicu59", pkg.ControlFile["Depends"]);
+            Assert.Equal("libc6, libcurl3 | libcurl4, libgcc1, libgssapi-krb5-2, liblttng-ust0, libssl0.9.8 | libssl1.0.0 | libssl1.0.1 | libssl1.0.2, libstdc++6, libunwind8, libuuid1, zlib1g, libicu52 | libicu53 | libicu54 | libicu55 | libicu56 | libicu57 | libicu58 | libicu59", pkg.ControlFile["Depends"]);
         }
     }
 }
