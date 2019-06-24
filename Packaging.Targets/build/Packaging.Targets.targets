@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="Packaging.Targets.TarballTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
   <UsingTask TaskName="Packaging.Targets.ZipTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
   <UsingTask TaskName="Packaging.Targets.RpmTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
@@ -83,7 +83,7 @@
          See also https://github.com/dotnet/core-setup/blob/master/src/pkg/packaging/deb/dotnet-runtime-deps-debian_config_debian.9-x64.json  -->
     <ItemGroup Condition="'@(DebDotNetDependencies)' == ''">
       <DebDotNetDependencies Include="libc6"/>
-      <DebDotNetDependencies Include="libcurl3"/>
+      <DebDotNetDependencies Include="libcurl3 | libcurl4"/>
       <DebDotNetDependencies Include="libgcc1"/>
       <DebDotNetDependencies Include="libgssapi-krb5-2"/>
       <DebDotNetDependencies Include="liblttng-ust0"/>
