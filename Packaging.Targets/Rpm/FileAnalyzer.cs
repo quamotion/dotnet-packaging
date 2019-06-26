@@ -33,17 +33,7 @@ namespace Packaging.Targets.Rpm
         /// <inheritdoc/>
         public virtual RpmFileFlags DetermineFlags(ArchiveEntry entry)
         {
-            // The only custom flags which are supported for now are the RPMFILE_DOC flags for non-executable
-            // files.
-            if (entry.Mode.HasFlag(LinuxFileMode.S_IFDIR))
-            {
-                return RpmFileFlags.None;
-            }
-            else if (entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
-            {
-                return RpmFileFlags.None;
-            }
-            else if (entry.TargetPath.StartsWith("/usr/share/doc"))
+            if (entry.Type == ArchiveEntryType.Doc)
             {
                 return RpmFileFlags.RPMFILE_DOC;
             }
@@ -64,6 +54,9 @@ namespace Packaging.Targets.Rpm
 
                 case ArchiveEntryType.Executable64:
                     return RpmFileColor.RPMFC_ELF64;
+
+                case ArchiveEntryType.NetAssembly:
+                    return RpmFileColor.RPMFC_INCLUDE;
 
                 default:
                     return RpmFileColor.RPMFC_BLACK;
@@ -88,6 +81,11 @@ namespace Packaging.Targets.Rpm
             if (entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
             {
                 return string.Empty;
+            }
+
+            if (entry.Type == ArchiveEntryType.NetAssembly)
+            {
+                return "mono";
             }
 
             if (entry.TargetPath.EndsWith(".svg"))
