@@ -220,7 +220,6 @@ namespace Packaging.Targets.IO
         public override void Write(byte[] buffer, int offset, int count)
         {
             this.EnsureNotDisposed();
-            Debug.WriteLine($"Write {count - offset} bytes");
 
             if (count == 0)
             {
