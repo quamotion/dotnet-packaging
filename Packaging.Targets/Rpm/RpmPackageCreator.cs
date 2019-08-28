@@ -413,7 +413,12 @@ namespace Packaging.Targets.Rpm
 
             using (MemoryStream dummyCompressedPayload = new MemoryStream())
             {
-                using (XZOutputStream dummyPayloadCompressor = new XZOutputStream(dummyCompressedPayload, 1, XZOutputStream.DefaultPreset, leaveOpen: true))
+                using (XZOutputStream dummyPayloadCompressor =
+                    new XZOutputStream(
+                        dummyCompressedPayload,
+                        XZOutputStream.DefaultThreads,
+                        XZOutputStream.DefaultPreset,
+                        leaveOpen: true))
                 {
                     dummyPayloadCompressor.Write(new byte[] { 0 }, 0, 1);
                 }
@@ -461,7 +466,11 @@ namespace Packaging.Targets.Rpm
             }
             else
             {
-                using (XZOutputStream compressor = new XZOutputStream(targetStream, 1, XZOutputStream.DefaultPreset, leaveOpen: true))
+                using (XZOutputStream compressor = new XZOutputStream(
+                    targetStream,
+                    XZOutputStream.DefaultThreads,
+                    XZOutputStream.DefaultPreset,
+                    leaveOpen: true))
                 {
                     payloadStream.Position = 0;
                     payloadStream.CopyTo(compressor);
