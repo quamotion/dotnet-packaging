@@ -1,4 +1,4 @@
-FROM opensuse:42.3
+FROM opensuse/leap:42.3
 
 ENV rid=opensuse.42.3-x64
 COPY cliscd.1.0.0.$rid.rpm /pkg/

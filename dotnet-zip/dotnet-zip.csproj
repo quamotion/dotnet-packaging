@@ -2,13 +2,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
-    <VersionPrefix>0.1.1</VersionPrefix>
     <Authors>Frederik Carlier</Authors>
     <Company>Quamotion</Company>
     <Copyright>Copyright (c) Frederik Carlier and Contributors</Copyright>
-    <PackageLicenseUrl>https://github.com/qmfrederik/dotnet-packaging/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/qmfrederik/dotnet-packaging/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/qmfrederik/dotnet-packaging/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>dotnet cli packaging zip archive</PackageTags>
     <Description>Create .zip files of your .NET Core projects straight from the command line.
@@ -19,13 +15,17 @@ See https://github.com/qmfrederik/dotnet-packaging/ for more information on how 
     <Product>Packaging Tools for .NET CLI</Product>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>dotnet-zip</ToolCommandName>
+    
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
-    <PackageReference Include="NerdBank.GitVersioning" Version="2.3.38">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="NerdBank.GitVersioning" Version="3.0.25" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19351-01" PrivateAssets="All"/>
   </ItemGroup>
   
   <ItemGroup>
