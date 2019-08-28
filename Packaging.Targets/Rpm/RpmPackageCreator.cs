@@ -32,6 +32,13 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
+        /// Gets or sets the number of threads to use when compressing <c>.xz</c> files.
+        /// The default is to use the number of CPUs. You may want to set this to 1 for
+        /// compatibility purposes.
+        /// </summary>
+        public int CompressionThreads { get; set; } = XZOutputStream.DefaultThreads;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="RpmPackageCreator"/> class.
         /// </summary>
         /// <param name="analyzer">
@@ -416,7 +423,7 @@ namespace Packaging.Targets.Rpm
                 using (XZOutputStream dummyPayloadCompressor =
                     new XZOutputStream(
                         dummyCompressedPayload,
-                        XZOutputStream.DefaultThreads,
+                        this.CompressionThreads,
                         XZOutputStream.DefaultPreset,
                         leaveOpen: true))
                 {
