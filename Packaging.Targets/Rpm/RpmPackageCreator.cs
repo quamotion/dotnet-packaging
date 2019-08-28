@@ -32,6 +32,13 @@ namespace Packaging.Targets.Rpm
         }
 
         /// <summary>
+        /// Gets or sets the number of threads to use when compressing <c>.xz</c> files.
+        /// The default is to use the number of CPUs. You may want to set this to 1 for
+        /// compatibility purposes.
+        /// </summary>
+        public int CompressionThreads { get; set; } = XZOutputStream.DefaultThreads;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="RpmPackageCreator"/> class.
         /// </summary>
         /// <param name="analyzer">
@@ -413,7 +420,12 @@ namespace Packaging.Targets.Rpm
 
             using (MemoryStream dummyCompressedPayload = new MemoryStream())
             {
-                using (XZOutputStream dummyPayloadCompressor = new XZOutputStream(dummyCompressedPayload, 1, XZOutputStream.DefaultPreset, leaveOpen: true))
+                using (XZOutputStream dummyPayloadCompressor =
+                    new XZOutputStream(
+                        dummyCompressedPayload,
+                        this.CompressionThreads,
+                        XZOutputStream.DefaultPreset,
+                        leaveOpen: true))
                 {
                     dummyPayloadCompressor.Write(new byte[] { 0 }, 0, 1);
                 }
@@ -461,7 +473,11 @@ namespace Packaging.Targets.Rpm
             }
             else
             {
-                using (XZOutputStream compressor = new XZOutputStream(targetStream, 1, XZOutputStream.DefaultPreset, leaveOpen: true))
+                using (XZOutputStream compressor = new XZOutputStream(
+                    targetStream,
+                    XZOutputStream.DefaultThreads,
+                    XZOutputStream.DefaultPreset,
+                    leaveOpen: true))
                 {
                     payloadStream.Position = 0;
                     payloadStream.CopyTo(compressor);

@@ -354,6 +354,7 @@ namespace Packaging.Targets.Tests.Rpm
                 using (var compressedPayloadStream = RpmPayloadReader.GetCompressedPayloadStream(originalPackage))
                 {
                     RpmPackageCreator creator = new RpmPackageCreator(new PlistFileAnalyzer());
+                    creator.CompressionThreads = 1;
                     creator.CreatePackage(
                         archive,
                         compressedPayloadStream,

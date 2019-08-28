@@ -47,7 +47,7 @@ namespace Packaging.Targets.IO
         private bool disposed;
 
         public XZOutputStream(Stream s)
-            : this(s, 1)
+            : this(s, DefaultThreads)
         {
         }
 
@@ -108,6 +108,8 @@ namespace Packaging.Targets.IO
         {
             this.Dispose(false);
         }
+
+        public static int DefaultThreads => Environment.ProcessorCount;
 
         /// <inheritdoc/>
         public override bool CanRead
