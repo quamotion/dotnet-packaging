@@ -30,11 +30,11 @@ test_script:
   - cmd: dotnet deb -c Release -r ubuntu.16.04-x64 -f netcoreapp2.1
 
 artifacts:
-  - path: dotnet-tarball\bin\Release\dotnet-tarball.*.nupkg
-  - path: dotnet-zip\bin\Release\dotnet-zip.*.nupkg
-  - path: dotnet-rpm\bin\Release\dotnet-rpm.*.nupkg
-  - path: dotnet-deb\bin\Release\dotnet-deb.*.nupkg
-  - path: Packaging.Targets\bin\Release\Packaging.Targets.*.nupkg
+  - path: dotnet-tarball\bin\Release\dotnet-tarball.*nupkg
+  - path: dotnet-zip\bin\Release\dotnet-zip.*nupkg
+  - path: dotnet-rpm\bin\Release\dotnet-rpm.*nupkg
+  - path: dotnet-deb\bin\Release\dotnet-deb.*nupkg
+  - path: Packaging.Targets\bin\Release\Packaging.Targets.*nupkg
   - path: demo\**\*.deb
   - path: demo\**\*.rpm
 
@@ -44,4 +44,3 @@ deploy:
     branch: master
   api_key:
     secure: BFOZBsR25Gez8A7QnyJdKckE3JIiCfc9v70k8eMHOz/fmlbgiouG/oSv3izNejOd
-  skip_symbols: true
