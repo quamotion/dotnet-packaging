@@ -335,7 +335,7 @@ namespace Packaging.Targets.Rpm
                 // Add the user and group, under which the service runs.
                 // These users are never removed because UIDs are re-used on Linux.
                 preIn += $"/usr/sbin/groupadd -r {userName} 2>/dev/null || :\n" +
-                    $"/usr/sbin/useradd -g {userName} -s /sbin/nologin -r -d {prefix} {userName} 2>/dev/null || :\n";
+                    $"/usr/sbin/useradd -g {userName} -s /sbin/nologin -r {userName} 2>/dev/null || :\n";
             }
 
             if (installService)
