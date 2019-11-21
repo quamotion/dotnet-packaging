@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -43,6 +44,19 @@ namespace Packaging.Targets
 
         [Required]
         public string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the runtime identifier for which we are currently building.
+        /// Used to determine the target architecture of the package.
+        /// </summary>
+        [Required]
+        public string RuntimeIdentifier { get; set; }
+
+        /// <summary>
+        /// Gets or sets the package architecture (amd64, i386,...). When not set,
+        /// the target architecture will be derived based on the <see cref="RuntimeIdentifier"/>
+        /// </summary>
+        public string DebPackageArchitecture { get; set; }
 
         public string Section { get; set; }
 
@@ -126,6 +140,41 @@ namespace Packaging.Targets
         /// </remarks>
         public string PostRemoveScript { get; set; }
 
+        /// <summary>
+        /// Derives the package architecture from a .NET runtime identiifer.
+        /// </summary>
+        /// <param name="runtimeIdentifier">
+        /// The runtime identifier.
+        /// </param>
+        /// <returns>
+        /// The equivalent package architecture.
+        /// </returns>
+        public static string GetPackageArchitecture(string runtimeIdentifier)
+        {
+            // Valid architectures can be obtained by running "dpkg-architecture --list-known"
+            RuntimeIdentifiers.ParseRuntimeId(runtimeIdentifier, out _, out _, out Architecture? architecture, out _);
+
+            if (architecture != null)
+            {
+                switch (architecture.Value)
+                {
+                    case Architecture.Arm:
+                        return "armhf";
+
+                    case Architecture.Arm64:
+                        return "arm64";
+
+                    case Architecture.X64:
+                        return "amd64";
+
+                    case Architecture.X86:
+                        return "i386";
+                }
+            }
+
+            return "any";
+        }
+
         public override bool Execute()
         {
             this.Log.LogMessage(
@@ -187,7 +236,7 @@ namespace Packaging.Targets
                         this.Description,
                         this.Maintainer,
                         this.Version,
-                        "amd64",
+                        !string.IsNullOrWhiteSpace(this.DebPackageArchitecture) ? this.DebPackageArchitecture : GetPackageArchitecture(this.RuntimeIdentifier),
                         this.CreateUser,
                         this.UserName,
                         this.InstallService,
