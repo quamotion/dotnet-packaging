@@ -92,7 +92,7 @@
       <DebDotNetDependencies Include="libgcc1"/>
       <DebDotNetDependencies Include="libgssapi-krb5-2"/>
       <DebDotNetDependencies Include="liblttng-ust0"/>
-      <DebDotNetDependencies Include="libssl0.9.8 | libssl1.0.0 | libssl1.0.1 | libssl1.0.2"/>
+      <DebDotNetDependencies Include="libssl0.9.8 | libssl1.0.0 | libssl1.0.1 | libssl1.0.2 | libssl1.1"/>
       <DebDotNetDependencies Include="libstdc++6"/>
       <DebDotNetDependencies Include="libunwind8"/>
       <DebDotNetDependencies Include="libuuid1"/>
