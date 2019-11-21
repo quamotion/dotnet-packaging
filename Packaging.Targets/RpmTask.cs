@@ -5,6 +5,7 @@ using Packaging.Targets.Rpm;
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Packaging.Targets
 {
@@ -65,6 +66,19 @@ namespace Packaging.Targets
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets the runtime identifier for which we are currently building.
+        /// Used to determine the target architecture of the package.
+        /// </summary>
+        [Required]
+        public string RuntimeIdentifier { get; set; }
+
+        /// <summary>
+        /// Gets or sets the package architecture (x86_64, i686,...). When not set,
+        /// the target architecture will be derived based on the <see cref="RuntimeIdentifier"/>
+        /// </summary>
+        public string RpmPackageArchitecture { get; set; }
 
         /// <summary>
         /// Gets or sets a list of empty folders to create when
@@ -187,6 +201,43 @@ namespace Packaging.Targets
         /// </remarks>
         public string PostRemoveScript { get; set; }
 
+        /// <summary>
+        /// Derives the package architecture from a .NET runtime identiifer.
+        /// </summary>
+        /// <param name="runtimeIdentifier">
+        /// The runtime identifier.
+        /// </param>
+        /// <returns>
+        /// The equivalent package architecture.
+        /// </returns>
+        public static string GetPackageArchitecture(string runtimeIdentifier)
+        {
+            // Some architectures are listed here:
+            // - https://wiki.centos.org/Download
+            // - https://docs.fedoraproject.org/ro/Fedora_Draft_Documentation/0.1/html/RPM_Guide/ch01s03.html
+            RuntimeIdentifiers.ParseRuntimeId(runtimeIdentifier, out _, out _, out Architecture? architecture, out _);
+
+            if (architecture != null)
+            {
+                switch (architecture.Value)
+                {
+                    case Architecture.Arm:
+                        return "armhfp";
+
+                    case Architecture.Arm64:
+                        return "aarch64";
+
+                    case Architecture.X64:
+                        return "x86_64";
+
+                    case Architecture.X86:
+                        return "i386";
+                }
+            }
+
+            return "any";
+        }
+
         public override bool Execute()
         {
             this.Log.LogMessage(MessageImportance.Normal, "Creating RPM package '{0}' from folder '{1}'", this.RpmPath, this.PublishDir);
@@ -235,7 +286,7 @@ namespace Packaging.Targets
                     cpioStream,
                     this.PackageName,
                     this.Version,
-                    "x86_64",
+                    !string.IsNullOrEmpty(this.RpmPackageArchitecture) ? this.RpmPackageArchitecture : GetPackageArchitecture(this.RuntimeIdentifier),
                     this.Release,
                     this.CreateUser,
                     this.UserName,

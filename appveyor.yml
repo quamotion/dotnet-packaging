@@ -13,7 +13,7 @@ test_script:
   - cmd: cd %APPVEYOR_BUILD_FOLDER%\Packaging.Targets.Tests\
   - cmd: dotnet restore
   - cmd: dotnet build
-  - cmd: dotnet vstest bin\Debug\netcoreapp2.0\Packaging.Targets.Tests.dll /logger:trx;LogFileName=testresults.trx
+  - cmd: dotnet vstest bin\Debug\netcoreapp2.1\Packaging.Targets.Tests.dll /logger:trx;LogFileName=testresults.trx
   - ps: '& (Join-Path $env:APPVEYOR_BUILD_FOLDER "appveyor-testresults.ps1")'
   - cmd: cd ..
 

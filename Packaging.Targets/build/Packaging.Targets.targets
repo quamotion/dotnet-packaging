@@ -6,7 +6,6 @@
 
   <Target Name="CreatePackageProperties" DependsOnTargets="Publish">
     <PropertyGroup>
-
       <!-- Use the Version as the PackageVersion, but default to 1.0.0 if an Version has not been set
            and allow the user to override this. -->
       <PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' != ''">$(Version)</PackageVersion>
@@ -37,6 +36,7 @@
       <RpmVendor Condition="'$(RpmVendor)' == ''">$(Authors)</RpmVendor>
       <RpmDescription Condition="'$(RpmDescription)' == ''">$(PackageDescription)</RpmDescription>
       <RpmUrl Condition="'$(RpmUrl)' == ''">$(PackageProjectUrl)</RpmUrl>
+      <RpmPackageArchitecture Condition="'$(RpmPackageArchitecture)' == ''"></RpmPackageArchitecture>
   </PropertyGroup>
 
     <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
@@ -51,6 +51,8 @@
              Content="@(Content)"
              LinuxFolders="@(LinuxFolder)"
              RpmDependencies="@(RpmDependency)"
+             RpmPackageArchitecture="$(RpmPackageArchitecture)"
+             RuntimeIdentifier="$(RuntimeIdentifier)"
              CreateUser="$(CreateUser)"
              UserName="$(UserName)"
              InstallService="$(InstallService)"
@@ -72,10 +74,13 @@
       <Prefix Condition="'$(Prefix)' == ''">/usr/share/$(PackagePrefix)</Prefix>
       <PackageName>$(PackagePrefix)</PackageName>
       <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
-      <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName >
+      <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName>
       <DebSection Condition="'$(Section)' == ''">misc</DebSection>
       <DebPriority Condition="'$(DebPriority)' == ''">extra</DebPriority>
       <DebHomepage Condition="'$(DebHomepage)' == ''">$(PackageProjectUrl)</DebHomepage>
+
+      <!-- DebPackageArchitecture is the architecture used for the deb package. Values like any, i386, amd64, arm and arm64 are supported -->
+      <DebPackageArchitecture Condition="'$(DebPackageArchitecture)' == ''"></DebPackageArchitecture>
     </PropertyGroup>
     
     <!-- Dependency list from https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/jessie/amd64/Dockerfile 
@@ -106,6 +111,8 @@
              LinuxFolders="@(LinuxFolder)"
              DebDependencies="@(DebDependency)"
              DebDotNetDependencies="@(DebDotNetDependencies)"
+             DebPackageArchitecture="$(DebPackageArchitecture)"
+             RuntimeIdentifier="$(RuntimeIdentifier)"
              CreateUser="$(CreateUser)"
              Maintainer="$(PackageMaintainer)"
              Description="$(PackageDescription)"
