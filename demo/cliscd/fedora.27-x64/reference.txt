@@ -1,6 +1,7 @@
 .
 ..
 Microsoft.CSharp.dll
+Microsoft.VisualBasic.Core.dll
 Microsoft.VisualBasic.dll
 Microsoft.Win32.Primitives.dll
 Microsoft.Win32.Registry.dll
@@ -133,10 +134,10 @@ System.Security.Cryptography.Csp.dll
 System.Security.Cryptography.Encoding.dll
 System.Security.Cryptography.Native.OpenSsl.a
 System.Security.Cryptography.Native.OpenSsl.so
+System.Security.Cryptography.Native.so
 System.Security.Cryptography.OpenSsl.dll
 System.Security.Cryptography.Primitives.dll
 System.Security.Cryptography.X509Certificates.dll
-System.Security.Cryptography.Native.so
 System.Security.Principal.Windows.dll
 System.Security.Principal.dll
 System.Security.SecureString.dll
@@ -145,12 +146,12 @@ System.ServiceModel.Web.dll
 System.ServiceProcess.dll
 System.Text.Encoding.CodePages.dll
 System.Text.Encoding.Extensions.dll
-System.Text.Encodings.Web.dll
 System.Text.Encoding.dll
+System.Text.Encodings.Web.dll
 System.Text.Json.dll
 System.Text.RegularExpressions.dll
-System.Threading.Overlapped.dll
 System.Threading.Channels.dll
+System.Threading.Overlapped.dll
 System.Threading.Tasks.Dataflow.dll
 System.Threading.Tasks.Extensions.dll
 System.Threading.Tasks.Parallel.dll
