@@ -36,6 +36,7 @@
       <RpmVendor Condition="'$(RpmVendor)' == ''">$(Authors)</RpmVendor>
       <RpmDescription Condition="'$(RpmDescription)' == ''">$(PackageDescription)</RpmDescription>
       <RpmUrl Condition="'$(RpmUrl)' == ''">$(PackageProjectUrl)</RpmUrl>
+      <RpmPackageArchitecture Condition="'$(RpmPackageArchitecture)' == ''"></RpmPackageArchitecture>
   </PropertyGroup>
 
     <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
@@ -50,6 +51,8 @@
              Content="@(Content)"
              LinuxFolders="@(LinuxFolder)"
              RpmDependencies="@(RpmDependency)"
+             RpmPackageArchitecture="$(RpmPackageArchitecture)"
+             RuntimeIdentifier="$(RuntimeIdentifier)"
              CreateUser="$(CreateUser)"
              UserName="$(UserName)"
              InstallService="$(InstallService)"
