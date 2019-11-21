@@ -1,15 +1,10 @@
-﻿using McMaster.Extensions.CommandLineUtils;
-using System;
-using System.Diagnostics;
-using System.Text;
-
-namespace Dotnet.Packaging
+﻿namespace Dotnet.Packaging
 {
     public class Program
     {
         public static int Main(string[] args)
         {
-            PackagingRunner runner = new PackagingRunner("RPM package", "CreateRpm");
+            PackagingRunner runner = new PackagingRunner("RPM package", "CreateRpm", "rpm");
             return runner.Run(args);
         }
     }
