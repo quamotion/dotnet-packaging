@@ -1,0 +1,94 @@
+resources:
+  containers:
+  - container: 2.2-bionic
+    image: mcr.microsoft.com/dotnet/core/sdk:2.2-bionic
+  - container: 3.0-disco
+    image: mcr.microsoft.com/dotnet/core/sdk:3.0-disco
+  - container: 3.0-buster
+    image: mcr.microsoft.com/dotnet/core/sdk:3.0-buster
+
+stages:
+- stage: Build
+  jobs:
+  - job: build
+    container: 3.0-buster
+    steps:
+    - bash: |
+        dotnet restore dotnet-packaging.sln
+        dotnet pack dotnet-packaging.sln -c Release -o $(Build.ArtifactStagingDirectory)
+        dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj
+
+        cp demo/Directory.Build.props $(Build.ArtifactStagingDirectory)
+        cp demo/version.txt $(Build.ArtifactStagingDirectory)
+      displayName: Build
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: nuget
+
+- stage: Test
+  jobs:
+  - job: build_package
+    strategy:
+      maxParallel: 8
+      matrix:
+        2.2-bionic-deb:
+          container: 2.2-bionic
+          command: deb
+        2.2-bionic-rpm:
+          container: 2.2-bionic
+          command: rpm
+        2.2-bionic-zip:
+          container: 2.2-bionic
+          command: zip
+        2.2-bionic-tarball:
+          container: 2.2-bionic
+          command: tarball
+
+        3.0-disco-deb:
+          container: 3.0-disco
+          command: deb
+        3.0-disco-rpm:
+          container: 3.0-disco
+          command: rpm
+        3.0-disco-zip:
+          container: 3.0-disco
+          command: zip
+        3.0-disco-tarball:
+          container: 3.0-disco
+          command: tarball
+
+    container: $[ variables['container'] ]
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Build Artifacts
+      inputs:
+        artifactName: nuget
+        downloadPath: $(Build.ArtifactStagingDirectory)
+    - bash: |
+        set -e
+        export PATH="$PATH:/$HOME/.dotnet/tools"
+
+        mkdir test-$(command)/
+        cd test-$(command)
+
+        echo "<configuration><packageSources><add key='local' value='$(Build.ArtifactStagingDirectory)/nuget' /></packageSources></configuration>" > NuGet.config
+        cat NuGet.config
+
+        version=$(cat $(Build.ArtifactStagingDirectory)/nuget/version.txt)
+        echo "Using version $version"
+
+        # Install the dotnet-$(command) tool
+        dotnet tool install --global dotnet-$(command) --version $version --add-source $(Build.ArtifactStagingDirectory)/nuget
+
+        # Create a new console application
+        dotnet new console
+
+        # Install and use dotnet $(command)
+        dotnet $(command) install
+        dotnet $(command)
+      workingDirectory: $(Pipeline.Workspace)
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Pipeline.Workspace)/test-$(command)/bin/Debug/
+        artifactName: artifacts
