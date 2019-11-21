@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Frederik Carlier</Authors>
+    <Company>Quamotion</Company>
+    <Copyright>Copyright (c) Frederik Carlier and Contributors</Copyright>
+    <RepositoryType>git</RepositoryType>
+    <Product>Packaging Tools for .NET CLI</Product>
+        
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NerdBank.GitVersioning" Version="2.3.3" PrivateAssets="All" />
+  </ItemGroup>
+</Project>
