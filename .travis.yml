@@ -1,6 +1,6 @@
 language: csharp
 mono: none
-dotnet: 2.2.203-1
+dotnet: 3.0.100-1
 dist: xenial
 
 branches:
