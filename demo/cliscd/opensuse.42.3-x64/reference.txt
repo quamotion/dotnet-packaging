@@ -134,7 +134,6 @@ System.Security.Cryptography.Csp.dll
 System.Security.Cryptography.Encoding.dll
 System.Security.Cryptography.Native.OpenSsl.a
 System.Security.Cryptography.Native.OpenSsl.so
-System.Security.Cryptography.Native.so
 System.Security.Cryptography.OpenSsl.dll
 System.Security.Cryptography.Primitives.dll
 System.Security.Cryptography.X509Certificates.dll
