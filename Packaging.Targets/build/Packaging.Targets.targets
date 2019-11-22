@@ -12,7 +12,8 @@
       <PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' == ''">1.0.0</PackageVersion>
       
       <PackagePrefix Condition="'$(PackagePrefix)' == ''">$(TargetName)</PackagePrefix>
-      <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(PackageVersion).$(RuntimeIdentifier)</PackageName>
+      <PackageName Condition="'$(PackageName)' == '' AND '$(RuntimeIdentifier)' != ''">$(PackagePrefix).$(PackageVersion).$(RuntimeIdentifier)</PackageName>
+      <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(PackageVersion)</PackageName>
       <IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
       <PackageDir Condition="'$(PackageDir)' == ''">(TargetDir)</PackageDir>
       <PackagePath Condition="'$(PackagePath)' == ''">$([MSBuild]::EnsureTrailingSlash($(PackageDir)))$(PackageName)</PackagePath>
