@@ -86,9 +86,9 @@ stages:
 
         # Install and use dotnet $(command)
         dotnet $(command) install
-        dotnet $(command)
+        dotnet $(command) -o $(Build.ArtifactStagingDirectory)/packages/$(container)
       workingDirectory: $(Pipeline.Workspace)
     - task: PublishBuildArtifacts@1
       inputs:
-        pathToPublish: $(Pipeline.Workspace)/test-$(command)/bin/Debug/
-        artifactName: artifacts
+        pathToPublish: $(Build.ArtifactStagingDirectory)/packages/
+        artifactName: packages

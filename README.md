@@ -46,10 +46,12 @@ From the command line, run `dotnet rpm`, `dotnet zip` or `dotnet tarball` to cre
 
 All commands take the following command line arguments:
 
-* `-r`, `--runtime`: Required. The target runtime has to be specified in the project file. For example, `win7-x64` or `ubuntu.16.10-x64`.
-* `-f`, `--framework`: Required. The target framework has to be specified in the project file. For example, `netcoreapp1.1` or `net462`.
+* `-r`, `--runtime`: The target runtime to build your project for. For example, `win7-x64` or `ubuntu.16.10-x64`.
+* `-f`, `--framework`: The target framework to build your project for. For example, `netcoreapp1.1` or `net462`.
 * `-c`, `--configuration`: Target configuration. The default for most projects is 'Debug'.
+* `-o`, `--output`: The output directory to place built packages in.
 *  `---version-suffix`: Defines the value for the `$(VersionSuffix)` property in the project.
+*  `--no-restore`: Skip the implicit call to `dotnet restore`.
 
 All arguments are optional.
 
