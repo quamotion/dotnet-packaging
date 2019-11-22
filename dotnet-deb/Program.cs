@@ -6,7 +6,7 @@ namespace Dotnet.Packaging
     {
         static int Main(string[] args)
         {
-            PackagingRunner runner = new PackagingRunner("Debian/Ubuntu installer package", "CreateDeb");
+            PackagingRunner runner = new PackagingRunner("Debian/Ubuntu installer package", "CreateDeb", "deb");
             return runner.Run(args);
         }
     }

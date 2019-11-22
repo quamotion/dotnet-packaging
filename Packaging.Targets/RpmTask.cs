@@ -71,7 +71,6 @@ namespace Packaging.Targets
         /// Gets or sets the runtime identifier for which we are currently building.
         /// Used to determine the target architecture of the package.
         /// </summary>
-        [Required]
         public string RuntimeIdentifier { get; set; }
 
         /// <summary>

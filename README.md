@@ -22,21 +22,22 @@ Did we miss anything? Feel free to file a feature request, or send a PR!
 
 ## Installation
 
-First, add the following entry to your `.csproj` file, under the `Project` node.
-
-```xml
-  <ItemGroup>
-    <PackageReference Include="Packaging.Targets" Version="0.1.56" />
-  </ItemGroup>
-```
-
-Then, install the .NET Packaging tools:
+First, install the .NET Packaging tools. You don't need to install all tools if you only plan to use one.
 
 ```bash
 dotnet tool install --global dotnet-zip
 dotnet tool install --global dotnet-tarball
 dotnet tool install --global dotnet-rpm
 dotnet tool install --global dotnet-deb
+```
+
+Then, in your project directory, run `dotnet {zip|tarball|rpm|deb} install` to add the tool to your project:
+
+```bash
+dotnet zip install
+dotnet tarball install
+dotnet rpm install
+dotnet deb install
 ```
 
 ## Usage
@@ -50,6 +51,44 @@ All commands take the following command line arguments:
 * `-c`, `--configuration`: Target configuration. The default for most projects is 'Debug'.
 *  `---version-suffix`: Defines the value for the `$(VersionSuffix)` property in the project.
 
+All arguments are optional.
+
+## Tutorial
+
+Let's create a new console application and package it as a `.deb` file, so we can install it on our Ubuntu machine:
+
+First, create your console application:
+
+```bash
+mkdir my-app
+cd my-app
+dotnet new console
+```
+
+Then, install the dotnet-deb utility:
+
+```bash
+dotnet tool install --global dotnet-deb
+dotnet deb install
+```
+
+All set. Let's package your application as a deb package:
+
+```bash
+dotnet deb
+```
+
+There's now a `bin\Debug\netcoreapp3.0\my-app.1.0.0.deb` file wich you can install:
+
+```bash
+apt-get install bin\Debug\netcoreapp3.0\my-app.1.0.0.deb
+```
+
+Your application is installed into `/usr/local/share/my-app`. Invoke it by running `/usr/local/share/my-app/my-app`:
+
+```bash
+/usr/local/share/my-app/my-app
+```
 
 ### Note
 You can invoke the packaging tools manually, using a MSBuild target instead of using the a .NET Core CLI tool:
