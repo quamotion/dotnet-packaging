@@ -91,7 +91,9 @@ namespace Dotnet.Packaging
                     const string PackageId = "Packaging.Targets";
                     if (!propsFile.GetItemsByEvaluatedInclude(PackageId).Any(i => i.ItemType == PackageReferenceItemType && i.EvaluatedInclude == PackageId))
                     {
-                        string packageVersion = ThisAssembly.AssemblyInformationalVersion.Replace("+", "-g");
+                        // Using the -* suffix will allow us to match both released and prereleased versions, in the absence
+                        // of https://github.com/AArnott/Nerdbank.GitVersioning/issues/409
+                        string packageVersion = $"{new Version(ThisAssembly.AssemblyFileVersion).ToString(3)}-*";
                         propsFile.AddItem(
                             PackageReferenceItemType,
                             PackageId,
