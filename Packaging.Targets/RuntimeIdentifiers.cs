@@ -38,7 +38,7 @@ namespace Packaging.Targets
                 return;
             }
 
-            // We use the following convention in all newly-defined RIDs. Some RIDs (win7-x64, win8-x64) predate this convention and don't follow it, but all new RIDs should follow it. 
+            // We use the following convention in all newly-defined RIDs. Some RIDs (win7-x64, win8-x64) predate this convention and don't follow it, but all new RIDs should follow it.
             // [os name].[version]-[architecture]-[additional qualifiers]
             // See https://github.com/dotnet/corefx/blob/master/pkg/Microsoft.NETCore.Platforms/readme.md#naming-convention
             int versionSeparator = runtimeId.IndexOf('.');

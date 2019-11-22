@@ -4,6 +4,8 @@ namespace Packaging.Targets.IO
 {
 #pragma warning disable SA1307 // Accessible fields must begin with upper-case letter
 #pragma warning disable SA1310 // Field names must not contain underscore
+#pragma warning disable CS0169 // The field '' is never used
+#pragma warning disable IDE0051 // Remove unused private members
     /// <summary>
     /// Multithreading options
     /// </summary>
@@ -147,4 +149,6 @@ namespace Packaging.Targets.IO
     }
 #pragma warning restore SA1307 // Accessible fields must begin with upper-case letter
 #pragma warning restore SA1310 // Field names must not contain underscore
+#pragma warning restore CS0169 // The field '' is never used
+#pragma warning restore IDE0051 // Remove unused private members
 }

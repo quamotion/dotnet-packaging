@@ -322,7 +322,7 @@ namespace Packaging.Targets
                     {
                         mode = (LinuxFileMode)Convert.ToUInt32(overridenFileMode, 8);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         throw new Exception($"Could not parse the file mode '{overridenFileMode}' for file '{name}'. Make sure to set the LinuxFileMode attriubute to an octal representation of a Unix file mode.");
                     }
