@@ -59,6 +59,11 @@ provisioner:
   name: ansible
   lint:
     name: ansible-lint
+  inventory:
+    host_vars:
+      fedora.30:
+        # https://github.com/ansible/ansible/issues/54855
+        ansible_python_interpreter: /usr/bin/python3
 scenario:
   name: default
 verifier:
