@@ -13,7 +13,7 @@ namespace cliscd
             Assert.NotEqual(0, user.UserId);
             Assert.NotEqual(0, user.GroupId);
             Assert.Equal("quamotion", user.GroupName);
-            Assert.Equal("/usr/share/cliscd", user.HomeDirectory);
+            Assert.Equal("/home/quamotion", user.HomeDirectory);
         }
 
         [Fact]

@@ -129,7 +129,7 @@ namespace Packaging.Targets.Tests.Deb
                 additionalMetadata: null);
 
             Assert.Equal(@"/usr/sbin/groupadd -r demouser 2>/dev/null || :
-/usr/sbin/useradd -g demouser -s /sbin/nologin -r -d /opt/local demouser 2>/dev/null || :
+/usr/sbin/useradd -g demouser -s /sbin/nologin -r demouser 2>/dev/null || :
 echo 'Hello from pre install'
 ", pkg.PreInstallScript, ignoreLineEndingDifferences: true);
             Assert.Equal(@"systemctl daemon-reload
