@@ -1,0 +1,69 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint:
+  name: yamllint
+platforms:
+  # This list should be roughly kept in sync with the list of supported OSes described at
+  # https://github.com/dotnet/core/blob/master/release-notes/3.0/3.0-supported-os.md,
+  # and/or the list of OSes for which .NET Core builds packages, as seen at
+  # https://dotnet.microsoft.com/download/linux-package-manager/sdk-current
+  # There are no Docker images for RHEL, so we can't test that.
+  # Not sure about Linux Mint/Suse Enterprise Linux docker images, so they are skipped for now.
+  #
+  # OpenSUSE uses zypper as the package manager, but zypper doesn't seem to
+  # handle RPM boolean dependencies. Installing the rpm package will fail like
+  # this:
+  #
+  # > Problem: nothing provides (openssl-libs or libopenssl1_1 or libopenssl_1_0_0) >=  needed by self-contained-app-1.0.0-0.x86_64
+  #
+  # You can manually install the package using rpm -i {path_to_rpm}, though, but Ansible doesn't provide
+  # a good way to do that.
+  #
+  # - name: opensuse.15.0
+  #   image: opensuse/leap:15.0
+  # - name: opensuse.15.1
+  #   image: opensuse/leap:15.1
+  # - name: opensuse.15.2
+  #   image: opensuse/leap:15.2
+  - name: centos.7
+    image: centos:7
+  - name: centos.8
+    image: centos:8
+  - name: ol.7
+    image: oraclelinux:7
+  - name: ol.8
+    image: oraclelinux:8
+  - name: fedora.30
+    image: fedora:30
+  - name: fedora.29
+    image: fedora:29
+  - name: debian.8
+    image: debian:8
+  - name: debian.9
+    image: debian:9
+  - name: debian.10
+    image: debian:10
+  - name: ubuntu.14.04
+    image: ubuntu:14.04
+  - name: ubuntu.16.04
+    image: ubuntu:16.04
+  - name: ubuntu.18.04
+    image: ubuntu:18.04
+  - name: ubuntu.19.10
+    image: ubuntu:19.10
+
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+scenario:
+  name: default
+verifier:
+  name: testinfra
+  options:
+    junitxml: pytest.xml
+  lint:
+    name: flake8

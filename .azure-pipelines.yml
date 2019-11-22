@@ -73,10 +73,7 @@ stages:
         cd test-$(command)
 
         echo "<configuration><packageSources><add key='local' value='$(Build.ArtifactStagingDirectory)/nuget' /></packageSources></configuration>" > NuGet.config
-        cat NuGet.config
-
         version=$(cat $(Build.ArtifactStagingDirectory)/nuget/version.txt)
-        echo "Using version $version"
 
         # Install the dotnet-$(command) tool
         dotnet tool install --global dotnet-$(command) --version $version --add-source $(Build.ArtifactStagingDirectory)/nuget
@@ -88,7 +85,62 @@ stages:
         dotnet $(command) install
         dotnet $(command) -o $(Build.ArtifactStagingDirectory)/packages/$(container)
       workingDirectory: $(Pipeline.Workspace)
+      displayName: Run dotnet $(command)
     - task: PublishBuildArtifacts@1
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)/packages/
         artifactName: packages
+
+  - job: molecule
+    pool:
+      vmImage: 'ubuntu-18.04'
+    steps:
+    - bash: |
+        set -e
+        export PATH=~/.local/bin/:$PATH
+
+        pip3 install wheel
+        pip3 install --upgrade --user setuptools
+        pip3 install --user molecule
+        pip3 install --user docker-py
+        molecule --version
+        ansible --version
+      displayName: Install molecule
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Build Artifacts
+      inputs:
+        artifactName: nuget
+        downloadPath: $(Build.ArtifactStagingDirectory)
+    - bash: |
+        set -e
+        export PATH="$PATH:/$HOME/.dotnet/tools"
+
+        cd self-contained-app
+
+        echo "<configuration><packageSources><add key='local' value='$(Build.ArtifactStagingDirectory)/nuget' /></packageSources></configuration>" > NuGet.config
+        version=$(cat $(Build.ArtifactStagingDirectory)/nuget/version.txt)
+
+        # Install the dotnet-rpm and dotnet-deb tools
+        dotnet tool install --global dotnet-deb --version $version --add-source $(Build.ArtifactStagingDirectory)/nuget
+        dotnet tool install --global dotnet-rpm --version $version --add-source $(Build.ArtifactStagingDirectory)/nuget
+
+        # Create .deb and .rpm packages
+        dotnet rpm install
+        dotnet rpm -o $(Build.SourcesDirectory)/molecule/self-contained/
+        dotnet deb -o $(Build.SourcesDirectory)/molecule/self-contained/
+      workingDirectory: $(Build.SourcesDirectory)/molecule/self-contained
+      displayName: Build self-contained-app
+    - bash: |
+        set -e
+        export PATH=~/.local/bin/:$PATH
+
+        molecule test
+      workingDirectory: $(Build.SourcesDirectory)/molecule/self-contained
+      displayName: Run molecule tests for self-contained-app
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: 'pytest.xml'
+        searchFolder: '$(Build.SourcesDirectory)/molecule/self-contained/molecule/default/'
+      condition: always()
+      displayName: Publish test results

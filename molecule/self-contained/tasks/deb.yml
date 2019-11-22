@@ -1,0 +1,10 @@
+---
+- name: Copy self-contained app to guest
+  copy:
+    src: "{{ role_path }}/self-contained-app.1.0.0.linux-x64.deb"
+    dest: /home/self-contained-app.1.0.0.linux-x64.deb
+
+- name: Install self-contained app
+  become: true
+  apt:
+    deb: /home/self-contained-app.1.0.0.linux-x64.deb

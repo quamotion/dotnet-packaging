@@ -11,3 +11,4 @@ obj/
 *.pkg
 *.zip
 *.tar.gz
+__pycache__/
