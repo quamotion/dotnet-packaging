@@ -40,12 +40,17 @@ namespace Dotnet.Packaging
 
             CommandOption framework = commandLineApplication.Option(
               "-f | --framework <framework>",
-              $"Required. Target framework of the {outputName}. The target framework has to be specified in the project file.",
+              $"Target framework of the {outputName}. The target framework has to be specified in the project file.",
               CommandOptionType.SingleValue);
 
             CommandOption configuration = commandLineApplication.Option(
               "-c | --configuration <configuration>",
-              $"Required. Target configuration of the {outputName}. The default for most projects is 'Debug'.",
+              $"Target configuration of the {outputName}. The default for most projects is 'Debug'.",
+              CommandOptionType.SingleValue);
+
+            CommandOption output = commandLineApplication.Option(
+              "-o | --output <output-dir>",
+              $"The output directory to place built packages in. The default is the output directory of your project.",
               CommandOptionType.SingleValue);
 
             CommandOption versionSuffix = commandLineApplication.Option(
@@ -136,6 +141,11 @@ namespace Dotnet.Packaging
                 if (versionSuffix.HasValue())
                 {
                     msbuildArguments.Append($"/p:VersionSuffix={versionSuffix.Value()} ");
+                }
+
+                if (output.HasValue())
+                {
+                    msbuildArguments.Append($"/p:PackageDir={output.Value()} ");
                 }
 
                 return RunDotnet(msbuildArguments);

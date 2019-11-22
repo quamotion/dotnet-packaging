@@ -12,9 +12,11 @@
       <PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' == ''">1.0.0</PackageVersion>
       
       <PackagePrefix Condition="'$(PackagePrefix)' == ''">$(TargetName)</PackagePrefix>
-      <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(PackageVersion).$(RuntimeIdentifier)</PackageName>
+      <PackageName Condition="'$(PackageName)' == '' AND '$(RuntimeIdentifier)' != ''">$(PackagePrefix).$(PackageVersion).$(RuntimeIdentifier)</PackageName>
+      <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(PackageVersion)</PackageName>
       <IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
-      <PackagePath Condition="'$(PackagePath)' == ''">$(TargetDir)$(PackageName)</PackagePath>
+      <PackageDir Condition="'$(PackageDir)' == ''">$(TargetDir)</PackageDir>
+      <PackagePath Condition="'$(PackagePath)' == ''">$([MSBuild]::EnsureTrailingSlash($(PackageDir)))$(PackageName)</PackagePath>
       <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
       <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
       <PackageMaintainer Condition="'$(PackageMaintainer)' == '' AND '$(Authors)' != ''">$(Authors)</PackageMaintainer>
@@ -41,6 +43,8 @@
 
     <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
 
+    <MakeDir Directories="$(PackageDir)"/>
+    
     <RpmTask PublishDir="$(PublishDir)"
              RpmPath="$(RpmPath)"
              CpioPath="$(CpioPath)"
@@ -99,6 +103,8 @@
       <DebDotNetDependencies Include="zlib1g"/>
       <DebDotNetDependencies Include="libicu52 | libicu53 | libicu54 | libicu55 | libicu56 | libicu57 | libicu58 | libicu59 | libicu60 | libicu61 | libicu62 | libicu63"/>
     </ItemGroup>
+
+    <MakeDir Directories="$(PackageDir)"/>
     
     <DebTask PublishDir="$(PublishDir)" 
              DebPath="$(DebPath)"
@@ -135,6 +141,8 @@
 
     <Message Text="Creating tarball $(TarballPath)" Importance="high"/>
 
+    <MakeDir Directories="$(PackageDir)"/>
+    
     <TarballTask PublishDir="$(PublishDir)"
              TarballPath="$(TarballPath)"/>
   </Target>
@@ -146,6 +154,8 @@
 
     <Message Text="Creating zip package $(ZipPath)" Importance="high"/>
 
+    <MakeDir Directories="$(PackageDir)"/>
+    
     <ZipTask PublishDir="$(PublishDir)"
              ZipPath="$(ZipPath)"/>
   </Target>
