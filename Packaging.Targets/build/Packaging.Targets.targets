@@ -15,7 +15,7 @@
       <PackageName Condition="'$(PackageName)' == '' AND '$(RuntimeIdentifier)' != ''">$(PackagePrefix).$(PackageVersion).$(RuntimeIdentifier)</PackageName>
       <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(PackageVersion)</PackageName>
       <IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
-      <PackageDir Condition="'$(PackageDir)' == ''">(TargetDir)</PackageDir>
+      <PackageDir Condition="'$(PackageDir)' == ''">$(TargetDir)</PackageDir>
       <PackagePath Condition="'$(PackagePath)' == ''">$([MSBuild]::EnsureTrailingSlash($(PackageDir)))$(PackageName)</PackagePath>
       <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
       <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
