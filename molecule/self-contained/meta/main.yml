@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: Frederik Carlier
+  description: |
+    Ansible Role to deploy a self-contained app created with dotnet deb or dotnet rpm
+    to a machine. Used to test dotnet deb and dotnet rpm.
+  license: MIT
+  min_ansible_version: 1.2
+  galaxy_tags: []
+  platforms:
+    - name: Debian
+    - name: Ubuntu
+    - name: CentOS
+dependencies: []

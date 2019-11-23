@@ -1,0 +1,14 @@
+---
+- name: Copy self-contained app to guest
+  copy:
+    src: "{{ role_path }}/self-contained-app.1.0.0.linux-x64.rpm"
+    dest: /home/self-contained-app.1.0.0.linux-x64.rpm
+
+- name: Install self-contained app
+  become: true
+  yum:
+    name: /home/self-contained-app.1.0.0.linux-x64.rpm
+    state: present
+    # We sign RPM packages with a PGP key, but don't export the PGP key yet.
+    # Skip GPG checks for now.
+    disable_gpg_check: true
