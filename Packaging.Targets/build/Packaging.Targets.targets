@@ -39,7 +39,33 @@
       <RpmDescription Condition="'$(RpmDescription)' == ''">$(PackageDescription)</RpmDescription>
       <RpmUrl Condition="'$(RpmUrl)' == ''">$(PackageProjectUrl)</RpmUrl>
       <RpmPackageArchitecture Condition="'$(RpmPackageArchitecture)' == ''"></RpmPackageArchitecture>
-  </PropertyGroup>
+    </PropertyGroup>
+
+    <!--
+        Default list of RPM dependencies.
+
+        This list is base don the dependencies defined here:
+        https://github.com/dotnet/core-setup/blob/release/2.1/src/pkg/packaging/rpm/
+        https://github.com/dotnet/core-setup/blob/release/2.2/src/pkg/packaging/rpm/
+        https://github.com/dotnet/core-setup/blob/master/src/pkg/packaging/rpm/
+    
+        The syntax for "boolean dependencies" is described here (available starting
+        with rpm 3.14):
+        https://rpm.org/user_doc/boolean_dependencies.html
+
+        You can search for packages here:
+        https://apps.fedoraproject.org/packages/
+        https://software.opensuse.org/find
+
+        NOTE
+        - Upstream lists compat libraries for OpenSSL 1.0 instead of OpenSSL 1.1, that
+          seems like an oversight.
+        -->
+    <ItemGroup Condition="'@(RpmDependency)' == ''">
+      <RpmDependency Include="openssl-libs" Version="" />
+      <RpmDependency Include="libicu" Version="" />
+      <RpmDependency Include="krb5-libs" Version="" />
+    </ItemGroup>
 
     <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
 
@@ -87,20 +113,14 @@
       <DebPackageArchitecture Condition="'$(DebPackageArchitecture)' == ''"></DebPackageArchitecture>
     </PropertyGroup>
     
-    <!-- Dependency list from https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/jessie/amd64/Dockerfile 
-         and https://github.com/dotnet/dotnet-docker/blob/master/2.0/runtime-deps/stretch/amd64/Dockerfile,
-         See also https://github.com/dotnet/core-setup/blob/master/src/pkg/packaging/deb/dotnet-runtime-deps-debian_config_debian.9-x64.json  -->
+    <!-- Dependency list from https://github.com/dotnet/core-setup/blob/release/3.0/src/pkg/packaging/deb/dotnet-runtime-deps-debian_config.json  -->
     <ItemGroup Condition="'@(DebDotNetDependencies)' == ''">
-      <DebDotNetDependencies Include="libc6"/>
-      <DebDotNetDependencies Include="libcurl4 | libcurl3"/>
+      <DebDotNetDependencies Include="libc6"/>  
       <DebDotNetDependencies Include="libgcc1"/>
       <DebDotNetDependencies Include="libgssapi-krb5-2"/>
-      <DebDotNetDependencies Include="liblttng-ust0"/>
-      <DebDotNetDependencies Include="libssl1.1 | libssl1.0.2 | libssl1.0.1 | libssl1.0.0 | libssl0.9.8"/>
       <DebDotNetDependencies Include="libstdc++6"/>
-      <DebDotNetDependencies Include="libunwind8"/>
-      <DebDotNetDependencies Include="libuuid1"/>
       <DebDotNetDependencies Include="zlib1g"/>
+      <DebDotNetDependencies Include="libssl1.1 | libssl1.0.2 | libssl1.0.1 | libssl1.0.0 | libssl0.9.8"/>
       <DebDotNetDependencies Include="libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
     </ItemGroup>
 
