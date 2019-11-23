@@ -1,0 +1,37 @@
+---
+- name: Copy framework-dependent app to guest
+  copy:
+    src: "{{ role_path }}/framework-dependent-app.1.0.0.rpm"
+    dest: /home/framework-dependent-app.1.0.0.rpm
+
+- name: Add .NET repository
+  yum_repository:
+    name: packages-microsoft-com-prod
+    description: Microsoft .NET RHEL Repository
+    # https://packages.microsoft.com/yumrepos/microsoft-centos7-prod/
+    # https://packages.microsoft.com/yumrepos/microsoft-fedora29-prod/
+    # https://packages.microsoft.com/yumrepos/microsoft-fedora30-prod/
+    baseurl: https://packages.microsoft.com/yumrepos/microsoft-{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}-prod
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+  when: ansible_distribution != 'openSUSE Leap'
+
+- name: Add .NET repository
+  zypper_repository:
+    name: packages-microsoft-com-prod
+    description: Microsoft .NET RHEL Repository
+    # https://packages.microsoft.com/opensuse/15/prod/
+    repo: 'https://packages.microsoft.com/opensuse/15/prod/'
+    state: present
+  when: ansible_distribution == 'openSUSE Leap'
+
+- name: Install self-contained app
+  become: true
+  yum:
+    name: /home/framework-dependent-app.1.0.0.rpm
+    state: present
+    # We sign RPM packages with a PGP key, but don't export the PGP key yet.
+    # Skip GPG checks for now.
+    disable_gpg_check: true
