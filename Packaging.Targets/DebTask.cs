@@ -171,7 +171,7 @@ namespace Packaging.Targets
                 }
             }
 
-            return "any";
+            return "all";
         }
 
         public override bool Execute()

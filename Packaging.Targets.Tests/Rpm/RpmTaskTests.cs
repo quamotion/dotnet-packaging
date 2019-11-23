@@ -16,13 +16,13 @@ namespace Packaging.Targets.Tests.Rpm
         /// <param name="packageAchitecture">
         /// The expected package architecture.
         /// </param>
-        [InlineData(null, "any")]
-        [InlineData("ubuntu.18.04", "any")]
-        [InlineData("ubuntu.18.04-x86", "i386")]
-        [InlineData("ubuntu.18.04-x64", "x86_64")]
-        [InlineData("ubuntu.18.04-arm", "armhfp")]
-        [InlineData("ubuntu.18.04-arm64", "aarch64")]
-        [InlineData("linux", "any")]
+        [InlineData(null, "noarch")]
+        [InlineData("centos.7", "noarch")]
+        [InlineData("centos.7-x86", "i386")]
+        [InlineData("centos.7-x64", "x86_64")]
+        [InlineData("centos.7-arm", "armhfp")]
+        [InlineData("centos.7-arm64", "aarch64")]
+        [InlineData("linux", "noarch")]
         [InlineData("linux-x86", "i386")]
         [InlineData("linux-x64", "x86_64")]
         [InlineData("linux-arm", "armhfp")]
