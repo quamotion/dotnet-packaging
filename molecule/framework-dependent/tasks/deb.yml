@@ -8,9 +8,9 @@
   become: true
   apt:
     pkg:
-    - gnupg
-    - apt-transport-https
-    - ca-certificates
+      - gnupg
+      - apt-transport-https
+      - ca-certificates
 
 - name: Import Microsoft APT key
   apt_key:
@@ -30,5 +30,5 @@
 - name: Install framework-dependent app
   become: true
   apt:
-    update_cache: yes
+    update_cache: true
     deb: /home/framework-dependent-app.1.0.0.deb

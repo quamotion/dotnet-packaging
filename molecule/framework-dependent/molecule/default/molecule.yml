@@ -6,7 +6,7 @@ driver:
 lint:
   name: yamllint
 platforms:
-  # This list should be roughly kept in sync with the list of 
+  # This list should be roughly kept in sync with the list of
   # OSes for which .NET Core builds packages, as seen at
   # https://dotnet.microsoft.com/download/linux-package-manager/sdk-current
   # There are no Docker images for RHEL, so we can't test that.

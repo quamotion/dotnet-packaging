@@ -12,8 +12,8 @@
     # https://packages.microsoft.com/yumrepos/microsoft-fedora29-prod/
     # https://packages.microsoft.com/yumrepos/microsoft-fedora30-prod/
     baseurl: https://packages.microsoft.com/yumrepos/microsoft-{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}-prod
-    enabled: yes
-    gpgcheck: yes
+    enabled: true
+    gpgcheck: true
     gpgkey: https://packages.microsoft.com/keys/microsoft.asc
     state: present
   when: ansible_distribution != 'openSUSE Leap'
