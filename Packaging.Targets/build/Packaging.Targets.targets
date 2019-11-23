@@ -61,7 +61,19 @@
         - Upstream lists compat libraries for OpenSSL 1.0 instead of OpenSSL 1.1, that
           seems like an oversight.
         -->
-    <ItemGroup Condition="'@(RpmDependency)' == ''">
+    <ItemGroup Condition="'@(RpmDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
+      <RpmDependency Include="dotnet-runtime-2.1" Version="" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(RpmDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
+      <RpmDependency Include="dotnet-runtime-2.2" Version="" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(RpmDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
+      <RpmDependency Include="dotnet-runtime-3.0" Version="" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(RpmDependency)' == '' AND '$(RuntimeIdentifier)' != ''">
       <RpmDependency Include="openssl-libs" Version="" />
       <RpmDependency Include="libicu" Version="" />
       <RpmDependency Include="krb5-libs" Version="" />
@@ -113,8 +125,20 @@
       <DebPackageArchitecture Condition="'$(DebPackageArchitecture)' == ''"></DebPackageArchitecture>
     </PropertyGroup>
     
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
+      <DebDotNetDependencies Include="dotnet-runtime-2.1"/>
+    </ItemGroup>
+    
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
+      <DebDotNetDependencies Include="dotnet-runtime-2.2"/>
+    </ItemGroup>
+    
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
+      <DebDotNetDependencies Include="dotnet-runtime-3.0"/>
+    </ItemGroup>
+
     <!-- Dependency list from https://github.com/dotnet/core-setup/blob/release/3.0/src/pkg/packaging/deb/dotnet-runtime-deps-debian_config.json  -->
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == ''">
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' != ''">
       <DebDotNetDependencies Include="libc6"/>  
       <DebDotNetDependencies Include="libgcc1"/>
       <DebDotNetDependencies Include="libgssapi-krb5-2"/>
