@@ -1,0 +1,50 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint:
+  name: yamllint
+platforms:
+  # This list should be roughly kept in sync with the list of
+  # OSes for which .NET Core builds packages, as seen at
+  # https://dotnet.microsoft.com/download/linux-package-manager/sdk-current
+  # There are no Docker images for RHEL, so we can't test that.
+  # Not sure about Linux Mint/Suse Enterprise Linux docker images, so they are skipped for now.
+  # - name: opensuse.15.1
+  #   image: opensuse/leap:15.1
+  # - name: opensuse.15.2
+  #   image: opensuse/leap:15.2
+  - name: ubuntu.16.04
+    image: ubuntu:16.04
+  - name: ubuntu.18.04
+    image: ubuntu:18.04
+  - name: ubuntu.19.04
+    image: ubuntu:19.04
+  - name: debian.9
+    image: debian:9
+  - name: debian.10
+    image: debian:10
+  - name: fedora.29
+    image: fedora:29
+  - name: fedora.30
+    image: fedora:30
+  - name: centos.7
+    image: centos:7
+  - name: opensuse.15.0
+    image: opensuse/leap:15.0
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  inventory:
+    host_vars:
+      fedora.30:
+        # https://github.com/ansible/ansible/issues/54855
+        ansible_python_interpreter: /usr/bin/python3
+scenario:
+  name: default
+verifier:
+  name: testinfra
+  lint:
+    name: flake8

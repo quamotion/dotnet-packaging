@@ -16,13 +16,13 @@ namespace Packaging.Targets.Tests.Deb
         /// <param name="packageAchitecture">
         /// The expected package architecture.
         /// </param>
-        [InlineData(null, "any")]
-        [InlineData("ubuntu.18.04", "any")]
+        [InlineData(null, "all")]
+        [InlineData("ubuntu.18.04", "all")]
         [InlineData("ubuntu.18.04-x86", "i386")]
         [InlineData("ubuntu.18.04-x64", "amd64")]
         [InlineData("ubuntu.18.04-arm", "armhf")]
         [InlineData("ubuntu.18.04-arm64", "arm64")]
-        [InlineData("linux", "any")]
+        [InlineData("linux", "all")]
         [InlineData("linux-x86", "i386")]
         [InlineData("linux-x64", "amd64")]
         [InlineData("linux-arm", "armhf")]

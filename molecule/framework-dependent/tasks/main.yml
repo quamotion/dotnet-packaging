@@ -1,0 +1,13 @@
+---
+- include_tasks: deb.yml
+  when: >
+    ansible_distribution == 'Debian'
+    or ansible_distribution == 'Ubuntu'
+
+- include_tasks: rpm.yml
+  when: >
+    ansible_distribution == 'CentOS'
+    or ansible_distribution == 'RedHat'
+    or ansible_distribution == 'OracleLinux'
+    or ansible_distribution == 'Fedora'
+    or ansible_distribution == 'openSUSE Leap'

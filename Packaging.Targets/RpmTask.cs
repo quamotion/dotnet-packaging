@@ -234,7 +234,7 @@ namespace Packaging.Targets
                 }
             }
 
-            return "any";
+            return "noarch";
         }
 
         public override bool Execute()

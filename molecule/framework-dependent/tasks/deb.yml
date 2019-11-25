@@ -1,0 +1,34 @@
+---
+- name: Copy framework-dependent app to guest
+  copy:
+    src: "{{ role_path }}/framework-dependent-app.1.0.0.deb"
+    dest: /home/framework-dependent-app.1.0.0.deb
+
+- name: Install dependencies
+  become: true
+  apt:
+    pkg:
+      - gnupg
+      - apt-transport-https
+      - ca-certificates
+
+- name: Import Microsoft APT key
+  apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: Add .NET Core repo
+  apt_repository:
+    repo: >
+      deb [arch=amd64]
+      https://packages.microsoft.com/repos/microsoft-{{ ansible_distribution | lower }}-{{ ansible_distribution_release | lower }}-prod
+      {{ ansible_distribution_release | lower }}
+      main
+    filename: "dotnetdev"
+    state: present
+
+- name: Install framework-dependent app
+  become: true
+  apt:
+    update_cache: true
+    deb: /home/framework-dependent-app.1.0.0.deb

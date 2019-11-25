@@ -94,6 +94,13 @@ stages:
   - job: molecule
     pool:
       vmImage: 'ubuntu-18.04'
+    strategy:
+      maxParallel: 8
+      matrix:
+        self-contained:
+          suite: self-contained
+        framework-dependent-app:
+          suite: framework-dependent
     steps:
     - bash: |
         set -e
@@ -115,7 +122,7 @@ stages:
         set -e
         export PATH="$PATH:/$HOME/.dotnet/tools"
 
-        cd self-contained-app
+        cd $(suite)-app
 
         echo "<configuration><packageSources><add key='local' value='$(Build.ArtifactStagingDirectory)/nuget' /></packageSources></configuration>" > NuGet.config
         version=$(cat $(Build.ArtifactStagingDirectory)/nuget/version.txt)
@@ -126,21 +133,21 @@ stages:
 
         # Create .deb and .rpm packages
         dotnet rpm install
-        dotnet rpm -o $(Build.SourcesDirectory)/molecule/self-contained/
-        dotnet deb -o $(Build.SourcesDirectory)/molecule/self-contained/
-      workingDirectory: $(Build.SourcesDirectory)/molecule/self-contained
-      displayName: Build self-contained-app
+        dotnet rpm -o $(Build.SourcesDirectory)/molecule/$(suite)/
+        dotnet deb -o $(Build.SourcesDirectory)/molecule/$(suite)/
+      workingDirectory: $(Build.SourcesDirectory)/molecule/$(suite)
+      displayName: Build $(suite)-app
     - bash: |
         set -e
         export PATH=~/.local/bin/:$PATH
 
         molecule test
-      workingDirectory: $(Build.SourcesDirectory)/molecule/self-contained
-      displayName: Run molecule tests for self-contained-app
+      workingDirectory: $(Build.SourcesDirectory)/molecule/$(suite)
+      displayName: Run molecule tests for $(suite)-app
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'pytest.xml'
-        searchFolder: '$(Build.SourcesDirectory)/molecule/self-contained/molecule/default/'
+        searchFolder: '$(Build.SourcesDirectory)/molecule/$(suite)/molecule/default/'
       condition: always()
       displayName: Publish test results
