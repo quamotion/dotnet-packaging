@@ -178,7 +178,7 @@ namespace Dotnet.Packaging
 
         public bool IsPackagingTargetsInstalled()
         {
-            var projectFilePath = Directory.GetFiles(Environment.CurrentDirectory, "*.csproj").SingleOrDefault();
+            var projectFilePath = Directory.GetFiles(Environment.CurrentDirectory, "*.*proj").SingleOrDefault();
 
             if (projectFilePath == null)
             {
