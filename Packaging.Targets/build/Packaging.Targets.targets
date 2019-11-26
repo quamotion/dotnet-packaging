@@ -61,22 +61,22 @@
         - Upstream lists compat libraries for OpenSSL 1.0 instead of OpenSSL 1.1, that
           seems like an oversight.
         -->
-    <ItemGroup Condition="'@(RpmDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
-      <RpmDependency Include="dotnet-runtime-2.1" Version="" />
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
+      <RpmDotNetDependency Include="dotnet-runtime-2.1" Version="" />
     </ItemGroup>
 
-    <ItemGroup Condition="'@(RpmDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
-      <RpmDependency Include="dotnet-runtime-2.2" Version="" />
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
+      <RpmDotNetDependency Include="dotnet-runtime-2.2" Version="" />
     </ItemGroup>
 
-    <ItemGroup Condition="'@(RpmDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
-      <RpmDependency Include="dotnet-runtime-3.0" Version="" />
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
+      <RpmDotNetDependency Include="dotnet-runtime-3.0" Version="" />
     </ItemGroup>
 
-    <ItemGroup Condition="'@(RpmDependency)' == '' AND '$(RuntimeIdentifier)' != ''">
-      <RpmDependency Include="openssl-libs" Version="" />
-      <RpmDependency Include="libicu" Version="" />
-      <RpmDependency Include="krb5-libs" Version="" />
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' != ''">
+      <RpmDotNetDependency Include="openssl-libs" Version="" />
+      <RpmDotNetDependency Include="libicu" Version="" />
+      <RpmDotNetDependency Include="krb5-libs" Version="" />
     </ItemGroup>
 
     <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
@@ -92,6 +92,7 @@
              PackageName="$(PackageName)"
              Content="@(Content)"
              LinuxFolders="@(LinuxFolder)"
+             RpmDotNetDependencies="@(RpmDotNetDependency)"
              RpmDependencies="@(RpmDependency)"
              RpmPackageArchitecture="$(RpmPackageArchitecture)"
              RuntimeIdentifier="$(RuntimeIdentifier)"
