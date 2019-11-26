@@ -42,34 +42,34 @@
 
   <!-- Fedora, CentOS, and RHEL dependencies -->
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('rhel')) OR $(RuntimeIdentifier.StartsWith('fedora')) OR $(RuntimeIdentifier.StartsWith('ol'))">
-    <RpmDependency Include="libstdc++" Version="" />
-    <RpmDependency Include="libunwind" Version="" />
-    <RpmDependency Include="libicu" Version="" />
+    <RpmDotNetDependency Include="libstdc++" Version="" />
+    <RpmDotNetDependency Include="libunwind" Version="" />
+    <RpmDotNetDependency Include="libicu" Version="" />
   </ItemGroup>
 
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('rhel')) OR $(RuntimeIdentifier.StartsWith('fedora'))">
-    <RpmDependency Include="compat-openssl10" Version="" />
+    <RpmDotNetDependency Include="compat-openssl10" Version="" />
   </ItemGroup>
 
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('ol'))">
-    <RpmDependency Include="openssl-libs" Version="" />
+    <RpmDotNetDependency Include="openssl-libs" Version="" />
   </ItemGroup>
 
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('centos'))">
     <!-- <RpmDependency Include="lttng-ust" Version=""/> -->
-    <RpmDependency Include="libcurl" Version="" />
-    <RpmDependency Include="openssl-libs" Version="" />
-    <RpmDependency Include="krb5-libs" Version="" />
-    <RpmDependency Include="libicu" Version="" />
-    <RpmDependency Include="zlib" Version="" />
-    <RpmDependency Include="libunwind" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
-    <RpmDependency Include="libuuid" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
+    <RpmDotNetDependency Include="libcurl" Version="" />
+    <RpmDotNetDependency Include="openssl-libs" Version="" />
+    <RpmDotNetDependency Include="krb5-libs" Version="" />
+    <RpmDotNetDependency Include="libicu" Version="" />
+    <RpmDotNetDependency Include="zlib" Version="" />
+    <RpmDotNetDependency Include="libunwind" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
+    <RpmDotNetDependency Include="libuuid" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
   </ItemGroup>
 
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('opensuse'))">
-    <RpmDependency Include="libopenssl1_0_0" Version="" />
-    <RpmDependency Include="libicu52_1" Version="" />
-    <RpmDependency Include="krb5" Version="" />
+    <RpmDotNetDependency Include="libopenssl1_0_0" Version="" />
+    <RpmDotNetDependency Include="libicu52_1" Version="" />
+    <RpmDotNetDependency Include="krb5" Version="" />
   </ItemGroup>
 
   <PropertyGroup>
