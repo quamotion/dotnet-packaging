@@ -3,6 +3,7 @@ using Microsoft.Build.Utilities;
 using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -84,6 +85,16 @@ namespace Packaging.Targets
         /// installing this package.
         /// </summary>
         public ITaskItem[] LinuxFolders
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a list of RPM packages on which the version of .NET Core
+        /// embedded in this RPM package dpeends.
+        /// </summary>
+        public ITaskItem[] RpmDotNetDependencies
         {
             get;
             set;
@@ -267,16 +278,20 @@ namespace Packaging.Targets
                 cpioStream.Position = 0;
 
                 // Prepare the list of dependencies
-                PackageDependency[] dependencies = Array.Empty<PackageDependency>();
+                List<PackageDependency> dependencies = new List<PackageDependency>();
+
+                if (this.RpmDotNetDependencies != null)
+                {
+                    dependencies.AddRange(
+                        this.RpmDotNetDependencies.Select(
+                            d => GetPackageDependency(d)));
+                }
 
                 if (this.RpmDependencies != null)
                 {
-                    dependencies = this.RpmDependencies.Select(
-                        d => new PackageDependency(
-                            d.ItemSpec,
-                            RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_GREATER,
-                            d.GetVersion()))
-                        .ToArray();
+                    dependencies.AddRange(
+                        this.RpmDependencies.Select(
+                            d => GetPackageDependency(d)));
                 }
 
                 RpmPackageCreator rpmCreator = new RpmPackageCreator();
@@ -307,6 +322,19 @@ namespace Packaging.Targets
 
             this.Log.LogMessage(MessageImportance.Normal, "Created RPM package '{0}' from folder '{1}'", this.RpmPath, this.PublishDir);
             return true;
+        }
+
+        private static PackageDependency GetPackageDependency(ITaskItem dependency)
+        {
+            if (dependency == null)
+            {
+                return null;
+            }
+
+            return new PackageDependency(
+                dependency.ItemSpec,
+                RpmSense.RPMSENSE_EQUAL | RpmSense.RPMSENSE_GREATER,
+                dependency.GetVersion());
         }
     }
 }
