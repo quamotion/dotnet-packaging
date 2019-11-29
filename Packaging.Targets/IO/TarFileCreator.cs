@@ -31,7 +31,14 @@ namespace Packaging.Targets.IO
 
         public static void WriteTrailer(Stream stream)
         {
-            Align(stream);
+            // The stream should already be aligned; as it is aligned after every entry.
+            // As a safety measure, for streams which can report on .Position, align the
+            // stream again.
+            if (stream.CanSeek)
+            {
+                Align(stream);
+            }
+
             var trailer = new byte[1024];
             stream.Write(trailer, 0, trailer.Length);
         }
@@ -39,10 +46,10 @@ namespace Packaging.Targets.IO
         public static void WriteEntry(Stream stream, TarHeader header, Stream data)
         {
             header.Checksum = header.ComputeChecksum();
-            stream.WriteStruct(header);
-            Align(stream);
+            int written = stream.WriteStruct(header);
+            Align(stream, written);
             data.CopyTo(stream);
-            Align(stream);
+            Align(stream, data.Length);
         }
 
         public static void WriteEntry(Stream stream, ArchiveEntry entry, Stream data = null)
@@ -151,7 +158,12 @@ namespace Packaging.Targets.IO
 
         private static void Align(Stream stream)
         {
-            var spos = stream.Position % 512;
+            Align(stream, stream.Position);
+        }
+
+        private static void Align(Stream stream, long position)
+        {
+            var spos = position % 512;
             if (spos == 0)
             {
                 return;

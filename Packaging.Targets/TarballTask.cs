@@ -1,11 +1,10 @@
-﻿using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Tar;
-using ICSharpCode.SharpZipLib.Zip;
-using Microsoft.Build.Framework;
+﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Packaging.Targets.IO;
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 
 namespace Packaging.Targets
 {
@@ -13,17 +12,18 @@ namespace Packaging.Targets
     {
         [Required]
         public string PublishDir
-        {
-            get;
-            set;
-        }
+        { get;  set; }
 
         [Required]
         public string TarballPath
-        {
-            get;
-            set;
-        }
+        { get; set; }
+
+        [Required]
+        public ITaskItem[] Content
+        { get; set; }
+
+        public string Prefix
+        { get; set; }
 
         public override bool Execute()
         {
@@ -37,14 +37,22 @@ namespace Packaging.Targets
 
         private void CreateLinuxTarball()
         {
-            using (var stream = File.Create(this.TarballPath))
-            using (var gzipStream = new GZipOutputStream(stream))
-            using (var archive = TarArchive.CreateOutputTarArchive(gzipStream))
-            {
-                archive.RootPath = this.PublishDir.Replace("\\", "/");
-                var entry = TarEntry.CreateEntryFromFile(this.PublishDir);
+            ArchiveBuilder archiveBuilder = new ArchiveBuilder();
+            var archiveEntries = archiveBuilder.FromDirectory(
+                this.PublishDir,
+                this.Prefix,
+                this.Content);
 
-                archive.WriteEntry(entry, true);
+            DebTask.EnsureDirectories(archiveEntries, includeRoot: false);
+
+            archiveEntries = archiveEntries
+                .OrderBy(e => e.TargetPathWithFinalSlash, StringComparer.Ordinal)
+                .ToList();
+
+            using (var stream = File.Create(this.TarballPath))
+            using (var gzipStream = new GZipStream(stream, CompressionMode.Compress))
+            {
+                TarFileCreator.FromArchiveEntries(archiveEntries, gzipStream);
             }
         }
     }

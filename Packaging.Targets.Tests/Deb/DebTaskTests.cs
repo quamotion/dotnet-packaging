@@ -1,4 +1,8 @@
-﻿using Xunit;
+﻿using Packaging.Targets.IO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
 
 namespace Packaging.Targets.Tests.Deb
 {
@@ -31,6 +35,71 @@ namespace Packaging.Targets.Tests.Deb
         public void GetPackageArchitectureTest(string runtimeIdentifier, string packageAchitecture)
         {
             Assert.Equal(packageAchitecture, DebTask.GetPackageArchitecture(runtimeIdentifier));
+        }
+
+        [Fact]
+        public void EnsureDirectoriesTest()
+        {
+            List<ArchiveEntry> archiveEntries = new List<ArchiveEntry>();
+            archiveEntries.Add(
+                new ArchiveEntry()
+                {
+                    Mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG,
+                    TargetPath = "./ConsoleApp1.deps.json",
+                });
+
+            DebTask.EnsureDirectories(archiveEntries, includeRoot: false);
+
+            // This example contains one entry in the current directory, so no new directory entries should
+            // have been created
+            Assert.Single(archiveEntries);
+        }
+
+        [Fact]
+        public void EnsureDirectoriesTest2()
+        {
+            List<ArchiveEntry> archiveEntries = new List<ArchiveEntry>();
+            archiveEntries.Add(
+                new ArchiveEntry()
+                {
+                    Mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG,
+                    TargetPath = "/usr/local/share/consoleapp/ConsoleApp1.deps.json",
+                });
+
+            DebTask.EnsureDirectories(archiveEntries, includeRoot: true);
+
+            archiveEntries = archiveEntries
+                .OrderBy(e => e.TargetPathWithFinalSlash, StringComparer.Ordinal)
+                .ToList();
+
+            // This example contains one entry in the current directory, so no new directory entries should
+            // have been created
+            Assert.Collection(
+                archiveEntries,
+                (e) => Assert.Equal("/", e.TargetPath),
+                (e) => Assert.Equal("/usr", e.TargetPath),
+                (e) => Assert.Equal("/usr/local", e.TargetPath),
+                (e) => Assert.Equal("/usr/local/share", e.TargetPath),
+                (e) => Assert.Equal("/usr/local/share/consoleapp", e.TargetPath),
+                (e) => Assert.Equal("/usr/local/share/consoleapp/ConsoleApp1.deps.json", e.TargetPath));
+        }
+
+        [Fact]
+        public void EnsureDirectoriesTest3()
+        {
+            List<ArchiveEntry> archiveEntries = new List<ArchiveEntry>();
+            archiveEntries.Add(
+                new ArchiveEntry()
+                {
+                    Mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG,
+                    TargetPath = "ConsoleApp1.deps.json",
+                });
+
+            DebTask.EnsureDirectories(archiveEntries, includeRoot: false);
+
+            // This example contains one entry in the current directory, so no new directory entries should
+            // have been created
+            Assert.Single(archiveEntries);
         }
     }
 }

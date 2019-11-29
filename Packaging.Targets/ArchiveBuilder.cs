@@ -293,7 +293,14 @@ namespace Packaging.Targets
 
                 if (name == null)
                 {
-                    name = prefix + "/" + fileName;
+                    if (!string.IsNullOrEmpty(prefix))
+                    {
+                        name = prefix + "/" + fileName;
+                    }
+                    else
+                    {
+                        name = fileName;
+                    }
                 }
 
                 string linkTo = string.Empty;
