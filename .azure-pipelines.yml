@@ -1,3 +1,6 @@
+trigger:
+- master
+
 resources:
   containers:
   - container: 2.2-bionic
@@ -60,36 +63,7 @@ stages:
 
     container: $[ variables['container'] ]
     steps:
-    - task: DownloadBuildArtifacts@0
-      displayName: Download Build Artifacts
-      inputs:
-        artifactName: nuget
-        downloadPath: $(Build.ArtifactStagingDirectory)
-    - bash: |
-        set -e
-        export PATH="$PATH:/$HOME/.dotnet/tools"
-
-        mkdir test-$(command)/
-        cd test-$(command)
-
-        echo "<configuration><packageSources><add key='local' value='$(Build.ArtifactStagingDirectory)/nuget' /></packageSources></configuration>" > NuGet.config
-        version=$(cat $(Build.ArtifactStagingDirectory)/nuget/version.txt)
-
-        # Install the dotnet-$(command) tool
-        dotnet tool install --global dotnet-$(command) --version $version --add-source $(Build.ArtifactStagingDirectory)/nuget
-
-        # Create a new console application
-        dotnet new console
-
-        # Install and use dotnet $(command)
-        dotnet $(command) install
-        dotnet $(command) -o $(Build.ArtifactStagingDirectory)/packages/$(container)
-      workingDirectory: $(Pipeline.Workspace)
-      displayName: Run dotnet $(command)
-    - task: PublishBuildArtifacts@1
-      inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)/packages/
-        artifactName: packages
+    - template: .azure-pipelines-shared.yml
 
   - job: molecule
     pool:
@@ -151,3 +125,42 @@ stages:
         searchFolder: '$(Build.SourcesDirectory)/molecule/$(suite)/molecule/default/'
       condition: always()
       displayName: Publish test results
+
+  - job: build_macos
+    pool:
+      vmImage: 'macOS-10.14'
+    variables:
+      container: macos
+      command: tarball
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core 3.0'
+      inputs:
+        packageType: sdk
+        version: 3.0.100
+    - template: .azure-pipelines-shared.yml
+
+  - job: test_macos
+    pool:
+      vmImage: 'macOS-10.14'
+    dependsOn: build_macos
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Build Artifacts
+      inputs:
+        artifactName: packages
+        downloadPath: $(Build.ArtifactStagingDirectory)/
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core 3.0'
+      inputs:
+        packageType: sdk
+        version: 3.0.100
+    - bash: |
+        set -e
+        tar xvzf $(Build.ArtifactStagingDirectory)/packages/macos/test-tarball.1.0.0.tar.gz
+      displayName: Extract tarball
+    - bash: |
+        set -e
+        chmod +x ./test-tarball
+        ./test-tarball
+      displayName: Execute program

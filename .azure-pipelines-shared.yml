@@ -1,0 +1,31 @@
+steps:
+- task: DownloadBuildArtifacts@0
+  displayName: Download Build Artifacts
+  inputs:
+    artifactName: nuget
+    downloadPath: $(Build.ArtifactStagingDirectory)
+- bash: |
+    set -e
+    export PATH="$PATH:/$HOME/.dotnet/tools"
+
+    mkdir test-$(command)/
+    cd test-$(command)
+
+    echo "<configuration><packageSources><add key='local' value='$(Build.ArtifactStagingDirectory)/nuget' /></packageSources></configuration>" > NuGet.config
+    version=$(cat $(Build.ArtifactStagingDirectory)/nuget/version.txt)
+
+    # Install the dotnet-$(command) tool
+    dotnet tool install --global dotnet-$(command) --version $version --add-source $(Build.ArtifactStagingDirectory)/nuget
+
+    # Create a new console application
+    dotnet new console
+
+    # Install and use dotnet $(command)
+    dotnet $(command) install
+    dotnet $(command) -o $(Build.ArtifactStagingDirectory)/packages/$(container)
+  workingDirectory: $(Pipeline.Workspace)
+  displayName: Run dotnet $(command)
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: $(Build.ArtifactStagingDirectory)/packages/
+    artifactName: packages
