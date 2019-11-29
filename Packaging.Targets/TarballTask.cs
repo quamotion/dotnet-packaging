@@ -3,6 +3,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Packaging.Targets.IO;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -22,12 +23,13 @@ namespace Packaging.Targets
         public ITaskItem[] Content
         { get; set; }
 
-        [Required]
         public string Prefix
         { get; set; }
 
         public override bool Execute()
         {
+            Debugger.Launch();
+
             this.Log.LogMessage(MessageImportance.Normal, "Creating tarball '{0}' from folder '{1}'", this.TarballPath, this.PublishDir);
 
             this.CreateLinuxTarball();
@@ -44,7 +46,7 @@ namespace Packaging.Targets
                 this.Prefix,
                 this.Content);
 
-            DebTask.EnsureDirectories(archiveEntries);
+            DebTask.EnsureDirectories(archiveEntries, includeRoot: false);
 
             archiveEntries = archiveEntries
                 .OrderBy(e => e.TargetPathWithFinalSlash, StringComparer.Ordinal)
