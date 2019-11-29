@@ -81,7 +81,7 @@ namespace Packaging.Targets
         /// <param name="data">
         /// The struct to write to the stram.
         /// </param>
-        public static void WriteStruct<T>(this Stream stream, T data)
+        public static int WriteStruct<T>(this Stream stream, T data)
             where T : struct
         {
             if (stream == null)
@@ -105,6 +105,7 @@ namespace Packaging.Targets
             RespectEndianness<T>(bytes);
 
             stream.Write(bytes, 0, bytes.Length);
+            return bytes.Length;
         }
 
         /// <summary>
