@@ -192,7 +192,7 @@ namespace Packaging.Targets
                     this.Content);
 
                 archiveEntries.AddRange(archiveBuilder.FromLinuxFolders(this.LinuxFolders));
-                this.EnsureDirectories(archiveEntries);
+                EnsureDirectories(archiveEntries);
 
                 archiveEntries = archiveEntries
                     .OrderBy(e => e.TargetPathWithFinalSlash, StringComparer.Ordinal)
@@ -268,7 +268,7 @@ namespace Packaging.Targets
             }
         }
 
-        private void EnsureDirectories(List<ArchiveEntry> entries)
+        internal static void EnsureDirectories(List<ArchiveEntry> entries)
         {
             var dirs = new HashSet<string>(entries.Where(x => x.Mode.HasFlag(LinuxFileMode.S_IFDIR))
                 .Select(d => d.TargetPathWithFinalSlash));

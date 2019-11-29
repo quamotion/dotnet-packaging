@@ -182,6 +182,7 @@
   <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">
     <PropertyGroup>
       <TarballPath Condition="'$(TarballPath)' == ''">$(PackagePath).tar.gz</TarballPath>
+      <TarballPrefix Condition="'$(TarballPrefix)' == ''">.</TarballPrefix>
     </PropertyGroup>
 
     <Message Text="Creating tarball $(TarballPath)" Importance="high"/>
@@ -189,7 +190,9 @@
     <MakeDir Directories="$(PackageDir)"/>
     
     <TarballTask PublishDir="$(PublishDir)"
-             TarballPath="$(TarballPath)"/>
+                 TarballPath="$(TarballPath)"
+                 Prefix="$(TarballPrefix)"
+                 Content="@(Content)" />
   </Target>
 
   <Target Name="CreateZip" DependsOnTargets="CreatePackageProperties">
