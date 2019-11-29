@@ -1,10 +1,9 @@
-﻿using ICSharpCode.SharpZipLib.GZip;
-using Microsoft.Build.Framework;
+﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Packaging.Targets.IO;
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 
 namespace Packaging.Targets
@@ -28,8 +27,6 @@ namespace Packaging.Targets
 
         public override bool Execute()
         {
-            Debugger.Launch();
-
             this.Log.LogMessage(MessageImportance.Normal, "Creating tarball '{0}' from folder '{1}'", this.TarballPath, this.PublishDir);
 
             this.CreateLinuxTarball();
@@ -53,7 +50,7 @@ namespace Packaging.Targets
                 .ToList();
 
             using (var stream = File.Create(this.TarballPath))
-            using (var gzipStream = new GZipOutputStream(stream))
+            using (var gzipStream = new GZipStream(stream, CompressionMode.Compress))
             {
                 TarFileCreator.FromArchiveEntries(archiveEntries, gzipStream);
             }
