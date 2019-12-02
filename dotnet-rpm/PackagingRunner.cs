@@ -63,8 +63,12 @@ namespace Dotnet.Packaging
                 "Do not restore the project before building.",
                 CommandOptionType.NoValue);
 
+            commandLineApplication.VersionOption("-v | --version", new Version(ThisAssembly.AssemblyFileVersion).ToString(3), ThisAssembly.AssemblyInformationalVersion);
+
             commandLineApplication.HelpOption("-? | -h | --help");
+            commandLineApplication.Name = $"dotnet {this.commandName}";
             commandLineApplication.FullName = $"dotnet {this.commandName}";
+            commandLineApplication.ShortVersionGetter = () => new Version(ThisAssembly.AssemblyFileVersion).ToString(3);
             commandLineApplication.LongVersionGetter = () => ThisAssembly.AssemblyInformationalVersion;
 
             commandLineApplication.ExtendedHelpText = $"{Environment.NewLine}See https://github.com/qmfrederik/dotnet-packaging for more information";
