@@ -20,7 +20,7 @@ namespace Packaging.Targets.Tests
         public void FromDirectoryTest()
         {
             ArchiveBuilder builder = new ArchiveBuilder();
-            var entries = builder.FromDirectory("archive", "/opt/demo", Array.Empty<ITaskItem>());
+            var entries = builder.FromDirectory("archive", null, "/opt/demo", Array.Empty<ITaskItem>());
 
             Assert.Equal(2, entries.Count);
 
@@ -68,7 +68,7 @@ namespace Packaging.Targets.Tests
 
             var taskItem = new TaskItem("script.sh", metadata);
             var taskItems = new ITaskItem[] { taskItem };
-            var entries = builder.FromDirectory("archive", "/opt/demo", taskItems);
+            var entries = builder.FromDirectory("archive", null, "/opt/demo", taskItems);
 
             Assert.Equal(2, entries.Count);
 
@@ -99,6 +99,57 @@ namespace Packaging.Targets.Tests
             Assert.Equal("/bin/script.sh", script.TargetPath);
             Assert.Equal("/bin/script.sh", script.TargetPathWithFinalSlash);
             Assert.Equal(ArchiveEntryType.None, script.Type);
+        }
+
+        /// <summary>
+        /// Tests the <see cref="ArchiveBuilder.FromDirectory(string, string, ITaskItem[])"/> method
+        /// </summary>
+        [Fact]
+        public void FromDirectoryWithAppHost()
+        {
+            ArchiveBuilder builder = new ArchiveBuilder();
+            var entries = builder.FromDirectory("archive", "demo", "/opt/demo", Array.Empty<ITaskItem>());
+
+            Assert.Equal(3, entries.Count);
+
+            var readme = entries[0];
+            Assert.Equal("root", readme.Group);
+            Assert.Equal(1L, readme.Inode);
+            Assert.False(readme.IsAscii);
+            Assert.Equal(string.Empty, readme.LinkTo);
+            Assert.Equal(LinuxFileMode.S_IROTH |  LinuxFileMode.S_IRGRP |  LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG, readme.Mode);
+            Assert.Equal("root", readme.Owner);
+            Assert.False(readme.RemoveOnUninstall);
+            Assert.Equal(Path.Combine("archive", "README.md"), readme.SourceFilename);
+            Assert.Equal("/opt/demo/README.md", readme.TargetPath);
+            Assert.Equal("/opt/demo/README.md", readme.TargetPathWithFinalSlash);
+            Assert.Equal(ArchiveEntryType.None, readme.Type);
+
+            var script = entries[1];
+            Assert.Equal("root", script.Group);
+            Assert.Equal(2L, script.Inode);
+            Assert.False(script.IsAscii);
+            Assert.Equal(string.Empty, script.LinkTo);
+            Assert.Equal(LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG, script.Mode);
+            Assert.Equal("root", script.Owner);
+            Assert.False(script.RemoveOnUninstall);
+            Assert.Equal(Path.Combine("archive", "script.sh"), script.SourceFilename);
+            Assert.Equal("/opt/demo/script.sh", script.TargetPath);
+            Assert.Equal("/opt/demo/script.sh", script.TargetPathWithFinalSlash);
+            Assert.Equal(ArchiveEntryType.None, script.Type);
+
+            var symlink = entries[2];
+            Assert.Equal("root", symlink.Group);
+            Assert.Equal(3L, symlink.Inode);
+            Assert.False(symlink.IsAscii);
+            Assert.Equal("/opt/demo/demo", symlink.LinkTo);
+            Assert.Equal(LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFLNK, symlink.Mode);
+            Assert.Equal("root", symlink.Owner);
+            Assert.False(symlink.RemoveOnUninstall);
+            Assert.Null(symlink.SourceFilename);
+            Assert.Equal("/usr/local/bin/demo", symlink.TargetPath);
+            Assert.Equal("/usr/local/bin/demo", symlink.TargetPathWithFinalSlash);
+            Assert.Equal(ArchiveEntryType.None, symlink.Type);
         }
     }
 }
