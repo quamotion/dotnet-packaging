@@ -107,7 +107,7 @@ namespace Packaging.Targets.IO
             }
             else
             {
-                type = TarTypeFlag.LnkType;
+                type = TarTypeFlag.SymType;
             }
 
             bool dispose = false;
@@ -137,7 +137,7 @@ namespace Packaging.Targets.IO
                     GroupId = 0,
                     UserId = 0,
                     GroupName = entry.Group,
-                    LinkName = string.Empty,
+                    LinkName = isLink ? entry.LinkTo : string.Empty,
                     Prefix = string.Empty,
                     TypeFlag = type,
                     UserName = entry.Owner,

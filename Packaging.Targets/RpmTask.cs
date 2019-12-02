@@ -81,6 +81,13 @@ namespace Packaging.Targets
         public string RpmPackageArchitecture { get; set; }
 
         /// <summary>
+        /// Gets or sets the path to the app host. This is a native executable which loads
+        /// the .NET Core runtime, and invokes the manage assembly. On Linux, it is symlinked
+        /// into ${prefix}/bin.
+        /// </summary>
+        public string AppHost { get; set; }
+
+        /// <summary>
         /// Gets or sets a list of empty folders to create when
         /// installing this package.
         /// </summary>
@@ -263,10 +270,12 @@ namespace Packaging.Targets
                 ArchiveBuilder archiveBuilder = new ArchiveBuilder();
                 var archiveEntries = archiveBuilder.FromDirectory(
                     this.PublishDir,
+                    this.AppHost,
                     this.Prefix,
                     this.Content);
 
                 archiveEntries.AddRange(archiveBuilder.FromLinuxFolders(this.LinuxFolders));
+
                 archiveEntries = archiveEntries
                     .OrderBy(e => e.TargetPathWithFinalSlash, StringComparer.Ordinal)
                     .ToList();

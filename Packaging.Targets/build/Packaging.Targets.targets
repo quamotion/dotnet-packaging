@@ -23,6 +23,8 @@
       <PackageMaintainer Condition="'$(PackageMaintainer)' == '' AND '$(Authors)' == ''">Anonymous &lt;noreply@example.com&gt;</PackageMaintainer>
       <PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' != ''">$(Description)</PackageDescription>
       <PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' == ''">$(PackageName) version $(PackageVersion) - $(Release)</PackageDescription>
+      <SymlinkAppHostInBin Condition="'$(SymlinkAppHostInBin)' == ''">true</SymlinkAppHostInBin>
+      <AppHost Condition="'$(AppHost)' == '' AND '$(SymlinkAppHostInBin)' == 'true'">$(AssemblyName)$(_NativeExecutableExtension)</AppHost>
     </PropertyGroup>
   </Target>
 
@@ -90,6 +92,7 @@
              Version="$(PackageVersion)"
              Release="$(Release)"
              PackageName="$(PackageName)"
+             AppHost="$(AppHost)"
              Content="@(Content)"
              LinuxFolders="@(LinuxFolder)"
              RpmDotNetDependencies="@(RpmDotNetDependency)"
@@ -158,6 +161,7 @@
              Prefix="$(Prefix)"
              Version="$(PackageVersion)"
              PackageName="$(PackageName)"
+             AppHost="$(AppHost)"
              Content="@(Content)"
              LinuxFolders="@(LinuxFolder)"
              DebDependencies="@(DebDependency)"

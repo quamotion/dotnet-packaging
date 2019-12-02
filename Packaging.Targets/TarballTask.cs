@@ -40,6 +40,7 @@ namespace Packaging.Targets
             ArchiveBuilder archiveBuilder = new ArchiveBuilder();
             var archiveEntries = archiveBuilder.FromDirectory(
                 this.PublishDir,
+                null,
                 this.Prefix,
                 this.Content);
 
