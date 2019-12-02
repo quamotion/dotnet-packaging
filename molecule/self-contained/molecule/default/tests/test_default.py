@@ -8,3 +8,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 def test_package_is_runnable(host):
     host.run_test("/usr/share/self-contained-app/self-contained-app")
+
+
+def test_package_symlink_is_runnable(host):
+    host.run_test("/usr/local/bin/self-contained-app")
