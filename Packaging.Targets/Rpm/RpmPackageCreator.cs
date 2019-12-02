@@ -524,6 +524,16 @@ namespace Packaging.Targets.Rpm
                     size = 0x1000;
                 }
 
+                if (entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
+                {
+                    // RPM uses cpio archives. cpio archives store the target of a symlink as
+                    // the file content (as opposed to tar, which has a dedicated field for this).
+                    // As a result, the file size is equal to the length of the path of the link
+                    // target.
+                    // https://bugzilla.redhat.com/show_bug.cgi?id=1224555 has some background info.
+                    size = (uint)Encoding.UTF8.GetByteCount(entry.LinkTo);
+                }
+
                 RpmFile file = new RpmFile()
                 {
                     Size = (int)size,

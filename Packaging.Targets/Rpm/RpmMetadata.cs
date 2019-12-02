@@ -615,7 +615,7 @@ namespace Packaging.Targets.Rpm
                     modes[i] = (short)file.Mode;
                     rdevs[i] = file.Rdev;
                     mtimes[i] = (int)file.ModifiedTime.ToUnixTimeSeconds();
-                    md5s[i] = BitConverter.ToString(file.MD5Hash).Replace("-", string.Empty).ToLowerInvariant();
+                    md5s[i] = file.MD5Hash == null ? string.Empty : BitConverter.ToString(file.MD5Hash).Replace("-", string.Empty).ToLowerInvariant();
                     linkTos[i] = file.LinkTo;
                     usernames[i] = file.UserName;
                     groupnames[i] = file.GroupName;

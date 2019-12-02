@@ -111,8 +111,8 @@ namespace Packaging.Targets
                 }
                 else if (entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
                 {
-                    using (var fileStrema = file.Open())
-                    using (var reader = new StreamReader(fileStrema, Encoding.UTF8))
+                    using (var fileStream = file.Open())
+                    using (var reader = new StreamReader(fileStream, Encoding.UTF8))
                     {
                         entry.LinkTo = reader.ReadToEnd();
                     }
@@ -188,10 +188,28 @@ namespace Packaging.Targets
         /// <returns>
         /// A list of <see cref="ArchiveEntry"/> objects representing the data in the directory.
         /// </returns>
-        public List<ArchiveEntry> FromDirectory(string directory, string prefix, ITaskItem[] metadata)
+        public List<ArchiveEntry> FromDirectory(string directory, string appHost, string prefix, ITaskItem[] metadata)
         {
             List<ArchiveEntry> value = new List<ArchiveEntry>();
             this.AddDirectory(directory, string.Empty, prefix, value, metadata);
+
+            // Add a symlink to appHost, if available
+            if (appHost != null)
+            {
+                value.Add(
+                    new ArchiveEntry()
+                    {
+                        Mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFLNK,
+                        Modified = DateTimeOffset.UtcNow,
+                        Group = "root",
+                        Owner = "root",
+                        TargetPath = $"/usr/local/bin/{appHost}",
+                        LinkTo = $"{prefix}/{appHost}",
+                        Inode = this.inode++,
+                        Sha256 = Array.Empty<byte>(),
+                    });
+            }
+
             return value;
         }
 
@@ -244,7 +262,7 @@ namespace Packaging.Targets
             {
                 if (fileName.StartsWith(".") || fileStream.Length == 0)
                 {
-                    // Skip hidden and empty files - this would case rmplint errors.
+                    // Skip hidden and empty files - this would case rpmlint errors.
                     return;
                 }
 
