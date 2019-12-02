@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Packaging.Targets.IO
 {
@@ -132,7 +133,7 @@ namespace Packaging.Targets.IO
                 Signature = "070701",
             };
 
-            cpioFile.Write(cpioHeader, targetPath, new MemoryStream(Array.Empty<byte>()));
+            cpioFile.Write(cpioHeader, targetPath, new MemoryStream(Encoding.UTF8.GetBytes(entry.LinkTo)));
         }
 
         /// <summary>
