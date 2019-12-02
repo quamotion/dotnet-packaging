@@ -43,6 +43,10 @@ namespace Packaging.Targets.IO
                     {
                         this.AddDirectory(entry, cpioFile);
                     }
+                    else if (entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
+                    {
+                        this.AddSymlink(entry, cpioFile);
+                    }
                     else
                     {
                         this.AddFile(entry, cpioFile);
@@ -90,6 +94,45 @@ namespace Packaging.Targets.IO
             }
 
             cpioFile.Write(directoryHeader, targetPath, new MemoryStream(Array.Empty<byte>()));
+        }
+
+        /// <summary>
+        /// Adds a symlink entry to a <see cref="CpioFile"/>.
+        /// </summary>
+        /// <param name="entry">
+        /// The symlink entry to add.
+        /// </param>
+        /// <param name="cpioFile">
+        /// The <see cref="CpioFile"/> to which to add the entry.
+        /// </param>
+        public void AddSymlink(ArchiveEntry entry, CpioFile cpioFile)
+        {
+            var targetPath = entry.TargetPath;
+
+            if (!targetPath.StartsWith("."))
+            {
+                targetPath = "." + targetPath;
+            }
+
+            CpioHeader cpioHeader = new CpioHeader()
+            {
+                Check = 0,
+                DevMajor = 1,
+                DevMinor = 0,
+                FileSize = entry.FileSize,
+                Gid = 0, // root
+                Uid = 0, // root
+                Ino = entry.Inode,
+                FileMode = entry.Mode,
+                LastModified = entry.Modified,
+                NameSize = (uint)entry.TargetPath.Length + 1,
+                Nlink = 1,
+                RDevMajor = 0,
+                RDevMinor = 0,
+                Signature = "070701",
+            };
+
+            cpioFile.Write(cpioHeader, targetPath, new MemoryStream(Array.Empty<byte>()));
         }
 
         /// <summary>
