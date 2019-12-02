@@ -111,8 +111,8 @@ namespace Packaging.Targets
                 }
                 else if (entry.Mode.HasFlag(LinuxFileMode.S_IFLNK))
                 {
-                    using (var fileStrema = file.Open())
-                    using (var reader = new StreamReader(fileStrema, Encoding.UTF8))
+                    using (var fileStream = file.Open())
+                    using (var reader = new StreamReader(fileStream, Encoding.UTF8))
                     {
                         entry.LinkTo = reader.ReadToEnd();
                     }
@@ -206,6 +206,7 @@ namespace Packaging.Targets
                         TargetPath = $"/usr/local/bin/{appHost}",
                         LinkTo = $"{prefix}/{appHost}",
                         Inode = this.inode++,
+                        Sha256 = Array.Empty<byte>(),
                     });
             }
 
@@ -261,7 +262,7 @@ namespace Packaging.Targets
             {
                 if (fileName.StartsWith(".") || fileStream.Length == 0)
                 {
-                    // Skip hidden and empty files - this would case rmplint errors.
+                    // Skip hidden and empty files - this would case rpmlint errors.
                     return;
                 }
 
