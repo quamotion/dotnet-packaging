@@ -37,7 +37,11 @@ namespace Packaging.Targets
 
         private void CreateLinuxTarball()
         {
-            ArchiveBuilder archiveBuilder = new ArchiveBuilder();
+            ArchiveBuilder archiveBuilder = new ArchiveBuilder()
+            {
+                Log = this.Log,
+            };
+
             var archiveEntries = archiveBuilder.FromDirectory(
                 this.PublishDir,
                 null,

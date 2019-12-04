@@ -192,7 +192,11 @@ namespace Packaging.Targets
             using (var targetStream = File.Open(this.DebPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             using (var tarStream = File.Open(this.DebTarPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
-                ArchiveBuilder archiveBuilder = new ArchiveBuilder();
+                ArchiveBuilder archiveBuilder = new ArchiveBuilder()
+                {
+                    Log = this.Log,
+                };
+
                 var archiveEntries = archiveBuilder.FromDirectory(
                     this.PublishDir,
                     this.AppHost,

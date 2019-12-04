@@ -14,6 +14,11 @@
       <Link>README.md</Link>
       <LinuxPath>/etc/dotnet-packaging/README.md</LinuxPath>
     </Content>
-  </ItemGroup>
 
+    <!-- Empty files are ignored (and generate a build warning) -->
+    <Content Include="../../empty" CopyToPublishDirectory="PreserveNewest" />
+
+    <!-- Hidden files are ignored (and generate a build warning) -->
+    <Content Include="../../../.gitignore" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

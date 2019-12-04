@@ -267,7 +267,11 @@ namespace Packaging.Targets
             using (var targetStream = File.Open(this.RpmPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             using (var cpioStream = File.Open(this.CpioPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
-                ArchiveBuilder archiveBuilder = new ArchiveBuilder();
+                ArchiveBuilder archiveBuilder = new ArchiveBuilder()
+                {
+                    Log = this.Log,
+                };
+
                 var archiveEntries = archiveBuilder.FromDirectory(
                     this.PublishDir,
                     this.AppHost,
