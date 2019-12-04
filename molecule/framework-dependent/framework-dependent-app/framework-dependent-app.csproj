@@ -6,4 +6,14 @@
     <RootNamespace>framework_dependent_app</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Makes sure a file which is located outside of the project directory structure,
+         but is linked into the project can be deployed correctly.
+         Non-regression test for https://github.com/qmfrederik/dotnet-packaging/issues/81 -->
+    <Content Include="../../../README.md" CopyToPublishDirectory="PreserveNewest">
+      <Link>README.md</Link>
+      <LinuxPath>/etc/dotnet-packaging/README.md</LinuxPath>
+    </Content>
+  </ItemGroup>
+
 </Project>
