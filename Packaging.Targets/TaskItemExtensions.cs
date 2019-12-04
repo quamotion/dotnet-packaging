@@ -59,7 +59,7 @@ namespace Packaging.Targets
             }
 
             var link = item.GetMetadata("Link");
-            if (link != string.Empty)
+            if (!string.IsNullOrEmpty(link))
             {
                 return link.Replace("\\", "/");
             }
