@@ -58,6 +58,12 @@ namespace Packaging.Targets
                 return null;
             }
 
+            var link = item.GetMetadata("Link");
+            if (!string.IsNullOrEmpty(link))
+            {
+                return link.Replace("\\", "/");
+            }
+
             var relativeDirectory = item.GetMetadata("RelativeDir");
             var filename = item.GetMetadata("FileName");
             var extension = item.GetMetadata("Extension");
