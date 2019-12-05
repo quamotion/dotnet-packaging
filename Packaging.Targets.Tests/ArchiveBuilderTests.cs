@@ -92,7 +92,7 @@ namespace Packaging.Targets.Tests
             Assert.Equal(string.Empty, script.LinkTo);
 
             // -rwxr-xr-x
-            Assert.Equal(LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR, script.Mode);
+            Assert.Equal(LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG, script.Mode);
             Assert.Equal("root", script.Owner);
             Assert.False(script.RemoveOnUninstall);
             Assert.Equal(Path.Combine("archive", "script.sh"), script.SourceFilename);

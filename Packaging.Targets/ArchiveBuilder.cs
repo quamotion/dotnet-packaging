@@ -359,10 +359,22 @@ namespace Packaging.Targets
 
                 if (overridenFileMode != null)
                 {
-                    // We expect the user to specify the file mode in its octal representation.
+                    // We expect the user to specify the file mode in its octal representation,
+                    // such as 755. We don't expect users to specify the higher bits (e.g.
+                    // S_IFREG).
                     try
                     {
                         mode = (LinuxFileMode)Convert.ToUInt32(overridenFileMode, 8);
+
+                        LinuxFileMode fileType = mode & LinuxFileMode.FileTypeMask;
+
+                        if (fileType != LinuxFileMode.None && fileType != LinuxFileMode.S_IFREG)
+                        {
+                            this.Log.LogWarning($"An invalid file type of '{fileType}' has been set for file '{name}'. The file type will be reset to IFREG.");
+                        }
+
+                        // Override the file type mask and hardcode it to S_IFREG.
+                        mode = (mode & ~LinuxFileMode.FileTypeMask) | LinuxFileMode.S_IFREG;
                     }
                     catch (Exception)
                     {
@@ -375,7 +387,7 @@ namespace Packaging.Targets
                     FileSize = (uint)fileStream.Length,
                     Group = fileMetadata.GetGroup(),
                     Owner = fileMetadata.GetOwner(),
-                    Modified = File.GetLastAccessTimeUtc(entry),
+                    Modified = File.GetLastWriteTimeUtc(entry),
                     SourceFilename = entry,
                     TargetPath = name,
                     Sha256 = hash,
