@@ -10,6 +10,11 @@ namespace Packaging.Targets.IO
     public enum LinuxFileMode : ushort
     {
         /// <summary>
+        /// No file mode has been specified.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
         /// Set user ID on execution
         /// </summary>
         S_ISUID = 0x0800,

@@ -26,3 +26,8 @@ def test_hidden_file_is_ignored(host):
 def test_empty_file_is_ignored(host):
     assert \
         not host.file("/usr/share/self-contained-app/empty").exists
+
+
+def test_license_is_deployed_with_permissions_and_sticky_bit(host):
+    assert host.file("/etc/dotnet-packaging/LICENSE").exists
+    assert host.file("/etc/dotnet-packaging/LICENSE").mode == 0o1755

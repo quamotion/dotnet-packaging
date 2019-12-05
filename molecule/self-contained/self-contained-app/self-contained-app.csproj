@@ -21,5 +21,12 @@
 
     <!-- Hidden files are ignored (and generate a build warning) -->
     <Content Include="../../../.gitignore" CopyToPublishDirectory="PreserveNewest" />
+    
+    <!-- Another variation, this time of a file which is outside the project root and
+         does not have the Link metadata set.
+         Non-regression test for https://github.com/qmfrederik/dotnet-packaging/issues/60#issuecomment-505895106 -->
+    <Content Include="../../../LICENSE" CopyToPublishDirectory="PreserveNewest" LinuxFileMode="1755">
+      <LinuxPath>/etc/dotnet-packaging/LICENSE</LinuxPath>
+    </Content>
   </ItemGroup>
 </Project>
