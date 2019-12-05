@@ -16,3 +16,13 @@ def test_package_symlink_is_runnable(host):
 
 def test_readme_is_deployed(host):
     assert host.file("/etc/dotnet-packaging/README.md").exists
+
+
+def test_hidden_file_is_ignored(host):
+    assert \
+        not host.file("/usr/share/framework-dependent-app/.gitignore").exists
+
+
+def test_empty_file_is_ignored(host):
+    assert \
+        not host.file("/usr/share/framework-dependent-app/empty").exists

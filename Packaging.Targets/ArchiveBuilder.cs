@@ -1,4 +1,5 @@
 ﻿using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 using Packaging.Targets.IO;
 using Packaging.Targets.Rpm;
 using System;
@@ -41,6 +42,15 @@ namespace Packaging.Targets
             }
 
             this.fileAnayzer = analyzer;
+        }
+
+        /// <summary>
+        /// Gets or sets a <see cref="TaskLoggingHelper"/> to which status messages can be written.
+        /// </summary>
+        public TaskLoggingHelper Log
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -260,9 +270,16 @@ namespace Packaging.Targets
 
             using (Stream fileStream = File.OpenRead(entry))
             {
-                if (fileName.StartsWith(".") || fileStream.Length == 0)
+                // Skip hidden and empty files - this would case rpmlint errors.
+                if (fileName.StartsWith("."))
                 {
-                    // Skip hidden and empty files - this would case rpmlint errors.
+                    this.Log.LogWarning($"Ignoring file {relativePath} because it starts with the '.' character and is considered a hidden file.");
+                    return;
+                }
+
+                if (fileStream.Length == 0)
+                {
+                    this.Log.LogWarning($"Ignoring file {relativePath} because it is empty.");
                     return;
                 }
 
