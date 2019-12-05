@@ -23,7 +23,7 @@
     
     <!-- Another variation, this time of a file which is outside the project root and
          does not have the Link metadata set. -->
-    <Content Include="../../../LICENSE" CopyToPublishDirectory="PreserveNewest" LinuxFileMode="0755">
+    <Content Include="../../../LICENSE" CopyToPublishDirectory="PreserveNewest" LinuxFileMode="1755">
       <LinuxPath>/etc/dotnet-packaging/LICENSE</LinuxPath>
     </Content>
   </ItemGroup>
