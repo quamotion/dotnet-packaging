@@ -283,7 +283,7 @@ namespace Packaging.Targets
         internal static void EnsureDirectories(List<ArchiveEntry> entries, bool includeRoot = true)
         {
             var dirs = new HashSet<string>(entries.Where(x => x.Mode.HasFlag(LinuxFileMode.S_IFDIR))
-                .Select(d => d.TargetPathWithFinalSlash));
+                .Select(d => d.TargetPathWithoutFinalSlash));
 
             var toAdd = new List<ArchiveEntry>();
 

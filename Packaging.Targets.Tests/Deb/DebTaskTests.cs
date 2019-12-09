@@ -101,5 +101,39 @@ namespace Packaging.Targets.Tests.Deb
             // have been created
             Assert.Single(archiveEntries);
         }
+
+        [Fact]
+        public void EnsureDirectoriesTest4()
+        {
+            List<ArchiveEntry> archiveEntries = new List<ArchiveEntry>();
+            archiveEntries.Add(
+                new ArchiveEntry()
+                {
+                    Mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFREG,
+                    TargetPath = "/etc/dotnet-packaging/LICENSE",
+                });
+
+            archiveEntries.Add(
+                new ArchiveEntry()
+                {
+                    Mode = LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
+                    TargetPath = "/etc/dotnet-packaging",
+                });
+
+            DebTask.EnsureDirectories(archiveEntries, includeRoot: false);
+
+            // This example contains an explicit entry (usually coming from LinuxFolder) for a folder for which a leaf
+            // node also exists. Make sure the folder entry was created only once, and the permissions for that folder
+            // are those which were set explicitly.
+            Assert.Collection(
+                archiveEntries,
+                (e) => Assert.Equal("/etc/dotnet-packaging/LICENSE", e.TargetPath),
+                (e) => 
+                {   
+                    Assert.Equal("/etc/dotnet-packaging", e.TargetPath);
+                    Assert.Equal(LinuxFileMode.S_IROTH | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR, e.Mode);
+                },
+                (e) => Assert.Equal("/etc", e.TargetPath));
+        }
     }
 }

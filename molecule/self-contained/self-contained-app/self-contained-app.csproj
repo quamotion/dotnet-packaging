@@ -16,6 +16,10 @@
       <LinuxPath>/etc/dotnet-packaging/README.md</LinuxPath>
     </Content>
 
+    <!-- Test for the LinuxFileMode flag on LinuxFolder entries. In this case, simulate
+        the /etc/dotnet-packaging being accessible to the default user and group only. -->
+    <LinuxFolder Include="/etc/dotnet-packaging" RemoveOnUninstall="true" LinuxFileMode="770" />
+
     <!-- Empty files are ignored (and generate a build warning) -->
     <Content Include="../../empty" CopyToPublishDirectory="PreserveNewest" />
 

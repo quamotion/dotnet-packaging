@@ -31,3 +31,9 @@ def test_empty_file_is_ignored(host):
 def test_license_is_deployed_with_permissions_and_sticky_bit(host):
     assert host.file("/etc/dotnet-packaging/LICENSE").exists
     assert host.file("/etc/dotnet-packaging/LICENSE").mode == 0o1755
+
+
+def test_settings_folder_has_correct_permissions(host):
+    assert host.file("/etc/dotnet-packaging/").exists
+    assert host.file("/etc/dotnet-packaging/").is_directory
+    assert host.file("/etc/dotnet-packaging/").mode == 0o770

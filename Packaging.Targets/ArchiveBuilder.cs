@@ -160,13 +160,16 @@ namespace Packaging.Targets
                 {
                     var path = folder.ItemSpec.Replace("\\", "/");
 
-                    // Write out an entry for the current directory
-                    // (actually, this is _not_ done)
+                    // Default file mode
+                    LinuxFileMode mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR;
+                    mode = this.GetFileMode(path, folder, mode);
+
+                    // Write out an entry for the directory
                     ArchiveEntry directoryEntry = new ArchiveEntry()
                     {
                         FileSize = 0x00001000,
                         Sha256 = Array.Empty<byte>(),
-                        Mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
+                        Mode = mode,
                         Modified = DateTime.Now,
                         Group = folder.GetGroup(),
                         Owner = folder.GetOwner(),
@@ -225,18 +228,7 @@ namespace Packaging.Targets
 
         protected void AddDirectory(string directory, string relativePath, string prefix, List<ArchiveEntry> value, ITaskItem[] metadata)
         {
-            // Write out an entry for the current directory
-            // (actually, this is _not_ done)
-            ArchiveEntry directoryEntry = new ArchiveEntry()
-            {
-                FileSize = 0x00001000,
-                Sha256 = Array.Empty<byte>(),
-                Mode = LinuxFileMode.S_IXOTH | LinuxFileMode.S_IROTH | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IRGRP | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IRUSR | LinuxFileMode.S_IFDIR,
-                Modified = Directory.GetLastWriteTime(directory),
-                Group = "root",
-                Owner = "root",
-                Inode = this.inode++
-            };
+            this.inode++;
 
             // The order in which the files appear in the cpio archive is important; if this is not respected xzdio
             // will report errors like:
@@ -354,33 +346,7 @@ namespace Packaging.Targets
                     hash = new byte[] { };
                 }
 
-                // If the user has chosen to override the file node, respect that
-                var overridenFileMode = fileMetadata?.GetLinuxFileMode();
-
-                if (overridenFileMode != null)
-                {
-                    // We expect the user to specify the file mode in its octal representation,
-                    // such as 755. We don't expect users to specify the higher bits (e.g.
-                    // S_IFREG).
-                    try
-                    {
-                        mode = (LinuxFileMode)Convert.ToUInt32(overridenFileMode, 8);
-
-                        LinuxFileMode fileType = mode & LinuxFileMode.FileTypeMask;
-
-                        if (fileType != LinuxFileMode.None && fileType != LinuxFileMode.S_IFREG)
-                        {
-                            this.Log.LogWarning($"An invalid file type of '{fileType}' has been set for file '{name}'. The file type will be reset to IFREG.");
-                        }
-
-                        // Override the file type mask and hardcode it to S_IFREG.
-                        mode = (mode & ~LinuxFileMode.FileTypeMask) | LinuxFileMode.S_IFREG;
-                    }
-                    catch (Exception)
-                    {
-                        throw new Exception($"Could not parse the file mode '{overridenFileMode}' for file '{name}'. Make sure to set the LinuxFileMode attriubute to an octal representation of a Unix file mode.");
-                    }
-                }
+                mode = this.GetFileMode(name, fileMetadata, mode);
 
                 ArchiveEntry archiveEntry = new ArchiveEntry()
                 {
@@ -420,6 +386,60 @@ namespace Packaging.Targets
             }
 
             return ArchiveEntryType.None;
+        }
+
+        /// <summary>
+        /// Gets the file mode for a file or directory entry, based on a default value
+        /// and the value of the LinuxFileMode attribute, if set.
+        /// </summary>
+        /// <param name="name">
+        /// The name (path) of the entry. Only used in error messages.
+        /// </param>
+        /// <param name="metadata">
+        /// The metadata for the current entry.
+        /// </param>
+        /// <param name="defaultMode">
+        /// The default mode. This mode is used to determine the file type (directory/file),
+        /// and when no LinuxFileMode value is specified.
+        /// </param>
+        /// <returns>
+        /// The <see cref="LinuxFileMode"/> for the current entry.
+        /// </returns>
+        private LinuxFileMode GetFileMode(string name, ITaskItem metadata, LinuxFileMode defaultMode)
+        {
+            LinuxFileMode mode = defaultMode;
+            LinuxFileMode defaultFileTypeMask = defaultMode & LinuxFileMode.FileTypeMask;
+
+            // If the user has chosen to override the file node, respect that
+            var overridenFileMode = metadata?.GetLinuxFileMode();
+
+            if (overridenFileMode != null)
+            {
+                // We expect the user to specify the file mode in its octal representation,
+                // such as 755. We don't expect users to specify the higher bits (e.g.
+                // S_IFREG).
+                try
+                {
+                    mode = (LinuxFileMode)Convert.ToUInt32(overridenFileMode, 8);
+
+                    LinuxFileMode fileType = mode & LinuxFileMode.FileTypeMask;
+
+                    if (fileType != LinuxFileMode.None && fileType != defaultFileTypeMask)
+                    {
+                        this.Log.LogWarning($"An invalid file type of '{fileType}' has been set for file '{name}'. The file type will be reset to {defaultFileTypeMask}.");
+                    }
+
+                    // Override the file type mask and hardcode it to the file type mask from the default mode.
+                    // In practice this will ensure the S_IFREG or S_IFDIR flag is set.
+                    mode = (mode & ~LinuxFileMode.FileTypeMask) | defaultFileTypeMask;
+                }
+                catch (Exception)
+                {
+                    throw new Exception($"Could not parse the file mode '{overridenFileMode}' for file '{name}'. Make sure to set the LinuxFileMode attriubute to an octal representation of a Unix file mode.");
+                }
+            }
+
+            return mode;
         }
     }
 }
