@@ -112,6 +112,17 @@ namespace Packaging.Targets.IO
             }
         }
 
+        /// <summary>
+        /// Gets the file name, excluding a final slash even if the file is a directory.
+        /// </summary>
+        public string TargetPathWithoutFinalSlash
+        {
+            get
+            {
+                return this.TargetPath?.TrimEnd('/');
+            }
+        }
+
         /// <inheritdoc/>
         public override string ToString()
         {
