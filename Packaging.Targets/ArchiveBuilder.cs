@@ -256,7 +256,7 @@ namespace Packaging.Targets
             byte[] buffer = new byte[1024];
             bool isAscii = true;
 
-            var fileMetadata = metadata.SingleOrDefault(m => m.IsPublished() && string.Equals(relativePath, m.GetPublishedPath()));
+            var fileMetadata = metadata?.SingleOrDefault(m => m.IsPublished() && string.Equals(relativePath, m.GetPublishedPath()));
 
             using (Stream fileStream = File.OpenRead(entry))
             {

@@ -439,7 +439,10 @@ namespace Packaging.Targets.Rpm
             byte[] nameBytes = new byte[66];
             var nameInLead = includeVersionInName ? $"{name}-{version}-{release}" : name;
 
-            Encoding.UTF8.GetBytes(nameInLead, 0, nameInLead.Length, nameBytes, 0);
+            if (nameInLead != null)
+            {
+                Encoding.UTF8.GetBytes(nameInLead, 0, nameInLead.Length, nameBytes, 0);
+            }
 
             var lead = new RpmLead()
             {
@@ -475,7 +478,7 @@ namespace Packaging.Targets.Rpm
             {
                 using (XZOutputStream compressor = new XZOutputStream(
                     targetStream,
-                    XZOutputStream.DefaultThreads,
+                    this.CompressionThreads,
                     XZOutputStream.DefaultPreset,
                     leaveOpen: true))
                 {
@@ -894,7 +897,14 @@ namespace Packaging.Targets.Rpm
                         break;
 
                     case IndexType.RPM_STRING_TYPE:
-                        size = Encoding.UTF8.GetByteCount((string)record.Value.Value) + 1;
+                        if (record.Value.Value == null)
+                        {
+                            size += 1;
+                        }
+                        else
+                        {
+                            size = Encoding.UTF8.GetByteCount((string)record.Value.Value) + 1;
+                        }
                         break;
 
                     case IndexType.RPM_INT16_TYPE:

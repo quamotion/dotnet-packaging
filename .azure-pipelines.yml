@@ -13,6 +13,27 @@ resources:
 stages:
 - stage: Build
   jobs:
+  - job: build_native
+    container:
+      image: ubuntu:18.04
+      options: "--name ci-container -v /usr/bin/docker:/tmp/docker:ro"
+    steps:
+    - script: |
+        /tmp/docker exec -t -u 0 ci-container \
+        sh -c "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confold" -y install sudo"
+      displayName: Set up sudo
+    - bash: |
+        sudo apt-get update
+        sudo apt-get install -y wget build-essential mingw-w64
+    - bash: |
+        wget http://tukaani.org/xz/xz-5.2.4.tar.gz -O- | tar xfz -
+        cd xz*
+        ./autogen.sh --host=x86_64-w64-mingw32
+        ./configure --host=x86_64-w64-mingw32
+        make
+        DESTDIR=$(Build.ArtifactStagingDirectory) make install
+    - publish: $(Build.ArtifactStagingDirectory)
+      artifact: native
   - job: build
     container: 3.0-buster
     steps:
@@ -24,10 +45,8 @@ stages:
         cp demo/Directory.Build.props $(Build.ArtifactStagingDirectory)
         cp demo/version.txt $(Build.ArtifactStagingDirectory)
       displayName: Build
-    - task: PublishBuildArtifacts@1
-      inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)
-        artifactName: nuget
+    - publish: $(Build.ArtifactStagingDirectory)
+      artifact: nuget
 
 - stage: Test
   jobs:
@@ -87,23 +106,20 @@ stages:
         molecule --version
         ansible --version
       displayName: Install molecule
-    - task: DownloadBuildArtifacts@0
-      displayName: Download Build Artifacts
-      inputs:
-        artifactName: nuget
-        downloadPath: $(Build.ArtifactStagingDirectory)
+    - download: current
+      artifact: nuget
     - bash: |
         set -e
         export PATH="$PATH:/$HOME/.dotnet/tools"
 
         cd $(suite)-app
 
-        echo "<configuration><packageSources><add key='local' value='$(Build.ArtifactStagingDirectory)/nuget' /></packageSources></configuration>" > NuGet.config
-        version=$(cat $(Build.ArtifactStagingDirectory)/nuget/version.txt)
+        echo "<configuration><packageSources><add key='local' value='$(Pipeline.Workspace)/nuget' /></packageSources></configuration>" > NuGet.config
+        version=$(cat $(Pipeline.Workspace)/nuget/version.txt)
 
         # Install the dotnet-rpm and dotnet-deb tools
-        dotnet tool install --global dotnet-deb --version $version --add-source $(Build.ArtifactStagingDirectory)/nuget
-        dotnet tool install --global dotnet-rpm --version $version --add-source $(Build.ArtifactStagingDirectory)/nuget
+        dotnet tool install --global dotnet-deb --version $version --add-source $(Pipeline.Workspace)/nuget
+        dotnet tool install --global dotnet-rpm --version $version --add-source $(Pipeline.Workspace)/nuget
 
         # Create .deb and .rpm packages
         dotnet rpm install
@@ -145,11 +161,8 @@ stages:
       vmImage: 'macOS-10.14'
     dependsOn: build_macos
     steps:
-    - task: DownloadBuildArtifacts@0
-      displayName: Download Build Artifacts
-      inputs:
-        artifactName: packages
-        downloadPath: $(Build.ArtifactStagingDirectory)/
+    - download: current
+      artifact: packages
     - task: UseDotNet@2
       displayName: 'Use .NET Core 3.0'
       inputs:
@@ -157,7 +170,7 @@ stages:
         version: 3.0.100
     - bash: |
         set -e
-        tar xvzf $(Build.ArtifactStagingDirectory)/packages/macos/test-tarball.1.0.0.tar.gz
+        tar xvzf $(Pipeline.Workspace)/packages/macos/test-tarball.1.0.0.tar.gz
       displayName: Extract tarball
     - bash: |
         set -e
