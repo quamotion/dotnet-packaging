@@ -17,6 +17,8 @@ And these are up next:
 * `dotnet pkg` - Create a macOS installer
 * `dotnet choco` - Create a Chocolatey package
 * `dotnet msi` - Create a Windows Installer (msi) package
+* `dotnet snap` - Create a Linux Snapcraft package
+* `dotnet flat` - Create a Linux Flatpak package
 
 Did we miss anything? Feel free to file a feature request, or send a PR!
 
