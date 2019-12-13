@@ -63,6 +63,10 @@ namespace Dotnet.Packaging
                 "Do not restore the project before building.",
                 CommandOptionType.NoValue);
 
+            CommandArgument projectArgument = commandLineApplication.Argument(
+                "project",
+                "The project file to operate on. If a file is not specified, the command will search the current directory for one.");
+
             commandLineApplication.VersionOption("-v | --version", new Version(ThisAssembly.AssemblyFileVersion).ToString(3), ThisAssembly.AssemblyInformationalVersion);
 
             commandLineApplication.HelpOption("-? | -h | --help");
@@ -118,9 +122,14 @@ namespace Dotnet.Packaging
             {
                 Console.WriteLine($"dotnet {this.commandName} ({ThisAssembly.AssemblyInformationalVersion})");
 
+                if (!TryGetProjectFilePath(projectArgument, out string projectFilePath))
+                {
+                    return -1;
+                }
+
                 if (!noRestore.HasValue())
                 {
-                    if (!this.IsPackagingTargetsInstalled())
+                    if (!this.IsPackagingTargetsInstalled(projectFilePath))
                     {
                         return -1;
                     }
@@ -154,6 +163,8 @@ namespace Dotnet.Packaging
                     msbuildArguments.Append($"/p:PackageDir={output.Value()} ");
                 }
 
+                msbuildArguments.Append($"{projectFilePath} ");
+
                 return RunDotnet(msbuildArguments);
             });
 
@@ -180,17 +191,8 @@ namespace Dotnet.Packaging
             return process.ExitCode;
         }
 
-        public bool IsPackagingTargetsInstalled()
+        public bool IsPackagingTargetsInstalled(string projectFilePath)
         {
-            var projectFilePath = Directory.GetFiles(Environment.CurrentDirectory, "*.*proj").SingleOrDefault();
-
-            if (projectFilePath == null)
-            {
-                Console.Error.WriteLine($"Failed to find a .csproj file in '{Environment.CurrentDirectory}'. dotnet {this.commandName} only works if");
-                Console.Error.WriteLine($"you have exactly one .csproj file in your directory. For advanced scenarios, please use 'dotnet msbuild /t:{this.msbuildTarget}'");
-                return false;
-            }
-
             var loggers = new IMSBuildLogger[] { new ConsoleLogger(LoggerVerbosity.Quiet) };
             var project = new MSBuild.Project(projectFilePath);
 
@@ -216,6 +218,38 @@ namespace Dotnet.Packaging
             {
                 Console.Error.WriteLine($"The project '{Path.GetFileName(projectFilePath)}' doesn't have a PackageReference to Packaging.Targets.");
                 Console.Error.WriteLine($"Please run 'dotnet {this.commandName} install', and try again.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool TryGetProjectFilePath(CommandArgument projectArgument, out string projectFilePath)
+        {
+            if (projectArgument == null)
+            {
+                throw new ArgumentNullException(nameof(projectArgument));
+            }
+
+            if (!string.IsNullOrWhiteSpace(projectArgument.Value))
+            {
+                projectFilePath = projectArgument.Value;
+
+                if (!File.Exists(projectFilePath))
+                {
+                    Console.Error.WriteLine($"Could not find the project file '{projectFilePath}'.");
+                    return false;
+                }
+
+                return true;
+            }
+
+            projectFilePath = Directory.GetFiles(Environment.CurrentDirectory, "*.*proj").SingleOrDefault();
+
+            if (projectFilePath == null)
+            {
+                Console.Error.WriteLine($"Failed to find a .*proj file in '{Environment.CurrentDirectory}'. dotnet {this.commandName} only works if");
+                Console.Error.WriteLine($"you have exactly one .*proj file in your directory. For advanced scenarios, please use 'dotnet msbuild /t:{this.msbuildTarget}'");
                 return false;
             }
 
