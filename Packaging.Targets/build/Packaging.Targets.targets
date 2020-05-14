@@ -75,6 +75,10 @@
       <RpmDotNetDependency Include="dotnet-runtime-3.0" Version="" />
     </ItemGroup>
 
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
+      <RpmDotNetDependency Include="dotnet-runtime-3.1" Version="" />
+    </ItemGroup>
+
     <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' != ''">
       <RpmDotNetDependency Include="openssl-libs" Version="" />
       <RpmDotNetDependency Include="libicu" Version="" />
@@ -139,6 +143,10 @@
     
     <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
       <DebDotNetDependencies Include="dotnet-runtime-3.0"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
+      <DebDotNetDependencies Include="dotnet-runtime-3.1"/>
     </ItemGroup>
 
     <!-- Dependency list from https://github.com/dotnet/core-setup/blob/release/3.0/src/pkg/packaging/deb/dotnet-runtime-deps-debian_config.json  -->
