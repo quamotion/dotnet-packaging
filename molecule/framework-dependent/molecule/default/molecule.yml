@@ -3,8 +3,9 @@ dependency:
   name: galaxy
 driver:
   name: docker
-lint:
-  name: yamllint
+lint: |
+  set -e
+  yamllint .
 platforms:
   # This list should be roughly kept in sync with the list of
   # OSes for which .NET Core builds packages, as seen at
@@ -35,8 +36,9 @@ platforms:
     image: opensuse/leap:15.0
 provisioner:
   name: ansible
-  lint:
-    name: ansible-lint
+  lint: |
+    set -e
+    ansible-lint
   inventory:
     host_vars:
       fedora.30:
@@ -46,5 +48,6 @@ scenario:
   name: default
 verifier:
   name: testinfra
-  lint:
-    name: flake8
+  lint: |
+    set -e
+    flake8
