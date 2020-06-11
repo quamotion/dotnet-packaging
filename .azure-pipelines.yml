@@ -9,6 +9,10 @@ resources:
     image: mcr.microsoft.com/dotnet/core/sdk:3.0-disco
   - container: 3.0-buster
     image: mcr.microsoft.com/dotnet/core/sdk:3.0-buster
+  - container: 3.1-focal
+    image: mcr.microsoft.com/dotnet/core/sdk:3.1-focal
+  - container: 5.0-focal
+    image: mcr.microsoft.com/dotnet/core/sdk:5.0-focal
 
 stages:
 - stage: Build
@@ -60,6 +64,32 @@ stages:
         3.0-disco-tarball:
           container: 3.0-disco
           command: tarball
+
+        3.1-focal-deb:
+          container: 3.1-focal
+          command: deb
+        3.1-disco-rpm:
+          container: 3.1-focal
+          command: rpm
+        3.1-focal-zip:
+          container: 3.1-focal
+          command: zip
+        3.1-focal-tarball:
+          container: 3.1-focal
+          command: tarball
+
+        # 5.0-focal-deb:
+        #   container: 5.0-focal
+        #   command: deb
+        # 5.0-disco-rpm:
+        #   container: 5.0-focal
+        #   command: rpm
+        # 5.0-focal-zip:
+        #   container: 5.0-focal
+        #   command: zip
+        # 5.0-focal-tarball:
+        #   container: 5.0-focal
+        #   command: tarball
 
     container: $[ variables['container'] ]
     steps:
