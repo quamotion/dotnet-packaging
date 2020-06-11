@@ -114,8 +114,11 @@ stages:
         pip3 install --upgrade --user setuptools
         pip3 install --user molecule
         pip3 install --user docker-py
+        pip3 install --user pytest
+        pip3 install --user testinfra
         molecule --version
         ansible --version
+        pytest --version
       displayName: Install molecule
     - task: DownloadBuildArtifacts@0
       displayName: Download Build Artifacts
