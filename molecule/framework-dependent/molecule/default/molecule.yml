@@ -26,12 +26,18 @@ platforms:
     image: debian:9
   - name: debian.10
     image: debian:10
-  - name: fedora.29
-    image: fedora:29
-  - name: fedora.30
-    image: fedora:30
+  - name: fedora.31
+    image: fedora:31
+  - name: fedora.32
+    image: fedora:32
   - name: centos.7
     image: centos:7
+  - name: centos.8
+    image: centos:8
+  - name: ol.7
+    image: oraclelinux:7
+  - name: ol.8
+    image: oraclelinux:8
   - name: opensuse.15.0
     image: opensuse/leap:15.0
 provisioner:
