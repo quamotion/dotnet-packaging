@@ -23,12 +23,6 @@ platforms:
   # You can manually install the package using rpm -i {path_to_rpm}, though, but Ansible doesn't provide
   # a good way to do that.
   #
-  # - name: opensuse.15.0
-  #   image: opensuse/leap:15.0
-  # - name: opensuse.15.1
-  #   image: opensuse/leap:15.1
-  # - name: opensuse.15.2
-  #   image: opensuse/leap:15.2
   - name: ubuntu.16.04
     image: ubuntu:16.04
   - name: ubuntu.18.04
@@ -53,8 +47,10 @@ platforms:
     image: oraclelinux:7
   - name: ol.8
     image: oraclelinux:8
-  - name: opensuse.15.0
-    image: opensuse/leap:15.0
+  # There's an issue with self-contained apps on OpenSUSE 15.0 (see above), so that's
+  # disabled for now.
+  # - name: opensuse.15.0
+  #   image: opensuse/leap:15.0
 
 provisioner:
   name: ansible
