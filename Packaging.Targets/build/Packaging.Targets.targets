@@ -149,7 +149,8 @@
       <DebDotNetDependencies Include="dotnet-runtime-3.1"/>
     </ItemGroup>
 
-    <!-- Dependency list from https://github.com/dotnet/core-setup/blob/release/3.0/src/pkg/packaging/deb/dotnet-runtime-deps-debian_config.json  -->
+    <!-- Dependency list from https://github.com/dotnet/core-setup/blob/release/3.1/src/pkg/packaging/deb/dotnet-runtime-deps-debian_config.json
+         and https://github.com/dotnet/runtime/blob/master/src/installer/pkg/packaging/deb/dotnet-runtime-deps-debian_config.json  -->
     <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' != ''">
       <DebDotNetDependencies Include="libc6"/>  
       <DebDotNetDependencies Include="libgcc1"/>
@@ -157,7 +158,7 @@
       <DebDotNetDependencies Include="libstdc++6"/>
       <DebDotNetDependencies Include="zlib1g"/>
       <DebDotNetDependencies Include="libssl1.1 | libssl1.0.2 | libssl1.0.1 | libssl1.0.0 | libssl0.9.8"/>
-      <DebDotNetDependencies Include="libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
+      <DebDotNetDependencies Include="libicu66 | libicu65 | libicu64 | libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
     </ItemGroup>
 
     <MakeDir Directories="$(PackageDir)"/>
