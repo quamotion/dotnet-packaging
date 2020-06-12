@@ -28,8 +28,9 @@ platforms:
     image: debian:10
   - name: fedora.31
     image: fedora:31
-  - name: fedora.32
-    image: fedora:32
+  # Fedora 32 supports .NET Core 3.1 only, but we target 3.0 (at the moment)
+  # - name: fedora.32
+  #   image: fedora:32
   - name: centos.7
     image: centos:7
   - name: centos.8
