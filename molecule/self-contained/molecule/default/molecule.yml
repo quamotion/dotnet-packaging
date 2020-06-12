@@ -23,12 +23,22 @@ platforms:
   # You can manually install the package using rpm -i {path_to_rpm}, though, but Ansible doesn't provide
   # a good way to do that.
   #
-  # - name: opensuse.15.0
-  #   image: opensuse/leap:15.0
-  # - name: opensuse.15.1
-  #   image: opensuse/leap:15.1
-  # - name: opensuse.15.2
-  #   image: opensuse/leap:15.2
+  - name: ubuntu.16.04
+    image: ubuntu:16.04
+  - name: ubuntu.18.04
+    image: ubuntu:18.04
+  - name: ubuntu.19.10
+    image: ubuntu:19.10
+  - name: ubuntu.20.04
+    image: ubuntu:20.04
+  - name: debian.9
+    image: debian:9
+  - name: debian.10
+    image: debian:10
+  - name: fedora.31
+    image: fedora:31
+  - name: fedora.32
+    image: fedora:32
   - name: centos.7
     image: centos:7
   - name: centos.8
@@ -37,24 +47,10 @@ platforms:
     image: oraclelinux:7
   - name: ol.8
     image: oraclelinux:8
-  - name: fedora.30
-    image: fedora:30
-  - name: fedora.29
-    image: fedora:29
-  - name: debian.8
-    image: debian:8
-  - name: debian.9
-    image: debian:9
-  - name: debian.10
-    image: debian:10
-  - name: ubuntu.14.04
-    image: ubuntu:14.04
-  - name: ubuntu.16.04
-    image: ubuntu:16.04
-  - name: ubuntu.18.04
-    image: ubuntu:18.04
-  - name: ubuntu.19.10
-    image: ubuntu:19.10
+  # There's an issue with self-contained apps on OpenSUSE 15.0 (see above), so that's
+  # disabled for now.
+  # - name: opensuse.15.0
+  #   image: opensuse/leap:15.0
 
 provisioner:
   name: ansible

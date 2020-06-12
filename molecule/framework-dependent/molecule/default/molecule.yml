@@ -26,12 +26,22 @@ platforms:
     image: debian:9
   - name: debian.10
     image: debian:10
-  - name: fedora.29
-    image: fedora:29
-  - name: fedora.30
-    image: fedora:30
+  - name: fedora.31
+    image: fedora:31
+  # Fedora 32 supports .NET Core 3.1 only, but we target 3.0 (at the moment)
+  # - name: fedora.32
+  #   image: fedora:32
   - name: centos.7
     image: centos:7
+  # There's an issue running on CentOS 8
+  # - name: centos.8
+  #   image: centos:8
+  # Installing .NET Core from sources doesn't work (properly) on Oracle Linux,
+  # so that distro is disabled for now.
+  # - name: ol.7
+  #   image: oraclelinux:7
+  # - name: ol.8
+  #   image: oraclelinux:8
   - name: opensuse.15.0
     image: opensuse/leap:15.0
 provisioner:
