@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Loader;
 using System.Text;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using IMSBuildLogger = Microsoft.Build.Framework.ILogger;
@@ -22,7 +23,19 @@ namespace Dotnet.Packaging
 
         public PackagingRunner(string outputName, string msbuildTarget, string commandName)
         {
-            MSBuildLocator.RegisterDefaults();
+            var instance =  MSBuildLocator.RegisterDefaults();
+
+            // Workaround for https://github.com/microsoft/MSBuildLocator/issues/86
+            AssemblyLoadContext.Default.Resolving += (assemblyLoadContext, assemblyName) =>
+            {
+                var path = Path.Combine(instance.MSBuildPath, assemblyName.Name + ".dll");
+                if (File.Exists(path))
+                {
+                    return assemblyLoadContext.LoadFromAssemblyPath(path);
+                }
+
+                return null;
+            };
 
             this.outputName = outputName;
             this.msbuildTarget = msbuildTarget;
