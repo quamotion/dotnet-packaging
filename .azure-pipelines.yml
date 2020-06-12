@@ -18,7 +18,7 @@ stages:
 - stage: Build
   jobs:
   - job: build
-    container: 3.0-buster
+    container: 5.0-focal
     steps:
     - bash: |
         dotnet restore dotnet-packaging.sln
@@ -78,18 +78,18 @@ stages:
           container: 3.1-focal
           command: tarball
 
-        # 5.0-focal-deb:
-        #   container: 5.0-focal
-        #   command: deb
-        # 5.0-disco-rpm:
-        #   container: 5.0-focal
-        #   command: rpm
-        # 5.0-focal-zip:
-        #   container: 5.0-focal
-        #   command: zip
-        # 5.0-focal-tarball:
-        #   container: 5.0-focal
-        #   command: tarball
+        5.0-focal-deb:
+          container: 5.0-focal
+          command: deb
+        5.0-disco-rpm:
+          container: 5.0-focal
+          command: rpm
+        5.0-focal-zip:
+          container: 5.0-focal
+          command: zip
+        5.0-focal-tarball:
+          container: 5.0-focal
+          command: tarball
 
     container: $[ variables['container'] ]
     steps:
