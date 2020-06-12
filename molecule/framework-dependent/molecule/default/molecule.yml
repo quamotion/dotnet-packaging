@@ -33,8 +33,9 @@ platforms:
   #   image: fedora:32
   - name: centos.7
     image: centos:7
-  - name: centos.8
-    image: centos:8
+  # There's an issue running on CentOS 8
+  # - name: centos.8
+  #   image: centos:8
   # Installing .NET Core from sources doesn't work (properly) on Oracle Linux,
   # so that distro is disabled for now.
   # - name: ol.7
