@@ -14,7 +14,7 @@ See https://github.com/qmfrederik/dotnet-packaging/ for more information on how 
 
   <ItemGroup>
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.4" />
-    <PackageReference Include="Microsoft.Build" Version="15.9.20" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build" Version="16.6.0" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Locator" Version="1.2.6" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
