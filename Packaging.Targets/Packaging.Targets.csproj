@@ -19,15 +19,15 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- MSBuild ships as part of the .NET CLI -->
-    <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409">
+    <PackageReference Include="Microsoft.Build.Framework" Version="16.6.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409">
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.6.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <!-- BoncyCastle and SharpZipLib are included in the lib\ folder in the Packaging.Targets package (see below), so we don't need an
          explicit dependency on them, either -->
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.3">
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="SharpZipLib" Version="1.2.0">
@@ -36,7 +36,7 @@
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="System.Buffers" Version="4.5.0" />
+    <PackageReference Include="System.Buffers" Version="4.5.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="build\*.*">
@@ -51,7 +51,7 @@
     </Content>
 
     <!-- Bouncy Castle-->
-    <Content Include="$(NuGetPackageRoot)\portable.bouncycastle\1.8.1.3\lib\netstandard2.0\BouncyCastle.Crypto.dll" Link="BouncyCastle.Crypto.dll">
+    <Content Include="$(NuGetPackageRoot)\portable.bouncycastle\1.8.6.7\lib\netstandard2.0\BouncyCastle.Crypto.dll" Link="BouncyCastle.Crypto.dll">
       <Pack>true</Pack>
       <PackagePath>tools\netstandard2.0\</PackagePath>
     </Content>
