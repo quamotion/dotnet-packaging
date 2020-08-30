@@ -12,12 +12,14 @@ resources:
   - container: 3.1-focal
     image: mcr.microsoft.com/dotnet/core/sdk:3.1-focal
   - container: 5.0-focal
-    image: mcr.microsoft.com/dotnet/sdk:5.0
+    image: mcr.microsoft.com/dotnet/sdk:5.0-focal
+  - container: 5.0-nanoserver
+    image: mcr.microsoft.com/dotnet/sdk:5.0-nanoserver-1809
 
 stages:
 - stage: Build
   jobs:
-  - job: build
+  - job: build_focal
     container: 5.0-focal
     steps:
     - bash: |
@@ -32,6 +34,25 @@ stages:
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: nuget
+
+  - job: build_windows
+    pool:
+      vmImage: windows-2019
+    container: 5.0-nanoserver
+    # Make sure we can run scripts in PowerShell core:
+    # https://github.com/microsoft/azure-pipelines-tasks/issues/11448
+    variables:
+      agent.preferPowerShellOnContainers: false
+    steps:
+    - pwsh: |
+        dotnet restore dotnet-packaging.sln
+        dotnet pack dotnet-packaging.sln -c Release -o $(Build.ArtifactStagingDirectory)
+        dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj -l "trx;LogFileName=$(Build.ArtifactStagingDirectory)/Packaging.Targets.Tests.trx"
+      displayName: Build
+    - task: PublishTestResults@2
+      inputs:
+        testRunner: VSTest
+        testResultsFiles: $(Build.ArtifactStagingDirectory)/*.trx
 
 - stage: Test
   jobs:
