@@ -111,6 +111,8 @@ namespace Packaging.Targets.IO
 
         public static int DefaultThreads => Environment.ProcessorCount;
 
+        public static bool SupportsMultiThreading => NativeMethods.SupportsMultiThreading;
+
         /// <inheritdoc/>
         public override bool CanRead
         {

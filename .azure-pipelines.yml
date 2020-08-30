@@ -25,11 +25,16 @@ stages:
     - bash: |
         dotnet restore dotnet-packaging.sln
         dotnet pack dotnet-packaging.sln -c Release -o $(Build.ArtifactStagingDirectory)
-        dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj
+        dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj -l "trx;LogFileName=$(Build.ArtifactStagingDirectory)/Packaging.Targets.Tests.trx"
 
         cp demo/Directory.Build.props $(Build.ArtifactStagingDirectory)
         cp demo/version.txt $(Build.ArtifactStagingDirectory)
       displayName: Build
+    - task: PublishTestResults@2
+      inputs:
+        testRunner: VSTest
+        testResultsFiles: $(Build.ArtifactStagingDirectory)/*.trx
+      condition: true
     - task: PublishBuildArtifacts@1
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)
