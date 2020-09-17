@@ -1,0 +1,12 @@
+kind: pipeline
+name: arm64
+
+platform:
+    os: linux
+    arch: arm64
+
+steps:
+- name: build
+  image: mcr.microsoft.com/dotnet/sdk:5.0-focal-arm64v8
+  commands:
+    - dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj
