@@ -33,6 +33,7 @@ namespace Packaging.Targets.Deb
             string preRemoveScript,
             string postRemoveScript,
             IEnumerable<string> additionalDependencies,
+            IEnumerable<string> recommends,
             Action<DebPackage> additionalMetadata)
         {
             var pkg = new DebPackage
@@ -130,9 +131,14 @@ namespace Packaging.Targets.Deb
                 }
             }
 
-            if (additionalDependencies != null)
+            if (additionalDependencies != null && additionalDependencies.Any())
             {
                 pkg.ControlFile["Depends"] = string.Join(", ", additionalDependencies);
+            }
+
+            if (recommends != null && recommends.Any())
+            {
+                pkg.ControlFile["Recommends"] = string.Join(", ", recommends);
             }
 
             additionalMetadata?.Invoke(pkg);

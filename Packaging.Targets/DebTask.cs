@@ -89,6 +89,12 @@ namespace Packaging.Targets
         public ITaskItem[] DebDependencies { get; set; }
 
         /// <summary>
+        /// Gets or sets a list of Debian packages which this Debian
+        /// package recommends.
+        /// </summary>
+        public ITaskItem[] DebRecommends { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether to create a Linux
         /// user and group when installing the package.
         /// </summary>
@@ -230,6 +236,14 @@ namespace Packaging.Targets
                     dependencies.AddRange(debDotNetDependencies);
                 }
 
+                // Prepare the list of recommended dependencies
+                List<string> recommends = new List<string>();
+
+                if (this.DebRecommends != null)
+                {
+                    recommends.AddRange(this.DebRecommends.Select(d => d.ItemSpec));
+                }
+
                 // XZOutputStream class has low quality (doesn't even know it's current position,
                 // needs to be disposed to finish compression, etc),
                 // So we are doing compression in a separate step
@@ -261,6 +275,7 @@ namespace Packaging.Targets
                         this.PreRemoveScript,
                         this.PostRemoveScript,
                         dependencies,
+                        recommends,
                         null);
 
                     DebPackageCreator.WriteDebPackage(
