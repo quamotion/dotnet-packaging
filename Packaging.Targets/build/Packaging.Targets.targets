@@ -176,6 +176,7 @@
              DebDependencies="@(DebDependency)"
              DebDotNetDependencies="@(DebDotNetDependencies)"
              DebPackageArchitecture="$(DebPackageArchitecture)"
+			 DebRecommends="@(DebRecommends)"
              RuntimeIdentifier="$(RuntimeIdentifier)"
              CreateUser="$(CreateUser)"
              Maintainer="$(PackageMaintainer)"

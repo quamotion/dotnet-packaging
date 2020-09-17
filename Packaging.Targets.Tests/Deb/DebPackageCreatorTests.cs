@@ -54,6 +54,7 @@ namespace Packaging.Targets.Tests.Deb
                 preRemoveScript: null,
                 postRemoveScript: null,
                 additionalDependencies: null,
+                recommends: null,
                 additionalMetadata: null);
 
             Assert.NotNull(pkg.Md5Sums);
@@ -72,6 +73,7 @@ namespace Packaging.Targets.Tests.Deb
             Assert.Equal("Demo User", pkg.ControlFile["Maintainer"]);
             Assert.Equal("Demo Package", pkg.ControlFile["Description"]);
             Assert.Equal("5", pkg.ControlFile["Installed-Size"]);
+            Assert.False(pkg.ControlFile.ContainsKey("Recommends"));
 
             Assert.Equal(new Version(2, 0), pkg.PackageFormatVersion);
             Assert.Null(pkg.PostInstallScript);
@@ -126,6 +128,7 @@ namespace Packaging.Targets.Tests.Deb
                 preRemoveScript: "echo 'Hello from pre remove'",
                 postRemoveScript: "echo 'Hello from post remove'",
                 additionalDependencies: null,
+                recommends: null,
                 additionalMetadata: null);
 
             Assert.Equal(@"/usr/sbin/groupadd -r demouser 2>/dev/null || :
@@ -187,10 +190,51 @@ echo 'Hello from post remove'
                 preRemoveScript: null,
                 postRemoveScript: null,
                 additionalDependencies: dependencies,
+                recommends: null,
                 additionalMetadata: null);
 
             Assert.NotNull(pkg.ControlFile);
             Assert.Equal("libc6, libcurl3 | libcurl4, libgcc1, libgssapi-krb5-2, liblttng-ust0, libssl0.9.8 | libssl1.0.0 | libssl1.0.1 | libssl1.0.2, libstdc++6, libunwind8, libuuid1, zlib1g, libicu52 | libicu53 | libicu54 | libicu55 | libicu56 | libicu57 | libicu58 | libicu59", pkg.ControlFile["Depends"]);
+            Assert.False(pkg.ControlFile.ContainsKey("Recommends"));
+        }
+
+        /// <summary>
+        /// Tests the <see cref="DebPackageCreator.BuildDebPackage"/> method where recommended dependencies are being used
+        /// </summary>
+        [Fact]
+        public void BuildDebPackageWithRecommendsTest()
+        {
+            List<ArchiveEntry> entries = new List<ArchiveEntry>();
+            var recommends = new string[]
+            {
+                "usbmuxd"
+            };
+
+            var pkg = DebPackageCreator.BuildDebPackage(
+                entries,
+                "demo",
+                "Demo Package",
+                "Demo User",
+                "1.0.0",
+                "x86-64",
+                createUser: false,
+                userName: null,
+                installService: false,
+                serviceName: null,
+                prefix: "/opt/local",
+                section: null,
+                priority: null,
+                homepage: null,
+                preInstallScript: null,
+                postInstallScript: null,
+                preRemoveScript: null,
+                postRemoveScript: null,
+                additionalDependencies: null,
+                recommends: recommends,
+                additionalMetadata: null);
+
+            Assert.NotNull(pkg.ControlFile);
+            Assert.Equal("usbmuxd", pkg.ControlFile["Recommends"]);
         }
     }
 }
