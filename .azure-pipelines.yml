@@ -223,3 +223,27 @@ stages:
         chmod +x ./test-tarball
         ./test-tarball
       displayName: Execute program
+
+  - job: publish_nuget
+    pool:
+      vmImage: 'VS2017-Win2016'
+    dependsOn:
+    - test_macos
+    - molecule
+
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    steps:
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        artifactName: 'nuget'
+      displayName: 'Download NuGet artifacts'
+      
+    - task: NuGetToolInstaller@0
+      displayName: Install NuGet
+
+    - task: NuGetCommand@2
+      inputs:
+        command: push
+        packagesToPush: '$(System.ArtifactsDirectory)/nuget/*.nupkg'
+        publishFeedCredentials: 'NuGet'
+        nuGetFeedType: external
