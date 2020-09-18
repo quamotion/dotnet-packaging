@@ -125,7 +125,7 @@
       <PackageName>$(PackagePrefix)</PackageName>
       <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
       <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName>
-      <DebSection Condition="'$(Section)' == ''">misc</DebSection>
+      <DebSection Condition="'$(DebSection)' == ''">misc</DebSection>
       <DebPriority Condition="'$(DebPriority)' == ''">extra</DebPriority>
       <DebHomepage Condition="'$(DebHomepage)' == ''">$(PackageProjectUrl)</DebHomepage>
 
