@@ -50,7 +50,7 @@ All commands take the following command line arguments:
 * `-f`, `--framework`: The target framework to build your project for. For example, `netcoreapp1.1` or `net462`.
 * `-c`, `--configuration`: Target configuration. The default for most projects is 'Debug'.
 * `-o`, `--output`: The output directory to place built packages in.
-*  `---version-suffix`: Defines the value for the `$(VersionSuffix)` property in the project.
+*  `--version-suffix`: Defines the value for the `$(VersionSuffix)` property in the project.
 *  `--no-restore`: Skip the implicit call to `dotnet restore`.
 
 All arguments are optional.
