@@ -13,7 +13,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-
     <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
@@ -26,5 +25,4 @@
     <PackageReference Include="NerdBank.GitVersioning" Version="3.2.31" PrivateAssets="All" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
-  
 </Project>
