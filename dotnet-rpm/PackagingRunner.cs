@@ -20,7 +20,6 @@ namespace Dotnet.Packaging
         private readonly string outputName;
         private readonly string msbuildTarget;
         private readonly string commandName;
-
         public PackagingRunner(string outputName, string msbuildTarget, string commandName)
         {
             var instance =  MSBuildLocator.RegisterDefaults();
@@ -44,7 +43,7 @@ namespace Dotnet.Packaging
 
         public int Run(string[] args)
         {
-            CommandLineApplication commandLineApplication = new CommandLineApplication(throwOnUnexpectedArg: true);
+            CommandLineApplication commandLineApplication = new CommandLineApplication();
 
             CommandOption runtime = commandLineApplication.Option(
               "-r |--runtime <runtime>",

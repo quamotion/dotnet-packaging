@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <Description>This package supports the dotnet-pack and dotnet-zip packages. Once you've installed this package together with dotnet-zip or dotnet-tarball, you can run commands such as dotnet zip or dotnet tarball to generate .zip or .tar.gz archives which contain the published output of your project.</Description>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -20,21 +20,21 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- MSBuild ships as part of the .NET CLI -->
-    <PackageReference Include="Microsoft.Build.Framework" Version="16.6.0">
+    <PackageReference Include="Microsoft.Build.Framework" Version="16.10.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.6.0">
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.10.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <!-- BoncyCastle and SharpZipLib are included in the lib\ folder in the Packaging.Targets package (see below), so we don't need an
          explicit dependency on them, either -->
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7">
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.10">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="SharpZipLib" Version="1.2.0">
+    <PackageReference Include="SharpZipLib" Version="1.3.2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="System.Buffers" Version="4.5.1" />
@@ -73,6 +73,9 @@
   </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="NerdBank.GitVersioning" Version="3.4.231" />
   </ItemGroup>
 
   <Target Name="WriteProperties" AfterTargets="Pack">

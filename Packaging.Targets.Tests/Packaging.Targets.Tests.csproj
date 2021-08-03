@@ -1,21 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
-    <PackageReference Include="Moq" Version="4.14.5" />
+    <PackageReference Include="Moq" Version="4.16.1" />
 
     <!-- The BouncyCastle dependency is defined as Private for Packaging.Targets, so we need to re-define it here. -->
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.10" />
 
     <!-- Defined as a private dependency, so we need to re-define it here -->
-    <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="16.10.0" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.10.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -77,6 +77,9 @@
   </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="..\Packaging.Targets\stylecop.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="NerdBank.GitVersioning" Version="3.4.231" />
   </ItemGroup>
 
 </Project>
