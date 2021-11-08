@@ -21,12 +21,16 @@ resources:
     image: mcr.microsoft.com/dotnet/sdk:5.0-nanoserver-1809
   - container: 6.0-focal
     image: mcr.microsoft.com/dotnet/sdk:6.0-focal
+  - container: 6.0-bullseye
+    image: mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim
+  - container: 6.0-nanoserver
+    image: mcr.microsoft.com/dotnet/sdk:6.0-nanoserver-1809
 
 stages:
 - stage: Build
   jobs:
   - job: build_focal
-    container: 5.0-focal
+    container: 6.0-focal
     pool:
       vmImage: ubuntu-20.04
     steps:
@@ -51,7 +55,7 @@ stages:
   - job: build_windows
     pool:
       vmImage: windows-2019
-    container: 5.0-nanoserver
+    container: 6.0-nanoserver
     # Make sure we can run scripts in PowerShell core:
     # https://github.com/microsoft/azure-pipelines-tasks/issues/11448
     variables:
@@ -123,18 +127,32 @@ stages:
           command: zip
         5.0-bullseye-tarball:
           container: 5.0-bullseye
+          command: tarball
 
         6.0-focal-deb:
-          container: 5.0-focal
+          container: 6.0-focal
           command: deb
         6.0-focal-rpm:
-          container: 5.0-focal
+          container: 6.0-focal
           command: rpm
         6.0-focal-zip:
-          container: 5.0-focal
+          container: 6.0-focal
           command: zip
         6.0-focal-tarball:
-          container: 5.0-focal
+          container: 6.0-focal
+          command: tarball
+
+        6.0-bullseye-deb:
+          container: 6.0-bullseye
+          command: deb
+        6.0-bullseye-rpm:
+          container: 6.0-bullseye
+          command: rpm
+        6.0-bullseye-zip:
+          container: 6.0-bullseye
+          command: zip
+        6.0-bullseye-tarball:
+          container: 6.0-bullseye
           command: tarball
 
     container: $[ variables['container'] ]

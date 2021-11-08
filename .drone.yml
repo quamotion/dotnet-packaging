@@ -7,6 +7,6 @@ platform:
 
 steps:
 - name: build
-  image: mcr.microsoft.com/dotnet/sdk:5.0-focal-arm64v8
+  image: mcr.microsoft.com/dotnet/sdk:6.0-focal-arm64v8
   commands:
     - dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj
