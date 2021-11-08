@@ -19,6 +19,8 @@ resources:
     image: mcr.microsoft.com/dotnet/sdk:5.0-bullseye-slim
   - container: 5.0-nanoserver
     image: mcr.microsoft.com/dotnet/sdk:5.0-nanoserver-1809
+  - container: 6.0-focal
+    image: mcr.microsoft.com/dotnet/sdk:6.0-focal
 
 stages:
 - stage: Build
@@ -121,6 +123,18 @@ stages:
           command: zip
         5.0-bullseye-tarball:
           container: 5.0-bullseye
+
+        6.0-focal-deb:
+          container: 5.0-focal
+          command: deb
+        6.0-focal-rpm:
+          container: 5.0-focal
+          command: rpm
+        6.0-focal-zip:
+          container: 5.0-focal
+          command: zip
+        6.0-focal-tarball:
+          container: 5.0-focal
           command: tarball
 
     container: $[ variables['container'] ]
