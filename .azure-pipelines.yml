@@ -21,6 +21,8 @@ stages:
   jobs:
   - job: build_focal
     container: 5.0-focal
+    pool:
+      vmImage: ubuntu-20.04
     steps:
     - bash: |
         dotnet restore dotnet-packaging.sln
@@ -118,6 +120,8 @@ stages:
           command: tarball
 
     container: $[ variables['container'] ]
+    pool:
+      vmImage: ubuntu-20.04
     steps:
     - template: .azure-pipelines-shared.yml
 
@@ -136,12 +140,15 @@ stages:
         set -e
         export PATH=~/.local/bin/:$PATH
 
+        pip3 install --upgrade pip
+
         pip3 install wheel
         pip3 install --upgrade --user setuptools
-        pip3 install --user molecule
-        pip3 install --user docker-py
-        pip3 install --user pytest
-        pip3 install --user testinfra
+        pip3 install --user ansible==2.9.13
+        pip3 install --user molecule==3.0.8
+        pip3 install --user docker-py==1.10.6
+        pip3 install --user pytest==6.0.2
+        pip3 install --user testinfra==5.3.1
         molecule --version
         ansible --version
         pytest --version

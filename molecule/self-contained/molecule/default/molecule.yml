@@ -27,8 +27,6 @@ platforms:
     image: ubuntu:16.04
   - name: ubuntu.18.04
     image: ubuntu:18.04
-  - name: ubuntu.19.10
-    image: ubuntu:19.10
   - name: ubuntu.20.04
     image: ubuntu:20.04
   - name: debian.9
