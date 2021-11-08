@@ -8,7 +8,7 @@ lint: |
   yamllint .
 platforms:
   # This list should be roughly kept in sync with the list of supported OSes described at
-  # https://github.com/dotnet/core/blob/master/release-notes/3.0/3.0-supported-os.md,
+  # https://github.com/dotnet/core/blob/main/release-notes/6.0/supported-os.md,
   # and/or the list of OSes for which .NET Core builds packages, as seen at
   # https://dotnet.microsoft.com/download/linux-package-manager/sdk-current
   # There are no Docker images for RHEL, so we can't test that.
@@ -29,14 +29,22 @@ platforms:
     image: ubuntu:18.04
   - name: ubuntu.20.04
     image: ubuntu:20.04
+  # Fails with: Package 'python-apt' has no installation candidate
+  # - name: ubuntu.21.10
+  #   image: ubuntu:21.10
   - name: debian.9
     image: debian:9
   - name: debian.10
     image: debian:10
+  # Fails with: Package 'python-apt' has no installation candidate
+  # - name: debian.11
+  #   image: debian:11
   - name: fedora.31
     image: fedora:31
   - name: fedora.32
     image: fedora:32
+  - name: fedora.33
+    image: fedora:33
   - name: centos.7
     image: centos:7
   - name: centos.8
