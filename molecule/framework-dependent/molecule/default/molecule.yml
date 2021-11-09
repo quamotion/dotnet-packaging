@@ -41,8 +41,11 @@ platforms:
   #   image: oraclelinux:7
   # - name: ol.8
   #   image: oraclelinux:8
-  - name: opensuse.15.0
-    image: opensuse/leap:15.0
+  # Recent versions of Ansible have difficulties detecting the yum version they should use with opensuse.15.0:
+  # > Could not detect which major revision of yum is in use, which is required to determine module backend.
+  # > You should manually specify use_backend to tell the module whether to use the yum (yum3) or dnf (yum4) backend
+  # - name: opensuse.15.0
+  #   image: opensuse/leap:15.0
 provisioner:
   name: ansible
   lint: |
