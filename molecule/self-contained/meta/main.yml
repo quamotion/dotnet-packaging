@@ -1,5 +1,7 @@
 ---
 galaxy_info:
+  role_name: self_contained_app
+  namespace: qmfrederik
   author: Frederik Carlier
   description: |
     Ansible Role to deploy a self-contained app created with dotnet deb or dotnet rpm
