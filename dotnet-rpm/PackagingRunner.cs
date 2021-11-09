@@ -1,7 +1,8 @@
-﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Build.Locator;
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -45,103 +46,112 @@ namespace Dotnet.Packaging
 
         public int Run(string[] args)
         {
-            CommandLineApplication commandLineApplication = new CommandLineApplication(throwOnUnexpectedArg: true);
+            var rootCommand = new RootCommand();
 
-            CommandOption runtime = commandLineApplication.Option(
-              "-r |--runtime <runtime>",
-              $"Target runtime of the {outputName}. The target runtime has to be specified in the project file.",
-              CommandOptionType.SingleValue);
-
-            CommandOption framework = commandLineApplication.Option(
-              "-f | --framework <framework>",
-              $"Target framework of the {outputName}. The target framework has to be specified in the project file.",
-              CommandOptionType.SingleValue);
-
-            CommandOption configuration = commandLineApplication.Option(
-              "-c | --configuration <configuration>",
-              $"Target configuration of the {outputName}. The default for most projects is 'Debug'.",
-              CommandOptionType.SingleValue);
-
-            CommandOption output = commandLineApplication.Option(
-              "-o | --output <output-dir>",
-              $"The output directory to place built packages in. The default is the output directory of your project.",
-              CommandOptionType.SingleValue);
-
-            CommandOption versionSuffix = commandLineApplication.Option(
-              "--version-suffix <version-suffix>",
-              "Defines the value for the $(VersionSuffix) property in the project.",
-              CommandOptionType.SingleValue);
-
-            CommandOption noRestore = commandLineApplication.Option(
-                "--no-restore",
-                "Do not restore the project before building.",
-                CommandOptionType.NoValue);
-
-            CommandArgument projectArgument = commandLineApplication.Argument(
-                "project",
-                "The project file to operate on. If a file is not specified, the command will search the current directory for one.");
-
-            commandLineApplication.VersionOption("-v | --version", new Version(ThisAssembly.AssemblyFileVersion).ToString(3), ThisAssembly.AssemblyInformationalVersion);
-
-            commandLineApplication.HelpOption("-? | -h | --help");
-            commandLineApplication.Name = $"dotnet {this.commandName}";
-            commandLineApplication.FullName = $"dotnet {this.commandName}";
-            commandLineApplication.ShortVersionGetter = () => new Version(ThisAssembly.AssemblyFileVersion).ToString(3);
-            commandLineApplication.LongVersionGetter = () => ThisAssembly.AssemblyInformationalVersion;
-
-            commandLineApplication.ExtendedHelpText = $"{Environment.NewLine}See https://github.com/qmfrederik/dotnet-packaging for more information";
-
-            var installCommand = commandLineApplication.Command(
-                "install",
-                command => command.OnExecute(() =>
+            rootCommand.AddOption(new Option(
+                new string[] { "-r", "--runtime" },
+                $"Target runtime of the {outputName}. The target runtime has to be specified in the project file.",
+                arity: ArgumentArity.ZeroOrOne)
                 {
-                    Console.WriteLine($"dotnet {this.commandName} ({ThisAssembly.AssemblyInformationalVersion})");
+                    Name = "runtime",
+                });
 
-                    // Create/update the Directory.Build.props file in the directory of the version.json file to add the Packaging.Targets package.
-                    string directoryBuildPropsPath = Path.Combine(Environment.CurrentDirectory, "Directory.Build.props");
-                    MSBuild.Project propsFile;
-                    if (File.Exists(directoryBuildPropsPath))
-                    {
-                        propsFile = new MSBuild.Project(directoryBuildPropsPath);
-                    }
-                    else
-                    {
-                        propsFile = new MSBuild.Project();
-                    }
+            rootCommand.AddOption(new Option(
+                new string[] { "-f", "--framework" },
+                $"Target framework of the {outputName}. The target framework has to be specified in the project file.",
+                arity: ArgumentArity.ZeroOrOne)
+                {
+                    Name = "framework"
+                });
 
-                    const string PackageReferenceItemType = "PackageReference";
-                    const string PackageId = "Packaging.Targets";
-                    if (!propsFile.GetItemsByEvaluatedInclude(PackageId).Any(i => i.ItemType == PackageReferenceItemType && i.EvaluatedInclude == PackageId))
+            rootCommand.AddOption(new Option(
+                new string[] { "-c", "--configuration" },
+                $"Target configuration of the {outputName}. The default for most projects is 'Debug'.",
+                arity: ArgumentArity.ZeroOrOne)
+                {
+                    Name = "configuration",
+                });
+
+            rootCommand.AddOption(new Option(
+                new string[] { "-o", "--output" },
+                $"The output directory to place built packages in. The default is the output directory of your project.",
+                arity: ArgumentArity.ZeroOrOne)
+                {
+                    Name = "output-dir",
+                });
+
+            rootCommand.AddOption(new Option(
+                new string[] { "--version-suffix" },
+                "Defines the value for the $(VersionSuffix) property in the project.",
+                arity: ArgumentArity.ZeroOrOne)
+                {
+                    Name = "version-suffix"
+                });
+
+            rootCommand.AddOption(new Option(
+                new string[] { "--no-restore" },
+                "Do not restore the project before building.",
+                arity: ArgumentArity.Zero));
+
+            rootCommand.AddArgument(new Argument("project")
+                {
+                    Description = "The project file to operate on. If a file is not specified, the command will search the current directory for one.",
+                    Arity = ArgumentArity.ZeroOrOne,
+                });
+
+            rootCommand.AddCommand(
+                new Command("install")
+                {
+                    Handler = CommandHandler.Create(() =>
                     {
-                        // Using the -* suffix will allow us to match both released and prereleased versions, in the absence
-                        // of https://github.com/AArnott/Nerdbank.GitVersioning/issues/409
-                        string packageVersion = $"{new Version(ThisAssembly.AssemblyFileVersion).ToString(3)}-*";
-                        propsFile.AddItem(
-                            PackageReferenceItemType,
-                            PackageId,
-                            new Dictionary<string, string>
-                            {
+                        Console.WriteLine($"dotnet {this.commandName} ({ThisAssembly.AssemblyInformationalVersion})");
+
+                        // Create/update the Directory.Build.props file in the directory of the version.json file to add the Packaging.Targets package.
+                        string directoryBuildPropsPath = Path.Combine(Environment.CurrentDirectory, "Directory.Build.props");
+                        MSBuild.Project propsFile;
+                        if (File.Exists(directoryBuildPropsPath))
+                        {
+                            propsFile = new MSBuild.Project(directoryBuildPropsPath);
+                        }
+                        else
+                        {
+                            propsFile = new MSBuild.Project();
+                        }
+
+                        const string PackageReferenceItemType = "PackageReference";
+                        const string PackageId = "Packaging.Targets";
+                        if (!propsFile.GetItemsByEvaluatedInclude(PackageId).Any(i => i.ItemType == PackageReferenceItemType && i.EvaluatedInclude == PackageId))
+                        {
+                            // Using the -* suffix will allow us to match both released and prereleased versions, in the absence
+                            // of https://github.com/AArnott/Nerdbank.GitVersioning/issues/409
+                            string packageVersion = $"{new Version(ThisAssembly.AssemblyFileVersion).ToString(3)}-*";
+                            propsFile.AddItem(
+                                PackageReferenceItemType,
+                                PackageId,
+                                new Dictionary<string, string>
+                                {
                                 { "Version", packageVersion },
                                 { "PrivateAssets", "all" },
-                            });
+                                });
 
-                        propsFile.Save(directoryBuildPropsPath);
-                    }
+                            propsFile.Save(directoryBuildPropsPath);
+                        }
 
-                    Console.WriteLine($"Successfully installed dotnet {this.commandName}. Now run 'dotnet {this.commandName}' to package your");
-                    Console.WriteLine($"application as a {this.outputName}");
-                }));
+                        Console.WriteLine($"Successfully installed dotnet {this.commandName}. Now run 'dotnet {this.commandName}' to package your");
+                        Console.WriteLine($"application as a {this.outputName}");
+                    })
+                });
 
-            commandLineApplication.OnExecute(() =>
+            rootCommand.Handler = CommandHandler.Create<string, string, string, string, string, bool, string>((runtime, framework, configuration, output, versionSuffix, noRestore, project) =>
             {
                 Console.WriteLine($"dotnet {this.commandName} ({ThisAssembly.AssemblyInformationalVersion})");
 
-                if (!TryGetProjectFilePath(projectArgument, out string projectFilePath))
+                if (!TryGetProjectFilePath(project, out string projectFilePath))
                 {
                     return -1;
                 }
 
-                if (!noRestore.HasValue())
+                if (!noRestore)
                 {
                     if (!this.IsPackagingTargetsInstalled(projectFilePath))
                     {
@@ -152,29 +162,29 @@ namespace Dotnet.Packaging
                 StringBuilder msbuildArguments = new StringBuilder();
                 msbuildArguments.Append($"msbuild /t:{msbuildTarget} ");
 
-                if (runtime.HasValue())
+                if (!string.IsNullOrWhiteSpace(runtime))
                 {
-                    msbuildArguments.Append($"/p:RuntimeIdentifier={runtime.Value()} ");
+                    msbuildArguments.Append($"/p:RuntimeIdentifier={runtime} ");
                 }
 
-                if (framework.HasValue())
+                if (!string.IsNullOrWhiteSpace(framework))
                 {
-                    msbuildArguments.Append($"/p:TargetFramework={framework.Value()} ");
+                    msbuildArguments.Append($"/p:TargetFramework={framework} ");
                 }
 
-                if (configuration.HasValue())
+                if (!string.IsNullOrWhiteSpace(configuration))
                 {
-                    msbuildArguments.Append($"/p:Configuration={configuration.Value()} ");
+                    msbuildArguments.Append($"/p:Configuration={configuration} ");
                 }
 
-                if (versionSuffix.HasValue())
+                if (!string.IsNullOrWhiteSpace(versionSuffix))
                 {
-                    msbuildArguments.Append($"/p:VersionSuffix={versionSuffix.Value()} ");
+                    msbuildArguments.Append($"/p:VersionSuffix={versionSuffix} ");
                 }
 
-                if (output.HasValue())
+                if (!string.IsNullOrWhiteSpace(output))
                 {
-                    msbuildArguments.Append($"/p:PackageDir={output.Value()} ");
+                    msbuildArguments.Append($"/p:PackageDir={output} ");
                 }
 
                 msbuildArguments.Append($"{projectFilePath} ");
@@ -182,7 +192,7 @@ namespace Dotnet.Packaging
                 return RunDotnet(msbuildArguments);
             });
 
-            return commandLineApplication.Execute(args);
+            return rootCommand.Invoke(args);
         }
 
         public int RunDotnet(StringBuilder msbuildArguments)
@@ -234,20 +244,15 @@ namespace Dotnet.Packaging
             return true;
         }
 
-        private bool TryGetProjectFilePath(CommandArgument projectArgument, out string projectFilePath)
+        private bool TryGetProjectFilePath(string project, out string projectFilePath)
         {
-            if (projectArgument == null)
+            if (!string.IsNullOrWhiteSpace(project))
             {
-                throw new ArgumentNullException(nameof(projectArgument));
-            }
+                projectFilePath = project;
 
-            if (!string.IsNullOrWhiteSpace(projectArgument.Value))
-            {
-                projectFilePath = projectArgument.Value;
-
-                if (!File.Exists(projectFilePath))
+                if (!File.Exists(project))
                 {
-                    Console.Error.WriteLine($"Could not find the project file '{projectFilePath}'.");
+                    Console.Error.WriteLine($"Could not find the project file '{project}'.");
                     return false;
                 }
 
