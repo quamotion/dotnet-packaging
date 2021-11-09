@@ -148,7 +148,7 @@ stages:
 
         pip3 install wheel
         pip3 install --upgrade --user setuptools
-        pip3 install --user ansible==2.9.13
+        pip3 install --user ansible==4.8.0
         pip3 install --user molecule==3.5.2
         pip3 install --user molecule-docker==1.1.0
         pip3 install --user docker==5.0.3
