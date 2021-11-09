@@ -1,5 +1,7 @@
 ---
 galaxy_info:
+  role_name: framework_dependent_app
+  namespace: qmfrederik
   author: Frederik Carlier
   description: |
     Ansible Role to deploy a framework-dependent app created with dotnet deb or dotnet rpm
