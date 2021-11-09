@@ -1,6 +1,5 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Build.Locator;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Loader;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using IMSBuildLogger = Microsoft.Build.Framework.ILogger;
 using LoggerVerbosity = Microsoft.Build.Framework.LoggerVerbosity;
@@ -219,13 +220,9 @@ namespace Dotnet.Packaging
 
             // NuGet has a LockFileUtilities.GetLockFile API which provides direct access to this file format,
             // but loading NuGet in the same process as MSBuild creates dependency conflicts.
-            LockFile lockFile = null;
-            using (StreamReader reader = File.OpenText(projectAssetsPath))
-            using (JsonReader jsonReader = new JsonTextReader(reader))
-            {
-                JsonSerializer serializer = new JsonSerializer();
-                lockFile = serializer.Deserialize<LockFile>(jsonReader);
-            }
+            var lockFileContent = File.ReadAllBytes(projectAssetsPath);
+            
+            LockFile lockFile = JsonSerializer.Deserialize<LockFile>(lockFileContent);
 
             if (!lockFile.Libraries.Any(l => l.Key.StartsWith("Packaging.Targets/")))
             {
@@ -271,7 +268,8 @@ namespace Dotnet.Packaging
 
         class LockFile
         {
-            public Dictionary<string, object> Libraries;
+            [JsonPropertyName("libraries")]
+            public Dictionary<string, object> Libraries { get; set; }
         }
     }
 }
