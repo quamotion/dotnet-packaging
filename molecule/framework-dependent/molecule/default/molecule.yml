@@ -20,18 +20,16 @@ platforms:
     image: ubuntu:16.04
   - name: ubuntu.18.04
     image: ubuntu:18.04
-  # Ubuntu 20.04 supports .NET Core 3.1 only, but we target 3.0 (at the moment)
-  # - name: ubuntu.20.04
-  #   image: ubuntu:20.04
+  - name: ubuntu.20.04
+    image: ubuntu:20.04
   - name: debian.9
     image: debian:9
   - name: debian.10
     image: debian:10
   - name: fedora.31
     image: fedora:31
-  # Fedora 32 supports .NET Core 3.1 only, but we target 3.0 (at the moment)
-  # - name: fedora.32
-  #   image: fedora:32
+  - name: fedora.32
+    image: fedora:32
   - name: centos.7
     image: centos:7
   # There's an issue running on CentOS 8

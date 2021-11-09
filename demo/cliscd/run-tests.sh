@@ -38,8 +38,8 @@ then
     exit 0
 fi
 
-dotnet $format -c Release -r $rid -f netcoreapp3.0
-cp bin/Release/netcoreapp3.0/$rid/cliscd.1.0.0.$rid.$format $rid
+dotnet $format -c Release -r $rid -f netcoreapp3.1
+cp bin/Release/netcoreapp3.1/$rid/cliscd.1.0.0.$rid.$format $rid
 sudo docker build -t clisc:$rid $rid
 sudo docker run clisc:$rid
 

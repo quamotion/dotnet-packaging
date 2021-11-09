@@ -80,10 +80,10 @@ All set. Let's package your application as a deb package:
 dotnet deb
 ```
 
-There's now a `bin\Debug\netcoreapp3.0\my-app.1.0.0.deb` file wich you can install:
+There's now a `bin\Debug\netcoreapp3.1\my-app.1.0.0.deb` file wich you can install:
 
 ```bash
-apt-get install bin\Debug\netcoreapp3.0\my-app.1.0.0.deb
+apt-get install bin\Debug\netcoreapp3.1\my-app.1.0.0.deb
 ```
 
 Your application is installed into `/usr/local/share/my-app`. Invoke it by running `/usr/local/share/my-app/my-app`:
