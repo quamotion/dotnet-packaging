@@ -13,6 +13,10 @@ resources:
     image: mcr.microsoft.com/dotnet/core/sdk:3.1-focal
   - container: 5.0-focal
     image: mcr.microsoft.com/dotnet/sdk:5.0-focal
+  - container: 5.0-buster
+    image: mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
+  - container: 5.0-bullseye
+    image: mcr.microsoft.com/dotnet/sdk:5.0-bullseye-slim
   - container: 5.0-nanoserver
     image: mcr.microsoft.com/dotnet/sdk:5.0-nanoserver-1809
 
@@ -67,32 +71,6 @@ stages:
     strategy:
       maxParallel: 8
       matrix:
-        2.2-bionic-deb:
-          container: 2.2-bionic
-          command: deb
-        2.2-bionic-rpm:
-          container: 2.2-bionic
-          command: rpm
-        2.2-bionic-zip:
-          container: 2.2-bionic
-          command: zip
-        2.2-bionic-tarball:
-          container: 2.2-bionic
-          command: tarball
-
-        3.0-disco-deb:
-          container: 3.0-disco
-          command: deb
-        3.0-disco-rpm:
-          container: 3.0-disco
-          command: rpm
-        3.0-disco-zip:
-          container: 3.0-disco
-          command: zip
-        3.0-disco-tarball:
-          container: 3.0-disco
-          command: tarball
-
         3.1-focal-deb:
           container: 3.1-focal
           command: deb
@@ -117,6 +95,32 @@ stages:
           command: zip
         5.0-focal-tarball:
           container: 5.0-focal
+          command: tarball
+
+        5.0-buster-deb:
+          container: 5.0-buster
+          command: deb
+        5.0-buster-rpm:
+          container: 5.0-buster
+          command: rpm
+        5.0-buster-zip:
+          container: 5.0-buster
+          command: zip
+        5.0-buster-tarball:
+          container: 5.0-buster
+          command: tarball
+
+        5.0-bullseye-deb:
+          container: 5.0-bullseye
+          command: deb
+        5.0-bullseye-rpm:
+          container: 5.0-bullseye
+          command: rpm
+        5.0-bullseye-zip:
+          container: 5.0-bullseye
+          command: zip
+        5.0-bullseye-tarball:
+          container: 5.0-bullseye
           command: tarball
 
     container: $[ variables['container'] ]
@@ -200,10 +204,10 @@ stages:
       command: tarball
     steps:
     - task: UseDotNet@2
-      displayName: 'Use .NET Core 3.0'
+      displayName: 'Use .NET Core 3.1'
       inputs:
         packageType: sdk
-        version: 3.0.100
+        version: 3.1.415
     - template: .azure-pipelines-shared.yml
 
   - job: test_macos
@@ -217,18 +221,20 @@ stages:
         artifactName: packages
         downloadPath: $(Build.ArtifactStagingDirectory)/
     - task: UseDotNet@2
-      displayName: 'Use .NET Core 3.0'
+      displayName: 'Use .NET Core 3.1'
       inputs:
         packageType: sdk
-        version: 3.0.100
+        version: 3.1.415
     - bash: |
         set -e
         tar xvzf $(Build.ArtifactStagingDirectory)/packages/macos/test-tarball.1.0.0.tar.gz
       displayName: Extract tarball
+    # .NET Core 3.x adn 5.x don't generate an app host for because the apps won't run on ARM if not notarized.
+    # See https://github.com/dotnet/sdk/pull/4019/files and https://github.com/dotnet/sdk/issues/4012.
+    # This means there's no 'test-tarball' executable to run.
     - bash: |
         set -e
-        chmod +x ./test-tarball
-        ./test-tarball
+        dotnet ./test-tarball.dll
       displayName: Execute program
 
   - job: publish_nuget
