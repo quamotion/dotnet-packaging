@@ -149,7 +149,8 @@ stages:
         pip3 install wheel
         pip3 install --upgrade --user setuptools
         pip3 install --user ansible==2.9.13
-        pip3 install --user molecule==3.0.8
+        pip3 install --user molecule==3.1.1
+        pip3 install --user molecule-docker==1.1.0
         pip3 install --user docker-py==1.10.6
         pip3 install --user pytest==6.2.5
         pip3 install --user testinfra==6.0.0
