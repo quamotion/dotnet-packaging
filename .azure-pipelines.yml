@@ -167,11 +167,32 @@ stages:
     strategy:
       maxParallel: 8
       matrix:
-        self-contained:
+        self-contained-3_1:
           suite: self-contained
-        framework-dependent-app:
+          framework: netcoreapp3.1
+        framework-dependent-app-3_1:
           suite: framework-dependent
+          framework: netcoreapp3.1
+          
+        self-contained-5_0:
+          suite: self-contained
+          framework: net5.0
+        framework-dependent-app-5_0:
+          suite: framework-dependent
+          framework: net5.0
+          
+        self-contained-6_0:
+          suite: self-contained
+          framework: net6.0
+        framework-dependent-app-6_0:
+          suite: framework-dependent
+          framework: net6.0
     steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core 6.0'
+      inputs:
+        packageType: sdk
+        version: 6.0.100
     - bash: |
         set -e
         export PATH=~/.local/bin/:$PATH
@@ -189,6 +210,7 @@ stages:
         molecule --version
         ansible --version
         pytest --version
+        dotnet --version
       displayName: Install molecule
     - task: DownloadBuildArtifacts@0
       displayName: Download Build Artifacts
@@ -210,10 +232,10 @@ stages:
 
         # Create .deb and .rpm packages
         dotnet rpm install
-        dotnet rpm -o $(Build.SourcesDirectory)/molecule/$(suite)/
-        dotnet deb -o $(Build.SourcesDirectory)/molecule/$(suite)/
+        dotnet rpm -o $(Build.SourcesDirectory)/molecule/$(suite)/ -f $(framework)
+        dotnet deb -o $(Build.SourcesDirectory)/molecule/$(suite)/ -f $(framework)
       workingDirectory: $(Build.SourcesDirectory)/molecule/$(suite)
-      displayName: Build $(suite)-app
+      displayName: Build $(suite)-app for $(framework)
     - bash: |
         set -e
         export PATH=~/.local/bin/:$PATH
