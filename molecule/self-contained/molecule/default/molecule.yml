@@ -39,10 +39,6 @@ platforms:
   # Fails with: Package 'python-apt' has no installation candidate
   # - name: debian.11
   #   image: debian:11
-  - name: fedora.31
-    image: fedora:31
-  - name: fedora.32
-    image: fedora:32
   - name: fedora.33
     image: fedora:33
   - name: centos.7

@@ -26,10 +26,8 @@ platforms:
     image: debian:9
   - name: debian.10
     image: debian:10
-  - name: fedora.31
-    image: fedora:31
-  - name: fedora.32
-    image: fedora:32
+  - name: fedora.33
+    image: fedora:33
   - name: centos.7
     image: centos:7
   # There's an issue running on CentOS 8
