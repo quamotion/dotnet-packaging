@@ -174,7 +174,7 @@
       <DebDotNetDependencies Include="libstdc++6"/>
       <DebDotNetDependencies Include="zlib1g"/>
       <DebDotNetDependencies Include="libssl1.1 | libssl1.0.2 | libssl1.0.1 | libssl1.0.0 | libssl0.9.8"/>
-      <DebDotNetDependencies Include="libicu67 | libicu66 | libicu65 | libicu64 | libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
+      <DebDotNetDependencies Include="libicu70 | libicu69 | libicu68 | libicu67 | libicu66 | libicu65 | libicu64 | libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
     </ItemGroup>
 
     <MakeDir Directories="$(PackageDir)"/>
