@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.IO;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace Dotnet.Packaging
 
         public PackagingRunner(string outputName, string msbuildTarget, string commandName)
         {
-            var instance =  MSBuildLocator.RegisterDefaults();
+            var instance = MSBuildLocator.RegisterDefaults();
 
             // Workaround for https://github.com/microsoft/MSBuildLocator/issues/86
             AssemblyLoadContext.Default.Resolving += (assemblyLoadContext, assemblyName) =>
@@ -93,7 +94,13 @@ namespace Dotnet.Packaging
                 "Do not restore the project before building.",
                 arity: ArgumentArity.Zero));
 
-            rootCommand.AddArgument(new Argument("project")
+            rootCommand.AddOption(new Option(
+                new string[] { "-v", "--verbose" },
+                "Enable verbose output.",
+                arity: ArgumentArity.Zero));
+
+            rootCommand.AddArgument(
+                new Argument("project")
                 {
                     Description = "The project file to operate on. If a file is not specified, the command will search the current directory for one.",
                     Arity = ArgumentArity.ZeroOrOne,
@@ -142,13 +149,29 @@ namespace Dotnet.Packaging
                     })
                 });
 
-            rootCommand.Handler = CommandHandler.Create<string, string, string, string, string, bool, string>((runtime, framework, configuration, output, versionSuffix, noRestore, project) =>
+            rootCommand.Handler = CommandHandler.Create<IConsole, string, string, string, string, string, bool, bool, string>((console, runtime, framework, configuration, output, versionSuffix, noRestore, verbose, project) =>
             {
-                Console.WriteLine($"dotnet {this.commandName} ({ThisAssembly.AssemblyInformationalVersion})");
+                console.Out.WriteLine($"dotnet {this.commandName} ({ThisAssembly.AssemblyInformationalVersion})");
+
+                if (verbose)
+                {
+                    console.Out.WriteLine($"{nameof(runtime)}: {runtime}");
+                    console.Out.WriteLine($"{nameof(framework)}: {framework}");
+                    console.Out.WriteLine($"{nameof(configuration)}: {configuration}");
+                    console.Out.WriteLine($"{nameof(output)}: {output}");
+                    console.Out.WriteLine($"{nameof(versionSuffix)}: {versionSuffix}");
+                    console.Out.WriteLine($"{nameof(noRestore)}: {noRestore}");
+                    console.Out.WriteLine($"{nameof(verbose)}: {verbose}");
+                }
 
                 if (!TryGetProjectFilePath(project, out string projectFilePath))
                 {
                     return -1;
+                }
+
+                if (verbose)
+                {
+                    console.Out.WriteLine($"User specified project '{project}', using '{projectFilePath}'.");
                 }
 
                 if (!noRestore)
@@ -231,7 +254,7 @@ namespace Dotnet.Packaging
             // NuGet has a LockFileUtilities.GetLockFile API which provides direct access to this file format,
             // but loading NuGet in the same process as MSBuild creates dependency conflicts.
             var lockFileContent = File.ReadAllBytes(projectAssetsPath);
-            
+
             LockFile lockFile = JsonSerializer.Deserialize<LockFile>(lockFileContent);
 
             if (!lockFile.Libraries.Any(l => l.Key.StartsWith("Packaging.Targets/")))
