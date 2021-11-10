@@ -50,6 +50,7 @@
         https://github.com/dotnet/core-setup/blob/release/2.1/src/pkg/packaging/rpm/
         https://github.com/dotnet/core-setup/blob/release/2.2/src/pkg/packaging/rpm/
         https://github.com/dotnet/core-setup/blob/master/src/pkg/packaging/rpm/
+	    	https://github.com/dotnet/runtime/tree/v6.0.0/src/installer/pkg/sfx/installers/dotnet-runtime-deps
     
         The syntax for "boolean dependencies" is described here (available starting
         with rpm 3.14):
@@ -77,6 +78,14 @@
 
     <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
       <RpmDotNetDependency Include="dotnet-runtime-3.1" Version="" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net5.0'">
+      <RpmDotNetDependency Include="dotnet-runtime-5.0" Version="" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net6.0'">
+      <RpmDotNetDependency Include="dotnet-runtime-6.0" Version="" />
     </ItemGroup>
 
     <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' != ''">
@@ -147,6 +156,14 @@
 
     <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
       <DebDotNetDependencies Include="dotnet-runtime-3.1"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net5.0'">
+      <DebDotNetDependencies Include="dotnet-runtime-5.0"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net6.0'">
+      <DebDotNetDependencies Include="dotnet-runtime-6.0"/>
     </ItemGroup>
 
     <!-- Dependency list for netcore3.1, updated to support Ubuntu 20.10/21.04  -->
