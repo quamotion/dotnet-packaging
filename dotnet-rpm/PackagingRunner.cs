@@ -51,7 +51,7 @@ namespace Dotnet.Packaging
             rootCommand.AddOption(new Option(
                 new string[] { "-r", "--runtime" },
                 $"Target runtime of the {outputName}. The target runtime has to be specified in the project file.",
-                arity: ArgumentArity.ZeroOrOne)
+                arity: ArgumentArity.ExactlyOne)
                 {
                     Name = "runtime",
                 });
@@ -59,7 +59,7 @@ namespace Dotnet.Packaging
             rootCommand.AddOption(new Option(
                 new string[] { "-f", "--framework" },
                 $"Target framework of the {outputName}. The target framework has to be specified in the project file.",
-                arity: ArgumentArity.ZeroOrOne)
+                arity: ArgumentArity.ExactlyOne)
                 {
                     Name = "framework"
                 });
@@ -67,7 +67,7 @@ namespace Dotnet.Packaging
             rootCommand.AddOption(new Option(
                 new string[] { "-c", "--configuration" },
                 $"Target configuration of the {outputName}. The default for most projects is 'Debug'.",
-                arity: ArgumentArity.ZeroOrOne)
+                arity: ArgumentArity.ExactlyOne)
                 {
                     Name = "configuration",
                 });
@@ -75,7 +75,7 @@ namespace Dotnet.Packaging
             rootCommand.AddOption(new Option(
                 new string[] { "-o", "--output" },
                 $"The output directory to place built packages in. The default is the output directory of your project.",
-                arity: ArgumentArity.ZeroOrOne)
+                arity: ArgumentArity.ExactlyOne)
                 {
                     Name = "output-dir",
                 });
@@ -83,7 +83,7 @@ namespace Dotnet.Packaging
             rootCommand.AddOption(new Option(
                 new string[] { "--version-suffix" },
                 "Defines the value for the $(VersionSuffix) property in the project.",
-                arity: ArgumentArity.ZeroOrOne)
+                arity: ArgumentArity.ExactlyOne)
                 {
                     Name = "version-suffix"
                 });
