@@ -253,7 +253,7 @@ stages:
 
   - job: build_macos
     pool:
-      vmImage: 'macOS-10.14'
+      vmImage: macOS-10.15
     variables:
       container: macos
       command: tarball
@@ -267,7 +267,7 @@ stages:
 
   - job: test_macos
     pool:
-      vmImage: 'macOS-10.14'
+      vmImage: macOS-10.15
     dependsOn: build_macos
     steps:
     - task: DownloadBuildArtifacts@0
@@ -294,7 +294,7 @@ stages:
 
   - job: publish_nuget
     pool:
-      vmImage: 'VS2017-Win2016'
+      vmImage: windows-2019
     dependsOn:
     - test_macos
     - molecule
