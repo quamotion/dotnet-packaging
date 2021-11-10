@@ -176,7 +176,7 @@ namespace Dotnet.Packaging
 
                 if (!noRestore)
                 {
-                    if (!this.IsPackagingTargetsInstalled(projectFilePath))
+                    if (!this.IsPackagingTargetsInstalled(console, verbose, projectFilePath, framework))
                     {
                         return -1;
                     }
@@ -238,18 +238,35 @@ namespace Dotnet.Packaging
             return process.ExitCode;
         }
 
-        public bool IsPackagingTargetsInstalled(string projectFilePath)
+        public bool IsPackagingTargetsInstalled(IConsole console, bool verbose, string projectFilePath, string framework)
         {
-            var loggers = new IMSBuildLogger[] { new ConsoleLogger(LoggerVerbosity.Quiet) };
+            var loggers = new IMSBuildLogger[] { new ConsoleLogger(verbose ? LoggerVerbosity.Detailed : LoggerVerbosity.Quiet) };
             var project = new MSBuild.Project(projectFilePath);
+
+            if (!string.IsNullOrWhiteSpace(framework))
+            {
+                project.SetProperty("TargetFramework", framework);
+            }
 
             if (!project.Build("Restore", loggers))
             {
-                Console.Error.WriteLine($"Failed to restore '{Path.GetFileName(projectFilePath)}'. Please run dotnet restore, and try again.");
+                console.Error.WriteLine($"Failed to restore '{Path.GetFileName(projectFilePath)}'. Please run dotnet restore, and try again.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(project.GetPropertyValue("TargetFramework")))
+            {
+                console.Error.WriteLine($"The project '{Path.GetFileName(projectFilePath)}' does not specify a default target framework. Please specify the -f {{framework}} option, and try again.");
                 return false;
             }
 
             var projectAssetsPath = project.GetPropertyValue("ProjectAssetsFile");
+
+            if (string.IsNullOrWhiteSpace(projectAssetsPath))
+            {
+                console.Error.WriteLine($"Failed to read the ProjectAssetsFile property for '{Path.GetFileName(projectFilePath)}'. Please run dotnet restore, and try again.");
+                return false;
+            }
 
             // NuGet has a LockFileUtilities.GetLockFile API which provides direct access to this file format,
             // but loading NuGet in the same process as MSBuild creates dependency conflicts.
@@ -259,8 +276,8 @@ namespace Dotnet.Packaging
 
             if (!lockFile.Libraries.Any(l => l.Key.StartsWith("Packaging.Targets/")))
             {
-                Console.Error.WriteLine($"The project '{Path.GetFileName(projectFilePath)}' doesn't have a PackageReference to Packaging.Targets.");
-                Console.Error.WriteLine($"Please run 'dotnet {this.commandName} install', and try again.");
+                console.Error.WriteLine($"The project '{Path.GetFileName(projectFilePath)}' doesn't have a PackageReference to Packaging.Targets.");
+                console.Error.WriteLine($"Please run 'dotnet {this.commandName} install', and try again.");
                 return false;
             }
 
