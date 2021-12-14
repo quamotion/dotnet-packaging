@@ -94,6 +94,10 @@
       <RpmDotNetDependency Include="krb5-libs" Version="" />
     </ItemGroup>
 
+    <ItemGroup Condition="'$(SkipRpmDependencies)' == 'true'">
+      <RpmDotNetDependency Remove="@(RpmDotNetDependency)"/>
+    </ItemGroup>    
+
     <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
 
     <MakeDir Directories="$(PackageDir)"/>
