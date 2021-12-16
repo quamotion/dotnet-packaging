@@ -86,11 +86,44 @@ There's now a `bin\Debug\netcoreapp3.1\my-app.1.0.0.deb` file wich you can insta
 apt-get install bin\Debug\netcoreapp3.1\my-app.1.0.0.deb
 ```
 
-Your application is installed into `/usr/local/share/my-app`. Invoke it by running `/usr/local/share/my-app/my-app`:
+Your application is installed into `/usr/share/my-app`. Invoke it by running `/usr/share/my-app/my-app`:
 
 ```bash
-/usr/local/share/my-app/my-app
+/usr/share/my-app/my-app
 ```
+
+Per default a symlink will by created in /usr/local/bin pointing to your application. Therefore it should be in your path and can be invoked just by the application name.
+
+```bash
+my-app
+```
+
+## Creating a Systemd Service
+
+Add a `my-app.service` file to your project containing at least the following
+
+```
+[Unit]
+Description=My awesome app
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/my-app
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Add the `my-app.service` file to an `<ItemGroup>` of your `.csproj` with the following content to make sure that it is installed at the right place.
+
+```
+    <Content Include="my-app.service" CopyToPublishDirectory="PreserveNewest" LinuxFileMode="1755">
+      <LinuxPath>/etc/systemd/system/my-app.service</LinuxPath>
+    </Content>
+```
+
+Make sure to set the Property `<InstallService>true</InstallService>` in your `.csproj` file.
+
 
 ### Note
 You can invoke the packaging tools manually, using a MSBuild target instead of using the a .NET Core CLI tool:
