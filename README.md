@@ -86,10 +86,16 @@ There's now a `bin\Debug\netcoreapp3.1\my-app.1.0.0.deb` file wich you can insta
 apt-get install bin\Debug\netcoreapp3.1\my-app.1.0.0.deb
 ```
 
-Your application is installed into `/usr/local/share/my-app`. Invoke it by running `/usr/local/share/my-app/my-app`:
+Your application is installed into `/usr/share/my-app`. Invoke it by running `/usr/share/my-app/my-app`:
 
 ```bash
-/usr/local/share/my-app/my-app
+/usr/share/my-app/my-app
+```
+
+Per default a symlink will by created in /usr/local/bin pointing to your application. Therefore it should be in your path and can be invoked just by the application name.
+
+```bash
+my-app
 ```
 
 ### Note
