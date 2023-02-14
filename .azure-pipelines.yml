@@ -25,7 +25,12 @@ resources:
     image: mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim
   - container: 6.0-nanoserver
     image: mcr.microsoft.com/dotnet/sdk:6.0-nanoserver-1809
-
+  - container: 7.0-jammy
+    image: mcr.microsoft.com/dotnet/sdk:7.0-jammy
+  - container: 7.0-bullseye
+    image: mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim
+  - container: 7.0-nanoserver
+    image: mcr.microsoft.com/dotnet/sdk:7.0-nanoserver-1809
 stages:
 - stage: Build
   jobs:
@@ -155,6 +160,32 @@ stages:
           container: 6.0-bullseye
           command: tarball
 
+        7.0-jammy-deb:
+          container: 7.0-jammy
+          command: deb
+        7.0-jammy-rpm:
+          container: 7.0-jammy
+          command: rpm
+        7.0-jammy-zip:
+          container: 7.0-jammy
+          command: zip
+        7.0-jammy-tarball:
+          container: 7.0-jammy
+          command: tarball
+
+        7.0-bullseye-deb:
+          container: 7.0-bullseye
+          command: deb
+        7.0-bullseye-rpm:
+          container: 7.0-bullseye
+          command: rpm
+        7.0-bullseye-zip:
+          container: 7.0-bullseye
+          command: zip
+        7.0-bullseye-tarball:
+          container: 7.0-bullseye
+          command: tarball          
+
     container: $[ variables['container'] ]
     pool:
       vmImage: ubuntu-20.04
@@ -187,12 +218,19 @@ stages:
         framework-dependent-app-6_0:
           suite: framework-dependent
           framework: net6.0
+
+        self-contained-7_0:
+          suite: self-contained
+          framework: net7.0
+        framework-dependent-app-7_0:
+          suite: framework-dependent
+          framework: net7.0
     steps:
     - task: UseDotNet@2
       displayName: 'Use .NET Core 6.0'
       inputs:
         packageType: sdk
-        version: 6.0.100
+        version: 7.0.100
     - bash: |
         set -e
         export PATH=~/.local/bin/:$PATH
