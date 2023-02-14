@@ -1,49 +1,49 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="Packaging.Targets.TarballTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
-  <UsingTask TaskName="Packaging.Targets.ZipTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
-  <UsingTask TaskName="Packaging.Targets.RpmTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
-  <UsingTask TaskName="Packaging.Targets.DebTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
+	<UsingTask TaskName="Packaging.Targets.TarballTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
+	<UsingTask TaskName="Packaging.Targets.ZipTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
+	<UsingTask TaskName="Packaging.Targets.RpmTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
+	<UsingTask TaskName="Packaging.Targets.DebTask" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\netstandard2.0\Packaging.Targets.dll" />
 
-  <Target Name="CreatePackageProperties" DependsOnTargets="Publish">
-    <PropertyGroup>
-      <!-- Use the Version as the PackageVersion, but default to 1.0.0 if an Version has not been set
+	<Target Name="CreatePackageProperties" DependsOnTargets="Publish">
+		<PropertyGroup>
+			<!-- Use the Version as the PackageVersion, but default to 1.0.0 if an Version has not been set
            and allow the user to override this. -->
-      <PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' != ''">$(Version)</PackageVersion>
-      <PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' == ''">1.0.0</PackageVersion>
-      
-      <PackagePrefix Condition="'$(PackagePrefix)' == ''">$(TargetName)</PackagePrefix>
-      <PackageName Condition="'$(PackageName)' == '' AND '$(RuntimeIdentifier)' != ''">$(PackagePrefix).$(PackageVersion).$(RuntimeIdentifier)</PackageName>
-      <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(PackageVersion)</PackageName>
-      <IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
-      <PackageDir Condition="'$(PackageDir)' == ''">$(TargetDir)</PackageDir>
-      <PackagePath Condition="'$(PackagePath)' == ''">$([MSBuild]::EnsureTrailingSlash($(PackageDir)))$(PackageName)</PackagePath>
-      <CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
-      <InstallService Condition="'$(InstallService)' == ''">false</InstallService>
-      <PackageMaintainer Condition="'$(PackageMaintainer)' == '' AND '$(Authors)' != ''">$(Authors)</PackageMaintainer>
-      <PackageMaintainer Condition="'$(PackageMaintainer)' == '' AND '$(Authors)' == ''">Anonymous &lt;noreply@example.com&gt;</PackageMaintainer>
-      <PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' != ''">$(Description)</PackageDescription>
-      <PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' == ''">$(PackageName) version $(PackageVersion) - $(Release)</PackageDescription>
-      <SymlinkAppHostInBin Condition="'$(SymlinkAppHostInBin)' == ''">true</SymlinkAppHostInBin>
-      <AppHost Condition="'$(AppHost)' == '' AND '$(SymlinkAppHostInBin)' == 'true'">$(AssemblyName)$(_NativeExecutableExtension)</AppHost>
-    </PropertyGroup>
-  </Target>
+			<PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' != ''">$(Version)</PackageVersion>
+			<PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' == ''">1.0.0</PackageVersion>
 
-  <Target Name="CreateRpm" DependsOnTargets="CreatePackageProperties">
-    <PropertyGroup>
-      <RpmPath Condition="'$(RpmPath)' == ''">$(PackagePath).rpm</RpmPath>
-      <CpioPath>$(IntermediatePackagePath).cpio</CpioPath>
-      <Prefix Condition="'$(Prefix)' == ''">/usr/share/$(PackagePrefix)</Prefix>
-      <Release Condition="'$(Release)' == ''">0</Release>
-      <PackageName>$(PackagePrefix)</PackageName>
-      <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
-      <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName>
-      <RpmVendor Condition="'$(RpmVendor)' == ''">$(Authors)</RpmVendor>
-      <RpmDescription Condition="'$(RpmDescription)' == ''">$(PackageDescription)</RpmDescription>
-      <RpmUrl Condition="'$(RpmUrl)' == ''">$(PackageProjectUrl)</RpmUrl>
-      <RpmPackageArchitecture Condition="'$(RpmPackageArchitecture)' == ''"></RpmPackageArchitecture>
-    </PropertyGroup>
+			<PackagePrefix Condition="'$(PackagePrefix)' == ''">$(TargetName)</PackagePrefix>
+			<PackageName Condition="'$(PackageName)' == '' AND '$(RuntimeIdentifier)' != ''">$(PackagePrefix).$(PackageVersion).$(RuntimeIdentifier)</PackageName>
+			<PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(PackageVersion)</PackageName>
+			<IntermediatePackagePath>$(IntermediateOutputPath)$(PackageName)</IntermediatePackagePath>
+			<PackageDir Condition="'$(PackageDir)' == ''">$(TargetDir)</PackageDir>
+			<PackagePath Condition="'$(PackagePath)' == ''">$([MSBuild]::EnsureTrailingSlash($(PackageDir)))$(PackageName)</PackagePath>
+			<CreateUser Condition="'$(CreateUser)' == ''">false</CreateUser>
+			<InstallService Condition="'$(InstallService)' == ''">false</InstallService>
+			<PackageMaintainer Condition="'$(PackageMaintainer)' == '' AND '$(Authors)' != ''">$(Authors)</PackageMaintainer>
+			<PackageMaintainer Condition="'$(PackageMaintainer)' == '' AND '$(Authors)' == ''">Anonymous &lt;noreply@example.com&gt;</PackageMaintainer>
+			<PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' != ''">$(Description)</PackageDescription>
+			<PackageDescription Condition="'$(PackageDescription)' == '' AND '$(Description)' == ''">$(PackageName) version $(PackageVersion) - $(Release)</PackageDescription>
+			<SymlinkAppHostInBin Condition="'$(SymlinkAppHostInBin)' == ''">true</SymlinkAppHostInBin>
+			<AppHost Condition="'$(AppHost)' == '' AND '$(SymlinkAppHostInBin)' == 'true'">$(AssemblyName)$(_NativeExecutableExtension)</AppHost>
+		</PropertyGroup>
+	</Target>
 
-    <!--
+	<Target Name="CreateRpm" DependsOnTargets="CreatePackageProperties">
+		<PropertyGroup>
+			<RpmPath Condition="'$(RpmPath)' == ''">$(PackagePath).rpm</RpmPath>
+			<CpioPath>$(IntermediatePackagePath).cpio</CpioPath>
+			<Prefix Condition="'$(Prefix)' == ''">/usr/share/$(PackagePrefix)</Prefix>
+			<Release Condition="'$(Release)' == ''">0</Release>
+			<PackageName>$(PackagePrefix)</PackageName>
+			<UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
+			<ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName>
+			<RpmVendor Condition="'$(RpmVendor)' == ''">$(Authors)</RpmVendor>
+			<RpmDescription Condition="'$(RpmDescription)' == ''">$(PackageDescription)</RpmDescription>
+			<RpmUrl Condition="'$(RpmUrl)' == ''">$(PackageProjectUrl)</RpmUrl>
+			<RpmPackageArchitecture Condition="'$(RpmPackageArchitecture)' == ''"></RpmPackageArchitecture>
+		</PropertyGroup>
+
+		<!--
         Default list of RPM dependencies.
 
         This list is base don the dependencies defined here:
@@ -64,222 +64,227 @@
         - Upstream lists compat libraries for OpenSSL 1.0 instead of OpenSSL 1.1, that
           seems like an oversight.
         -->
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
-      <RpmDotNetDependency Include="dotnet-runtime-2.1" Version="" />
-    </ItemGroup>
+		<ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
+			<RpmDotNetDependency Include="dotnet-runtime-2.1" Version="" />
+		</ItemGroup>
 
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
-      <RpmDotNetDependency Include="dotnet-runtime-2.2" Version="" />
-    </ItemGroup>
+		<ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
+			<RpmDotNetDependency Include="dotnet-runtime-2.2" Version="" />
+		</ItemGroup>
 
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
-      <RpmDotNetDependency Include="dotnet-runtime-3.0" Version="" />
-    </ItemGroup>
+		<ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
+			<RpmDotNetDependency Include="dotnet-runtime-3.0" Version="" />
+		</ItemGroup>
 
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
-      <RpmDotNetDependency Include="dotnet-runtime-3.1" Version="" />
-    </ItemGroup>
+		<ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
+			<RpmDotNetDependency Include="dotnet-runtime-3.1" Version="" />
+		</ItemGroup>
 
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net5.0'">
-      <RpmDotNetDependency Include="dotnet-runtime-5.0" Version="" />
-    </ItemGroup>
+		<ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net5.0'">
+			<RpmDotNetDependency Include="dotnet-runtime-5.0" Version="" />
+		</ItemGroup>
 
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net6.0'">
-      <RpmDotNetDependency Include="dotnet-runtime-6.0" Version="" />
-    </ItemGroup>
+		<ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net6.0'">
+			<RpmDotNetDependency Include="dotnet-runtime-6.0" Version="" />
+		</ItemGroup>
 
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' != ''">
-      <RpmDotNetDependency Include="openssl-libs" Version="" />
-      <RpmDotNetDependency Include="libicu" Version="" />
-      <RpmDotNetDependency Include="krb5-libs" Version="" />
-    </ItemGroup>
+		<ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net7.0'">
+			<RpmDotNetDependency Include="dotnet-runtime-7.0" Version="" />
+		</ItemGroup>
+		<ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' != ''">
+			<RpmDotNetDependency Include="openssl-libs" Version="" />
+			<RpmDotNetDependency Include="libicu" Version="" />
+			<RpmDotNetDependency Include="krb5-libs" Version="" />
+		</ItemGroup>
 
-    <ItemGroup Condition="'$(SkipRpmDependencies)' == 'true'">
-      <RpmDotNetDependency Remove="@(RpmDotNetDependency)"/>
-    </ItemGroup>    
+		<ItemGroup Condition="'$(SkipRpmDependencies)' == 'true'">
+			<RpmDotNetDependency Remove="@(RpmDotNetDependency)"/>
+		</ItemGroup>
 
-    <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
+		<Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
 
-    <MakeDir Directories="$(PackageDir)"/>
-    
-    <RpmTask PublishDir="$(PublishDir)"
-             RpmPath="$(RpmPath)"
-             CpioPath="$(CpioPath)"
-             Prefix="$(Prefix)"
-             Version="$(PackageVersion)"
-             Release="$(Release)"
-             PackageName="$(PackageName)"
-             AppHost="$(AppHost)"
-             Content="@(Content)"
-             LinuxFolders="@(LinuxFolder)"
-             RpmDotNetDependencies="@(RpmDotNetDependency)"
-             RpmDependencies="@(RpmDependency)"
-             RpmPackageArchitecture="$(RpmPackageArchitecture)"
-             RuntimeIdentifier="$(RuntimeIdentifier)"
-             CreateUser="$(CreateUser)"
-             UserName="$(UserName)"
-             InstallService="$(InstallService)"
-             ServiceName="$(ServiceName)"
-             Vendor="$(RpmVendor)"
-             Description="$(RpmDescription)"
-             Url="$(RpmUrl)"
-             PreInstallScript="$(PreInstallScript)"
-             PostInstallScript="$(PostInstallScript)"
-             PreRemoveScript="$(PreRemoveScript)"
-             PostRemoveScript="$(PostRemoveScript)"/>
-  </Target>
+		<MakeDir Directories="$(PackageDir)"/>
 
-  <Target Name="CreateDeb" DependsOnTargets="CreatePackageProperties">
-    <PropertyGroup>
-      <DebPath>$(PackagePath).deb</DebPath>
-      <DebTarPath>$(IntermediatePackagePath).deb.tar</DebTarPath>
-      <DebTarXzPath>$(IntermediatePackagePath).deb.tar.xz</DebTarXzPath>
-      <Prefix Condition="'$(Prefix)' == ''">/usr/share/$(PackagePrefix)</Prefix>
-      <PackageName>$(PackagePrefix)</PackageName>
-      <UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
-      <ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName>
-      <DebSection Condition="'$(DebSection)' == ''">misc</DebSection>
-      <DebPriority Condition="'$(DebPriority)' == ''">extra</DebPriority>
-      <DebHomepage Condition="'$(DebHomepage)' == ''">$(PackageProjectUrl)</DebHomepage>
+		<RpmTask PublishDir="$(PublishDir)"
+				 RpmPath="$(RpmPath)"
+				 CpioPath="$(CpioPath)"
+				 Prefix="$(Prefix)"
+				 Version="$(PackageVersion)"
+				 Release="$(Release)"
+				 PackageName="$(PackageName)"
+				 AppHost="$(AppHost)"
+				 Content="@(Content)"
+				 LinuxFolders="@(LinuxFolder)"
+				 RpmDotNetDependencies="@(RpmDotNetDependency)"
+				 RpmDependencies="@(RpmDependency)"
+				 RpmPackageArchitecture="$(RpmPackageArchitecture)"
+				 RuntimeIdentifier="$(RuntimeIdentifier)"
+				 CreateUser="$(CreateUser)"
+				 UserName="$(UserName)"
+				 InstallService="$(InstallService)"
+				 ServiceName="$(ServiceName)"
+				 Vendor="$(RpmVendor)"
+				 Description="$(RpmDescription)"
+				 Url="$(RpmUrl)"
+				 PreInstallScript="$(PreInstallScript)"
+				 PostInstallScript="$(PostInstallScript)"
+				 PreRemoveScript="$(PreRemoveScript)"
+				 PostRemoveScript="$(PostRemoveScript)"/>
+	</Target>
 
-      <!-- DebPackageArchitecture is the architecture used for the deb package. Values like any, i386, amd64, arm and arm64 are supported -->
-      <DebPackageArchitecture Condition="'$(DebPackageArchitecture)' == ''"></DebPackageArchitecture>
-    </PropertyGroup>
-    
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
-      <DebDotNetDependencies Include="dotnet-runtime-2.1"/>
-    </ItemGroup>
-    
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
-      <DebDotNetDependencies Include="dotnet-runtime-2.2"/>
-    </ItemGroup>
-    
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
-      <DebDotNetDependencies Include="dotnet-runtime-3.0"/>
-    </ItemGroup>
+	<Target Name="CreateDeb" DependsOnTargets="CreatePackageProperties">
+		<PropertyGroup>
+			<DebPath>$(PackagePath).deb</DebPath>
+			<DebTarPath>$(IntermediatePackagePath).deb.tar</DebTarPath>
+			<DebTarXzPath>$(IntermediatePackagePath).deb.tar.xz</DebTarXzPath>
+			<Prefix Condition="'$(Prefix)' == ''">/usr/share/$(PackagePrefix)</Prefix>
+			<PackageName>$(PackagePrefix)</PackageName>
+			<UserName Condition="'$(UserName)' == ''">$(PackagePrefix)</UserName>
+			<ServiceName Condition="'$(ServiceName)' == ''">$(PackagePrefix)</ServiceName>
+			<DebSection Condition="'$(DebSection)' == ''">misc</DebSection>
+			<DebPriority Condition="'$(DebPriority)' == ''">extra</DebPriority>
+			<DebHomepage Condition="'$(DebHomepage)' == ''">$(PackageProjectUrl)</DebHomepage>
 
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
-      <DebDotNetDependencies Include="dotnet-runtime-3.1"/>
-    </ItemGroup>
+			<!-- DebPackageArchitecture is the architecture used for the deb package. Values like any, i386, amd64, arm and arm64 are supported -->
+			<DebPackageArchitecture Condition="'$(DebPackageArchitecture)' == ''"></DebPackageArchitecture>
+		</PropertyGroup>
 
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net5.0'">
-      <DebDotNetDependencies Include="dotnet-runtime-5.0"/>
-    </ItemGroup>
+		<ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
+			<DebDotNetDependencies Include="dotnet-runtime-2.1"/>
+		</ItemGroup>
 
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net6.0'">
-      <DebDotNetDependencies Include="dotnet-runtime-6.0"/>
-    </ItemGroup>
+		<ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
+			<DebDotNetDependencies Include="dotnet-runtime-2.2"/>
+		</ItemGroup>
 
-    <!-- Dependency list for netcore3.1, updated to support Ubuntu 20.10/21.04  -->
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' != ''">
-      <DebDotNetDependencies Include="libc6"/>  
-      <DebDotNetDependencies Include="libgcc1"/>
-      <DebDotNetDependencies Include="libgssapi-krb5-2"/>
-      <DebDotNetDependencies Include="libstdc++6"/>
-      <DebDotNetDependencies Include="zlib1g"/>
-      <DebDotNetDependencies Include="libssl1.1 | libssl1.0.2 | libssl1.0.1 | libssl1.0.0 | libssl0.9.8"/>
-      <DebDotNetDependencies Include="libicu70 | libicu69 | libicu68 | libicu67 | libicu66 | libicu65 | libicu64 | libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
-    </ItemGroup>
+		<ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
+			<DebDotNetDependencies Include="dotnet-runtime-3.0"/>
+		</ItemGroup>
 
-    <ItemGroup Condition="'$(SkipDebDependencies)' == 'true'">
-      <DebDotNetDependencies Remove="@(DebDotNetDependencies)"/>
-    </ItemGroup>    
-    
-    <MakeDir Directories="$(PackageDir)"/>
-    
-    <DebTask PublishDir="$(PublishDir)" 
-             DebPath="$(DebPath)"
-             DebTarPath="$(DebTarPath)"
-             DebTarXzPath="$(DebTarXzPath)"
-             Prefix="$(Prefix)"
-             Version="$(PackageVersion)"
-             PackageName="$(PackageName)"
-             AppHost="$(AppHost)"
-             Content="@(Content)"
-             LinuxFolders="@(LinuxFolder)"
-             DebDependencies="@(DebDependency)"
-             DebDotNetDependencies="@(DebDotNetDependencies)"
-             DebPackageArchitecture="$(DebPackageArchitecture)"
-			 DebRecommends="@(DebRecommends)"
-             RuntimeIdentifier="$(RuntimeIdentifier)"
-             CreateUser="$(CreateUser)"
-             Maintainer="$(PackageMaintainer)"
-             Description="$(PackageDescription)"
-             UserName="$(UserName)"
-             InstallService="$(InstallService)"
-             ServiceName="$(ServiceName)"
-             Section="$(DebSection)"
-             Priority="$(DebPriority)"
-             Homepage="$(DebHomepage)"
-             PreInstallScript="$(PreInstallScript)"
-             PostInstallScript="$(PostInstallScript)"
-             PreRemoveScript="$(PreRemoveScript)"
-             PostRemoveScript="$(PostRemoveScript)"/>
-  </Target>
+		<ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
+			<DebDotNetDependencies Include="dotnet-runtime-3.1"/>
+		</ItemGroup>
 
-  <Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">
-    <PropertyGroup>
-      <TarballPath Condition="'$(TarballPath)' == ''">$(PackagePath).tar.gz</TarballPath>
-      <TarballPrefix Condition="'$(TarballPrefix)' == ''">.</TarballPrefix>
-    </PropertyGroup>
+		<ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net5.0'">
+			<DebDotNetDependencies Include="dotnet-runtime-5.0"/>
+		</ItemGroup>
 
-    <Message Text="Creating tarball $(TarballPath)" Importance="high"/>
+		<ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net6.0'">
+			<DebDotNetDependencies Include="dotnet-runtime-6.0"/>
+		</ItemGroup>
+		<ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net7.0'">
+			<DebDotNetDependencies Include="dotnet-runtime-7.0"/>
+		</ItemGroup>
+		<!-- Dependency list for netcore3.1, updated to support Ubuntu 20.10/21.04  -->
+		<ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' != ''">
+			<DebDotNetDependencies Include="libc6"/>
+			<DebDotNetDependencies Include="libgcc1"/>
+			<DebDotNetDependencies Include="libgssapi-krb5-2"/>
+			<DebDotNetDependencies Include="libstdc++6"/>
+			<DebDotNetDependencies Include="zlib1g"/>
+			<DebDotNetDependencies Include="libssl1.1 | libssl1.0.2 | libssl1.0.1 | libssl1.0.0 | libssl0.9.8"/>
+			<DebDotNetDependencies Include="libicu70 | libicu69 | libicu68 | libicu67 | libicu66 | libicu65 | libicu64 | libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
+		</ItemGroup>
 
-    <MakeDir Directories="$(PackageDir)"/>
-    
-    <TarballTask PublishDir="$(PublishDir)"
-                 TarballPath="$(TarballPath)"
-                 Prefix="$(TarballPrefix)"
-                 Content="@(Content)" />
-  </Target>
+		<ItemGroup Condition="'$(SkipDebDependencies)' == 'true'">
+			<DebDotNetDependencies Remove="@(DebDotNetDependencies)"/>
+		</ItemGroup>
 
-  <Target Name="CreateZip" DependsOnTargets="CreatePackageProperties">
-    <PropertyGroup>
-      <ZipPath Condition="'$(ZipPath)' == ''">$(PackagePath).zip</ZipPath>
-    </PropertyGroup>
+		<MakeDir Directories="$(PackageDir)"/>
 
-    <Message Text="Creating zip package $(ZipPath)" Importance="high"/>
+		<DebTask PublishDir="$(PublishDir)"
+				 DebPath="$(DebPath)"
+				 DebTarPath="$(DebTarPath)"
+				 DebTarXzPath="$(DebTarXzPath)"
+				 Prefix="$(Prefix)"
+				 Version="$(PackageVersion)"
+				 PackageName="$(PackageName)"
+				 AppHost="$(AppHost)"
+				 Content="@(Content)"
+				 LinuxFolders="@(LinuxFolder)"
+				 DebDependencies="@(DebDependency)"
+				 DebDotNetDependencies="@(DebDotNetDependencies)"
+				 DebPackageArchitecture="$(DebPackageArchitecture)"
+				 DebRecommends="@(DebRecommends)"
+				 RuntimeIdentifier="$(RuntimeIdentifier)"
+				 CreateUser="$(CreateUser)"
+				 Maintainer="$(PackageMaintainer)"
+				 Description="$(PackageDescription)"
+				 UserName="$(UserName)"
+				 InstallService="$(InstallService)"
+				 ServiceName="$(ServiceName)"
+				 Section="$(DebSection)"
+				 Priority="$(DebPriority)"
+				 Homepage="$(DebHomepage)"
+				 PreInstallScript="$(PreInstallScript)"
+				 PostInstallScript="$(PostInstallScript)"
+				 PreRemoveScript="$(PreRemoveScript)"
+				 PostRemoveScript="$(PostRemoveScript)"/>
+	</Target>
 
-    <MakeDir Directories="$(PackageDir)"/>
-    
-    <ZipTask PublishDir="$(PublishDir)"
-             ZipPath="$(ZipPath)"/>
-  </Target>
+	<Target Name="CreateTarball" DependsOnTargets="CreatePackageProperties">
+		<PropertyGroup>
+			<TarballPath Condition="'$(TarballPath)' == ''">$(PackagePath).tar.gz</TarballPath>
+			<TarballPrefix Condition="'$(TarballPrefix)' == ''">.</TarballPrefix>
+		</PropertyGroup>
 
-  <!-- Support for building Windows Installer (.msi) packages -->
-  <PropertyGroup>
-    <SetupProductName>$(TargetName)</SetupProductName>
-    <SetupProductManufacturer>$(TargetName)</SetupProductManufacturer>
-    <SetupFeatureId>$(TargetName)Feature</SetupFeatureId>
-    <SetupFeatureName>$(TargetName)</SetupFeatureName>
-    <SetupInstallFolderName>$(TargetName)</SetupInstallFolderName>
-    <SetupProductVersion>1.0.0.0</SetupProductVersion>
-    <SetupProductLanguage>1033</SetupProductLanguage>
-  </PropertyGroup>
+		<Message Text="Creating tarball $(TarballPath)" Importance="high"/>
 
-  <PropertyGroup>
-    <WixArguments>-nologo -dPublishDir="$(PublishDir)\" -dSetupProductName="$(SetupProductName)" -dSetupProductManufacturer="$(SetupProductManufacturer)" -dSetupFeatureId="$(SetupFeatureId)" -dSetupFeatureName="$(SetupFeatureName)" -dSetupInstallFolderName="$(SetupInstallFolderName)" -dSetupProductVersion="$(SetupProductVersion)" -dSetupProductLanguage="$(SetupProductLanguage)"</WixArguments>
-  </PropertyGroup>
+		<MakeDir Directories="$(PackageDir)"/>
 
-  <PropertyGroup>
-    <WixInstallPath>C:\Program Files (x86)\WiX Toolset v3.10\</WixInstallPath>
-    <HarvestSourceFilePath>$(IntermediateOutputPath)$(TargetName).harvest.wxs</HarvestSourceFilePath>
-    <HarvestObjectFilePath>$(IntermediateOutputPath)$(TargetName).harvest.wixobj</HarvestObjectFilePath>
-    <ProductSourceFilePath>$(MSBuildThisFileDirectory)\Product.wxs</ProductSourceFilePath>
-    <ProductObjectFilePath>$(IntermediateOutputPath)$(TargetName).product.wixobj</ProductObjectFilePath>
-    <SetupFilePath Condition="'$(SetupFilePath)' == ''">$(TargetDir)$(TargetName).msi</SetupFilePath>
-    <Heat>$(WixInstallPath)bin\heat.exe</Heat>
-    <Candle>$(WixInstallPath)bin\candle.exe</Candle>
-    <Light>$(WixInstallPath)bin\light.exe</Light>
-  </PropertyGroup>
-  <Target Name="Msi" DependsOnTargets="Publish">
-    <Message Text="Creating msi package $(SetupFilePath)" Importance="high"/>
-    <!-- $(PublishDir) ends with a \, which would escape the " that follows it. So we add an additional \ -->
-    <Exec Command='"$(Heat)" dir "$(PublishDir)\" -nologo -scom -sreg -sfrag -srd -gg -dr INSTALLFOLDER -cg SourceComponentGroup -var var.PublishDir -o $(HarvestSourceFilePath)'/>
+		<TarballTask PublishDir="$(PublishDir)"
+					 TarballPath="$(TarballPath)"
+					 Prefix="$(TarballPrefix)"
+					 Content="@(Content)" />
+	</Target>
 
-    <Exec Command='"$(Candle)" $(WixArguments) "$(HarvestSourceFilePath)" -o "$(HarvestObjectFilePath)"'/>
-    <Exec Command='"$(Candle)" $(WixArguments) "$(ProductSourceFilePath)" -o "$(ProductObjectFilePath)"'/>
+	<Target Name="CreateZip" DependsOnTargets="CreatePackageProperties">
+		<PropertyGroup>
+			<ZipPath Condition="'$(ZipPath)' == ''">$(PackagePath).zip</ZipPath>
+		</PropertyGroup>
 
-    <Exec Command='"$(Light)" $(WixArguments) "$(HarvestObjectFilePath)" "$(ProductObjectFilePath)" -o "$(SetupFilePath)"'/>
-  </Target>
+		<Message Text="Creating zip package $(ZipPath)" Importance="high"/>
+
+		<MakeDir Directories="$(PackageDir)"/>
+
+		<ZipTask PublishDir="$(PublishDir)"
+				 ZipPath="$(ZipPath)"/>
+	</Target>
+
+	<!-- Support for building Windows Installer (.msi) packages -->
+	<PropertyGroup>
+		<SetupProductName>$(TargetName)</SetupProductName>
+		<SetupProductManufacturer>$(TargetName)</SetupProductManufacturer>
+		<SetupFeatureId>$(TargetName)Feature</SetupFeatureId>
+		<SetupFeatureName>$(TargetName)</SetupFeatureName>
+		<SetupInstallFolderName>$(TargetName)</SetupInstallFolderName>
+		<SetupProductVersion>1.0.0.0</SetupProductVersion>
+		<SetupProductLanguage>1033</SetupProductLanguage>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<WixArguments>-nologo -dPublishDir="$(PublishDir)\" -dSetupProductName="$(SetupProductName)" -dSetupProductManufacturer="$(SetupProductManufacturer)" -dSetupFeatureId="$(SetupFeatureId)" -dSetupFeatureName="$(SetupFeatureName)" -dSetupInstallFolderName="$(SetupInstallFolderName)" -dSetupProductVersion="$(SetupProductVersion)" -dSetupProductLanguage="$(SetupProductLanguage)"</WixArguments>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<WixInstallPath>C:\Program Files (x86)\WiX Toolset v3.10\</WixInstallPath>
+		<HarvestSourceFilePath>$(IntermediateOutputPath)$(TargetName).harvest.wxs</HarvestSourceFilePath>
+		<HarvestObjectFilePath>$(IntermediateOutputPath)$(TargetName).harvest.wixobj</HarvestObjectFilePath>
+		<ProductSourceFilePath>$(MSBuildThisFileDirectory)\Product.wxs</ProductSourceFilePath>
+		<ProductObjectFilePath>$(IntermediateOutputPath)$(TargetName).product.wixobj</ProductObjectFilePath>
+		<SetupFilePath Condition="'$(SetupFilePath)' == ''">$(TargetDir)$(TargetName).msi</SetupFilePath>
+		<Heat>$(WixInstallPath)bin\heat.exe</Heat>
+		<Candle>$(WixInstallPath)bin\candle.exe</Candle>
+		<Light>$(WixInstallPath)bin\light.exe</Light>
+	</PropertyGroup>
+	<Target Name="Msi" DependsOnTargets="Publish">
+		<Message Text="Creating msi package $(SetupFilePath)" Importance="high"/>
+		<!-- $(PublishDir) ends with a \, which would escape the " that follows it. So we add an additional \ -->
+		<Exec Command='"$(Heat)" dir "$(PublishDir)\" -nologo -scom -sreg -sfrag -srd -gg -dr INSTALLFOLDER -cg SourceComponentGroup -var var.PublishDir -o $(HarvestSourceFilePath)'/>
+
+		<Exec Command='"$(Candle)" $(WixArguments) "$(HarvestSourceFilePath)" -o "$(HarvestObjectFilePath)"'/>
+		<Exec Command='"$(Candle)" $(WixArguments) "$(ProductSourceFilePath)" -o "$(ProductObjectFilePath)"'/>
+
+		<Exec Command='"$(Light)" $(WixArguments) "$(HarvestObjectFilePath)" "$(ProductObjectFilePath)" -o "$(SetupFilePath)"'/>
+	</Target>
 </Project>
