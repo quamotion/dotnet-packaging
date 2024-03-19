@@ -88,6 +88,14 @@
       <RpmDotNetDependency Include="dotnet-runtime-6.0" Version="" />
     </ItemGroup>
 
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net7.0'">
+      <RpmDotNetDependency Include="dotnet-runtime-7.0" Version="" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net8.0'">
+      <RpmDotNetDependency Include="dotnet-runtime-8.0" Version="" />
+    </ItemGroup>
+
     <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' != ''">
       <RpmDotNetDependency Include="openssl-libs" Version="" />
       <RpmDotNetDependency Include="libicu" Version="" />
@@ -170,15 +178,23 @@
       <DebDotNetDependencies Include="dotnet-runtime-6.0"/>
     </ItemGroup>
 
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net7.0'">
+      <DebDotNetDependencies Include="dotnet-runtime-7.0"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net8.0'">
+      <DebDotNetDependencies Include="dotnet-runtime-8.0"/>
+    </ItemGroup>
+
     <!-- Dependency list for netcore3.1, updated to support Ubuntu 20.10/21.04  -->
     <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' != ''">
-      <DebDotNetDependencies Include="libc6"/>  
-      <DebDotNetDependencies Include="libgcc1"/>
-      <DebDotNetDependencies Include="libgssapi-krb5-2"/>
-      <DebDotNetDependencies Include="libstdc++6"/>
-      <DebDotNetDependencies Include="zlib1g"/>
-      <DebDotNetDependencies Include="libssl1.1 | libssl1.0.2 | libssl1.0.1 | libssl1.0.0 | libssl0.9.8"/>
-      <DebDotNetDependencies Include="libicu70 | libicu69 | libicu68 | libicu67 | libicu66 | libicu65 | libicu64 | libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
+      <DebDependencies Include="libc6"/>  
+      <DebDependencies Include="libgcc1"/>
+      <DebDependencies Include="libgssapi-krb5-2"/>
+      <DebDependencies Include="libstdc++6"/>
+      <DebDependencies Include="zlib1g"/>
+      <DebDependencies Include="libssl3 | libssl1.1 | libssl1.0.2 | libssl1.0.1 | libssl1.0.0 | libssl0.9.8"/>
+      <DebDependencies Include="libicu74 | libicu72 | libicu70 | libicu69 | libicu68 | libicu67 | libicu66 | libicu65 | libicu64 | libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(SkipDebDependencies)' == 'true'">

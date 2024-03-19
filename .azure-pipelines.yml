@@ -25,14 +25,22 @@ resources:
     image: mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim
   - container: 6.0-nanoserver
     image: mcr.microsoft.com/dotnet/sdk:6.0-nanoserver-1809
-
+  - container: 7.0-bullseye
+    image: mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim
+  - container: 7.0-nanoserver
+    image: mcr.microsoft.com/dotnet/sdk:7.0-nanoserver-1809
+  - container: 8.0-jammy
+    image: mcr.microsoft.com/dotnet/sdk:8.0-jammy
+  - container: 8.0-nanoserver
+    image: mcr.microsoft.com/dotnet/sdk:8.0-nanoserver-1809
+    
 stages:
 - stage: Build
   jobs:
-  - job: build_focal
-    container: 6.0-focal
+  - job: build_jammy
+    container: 8.0-jammy
     pool:
-      vmImage: ubuntu-20.04
+      vmImage: ubuntu-22.04
     steps:
     - bash: |
         dotnet restore dotnet-packaging.sln
@@ -55,7 +63,7 @@ stages:
   - job: build_windows
     pool:
       vmImage: windows-2019
-    container: 6.0-nanoserver
+    container: 8.0-nanoserver
     # Make sure we can run scripts in PowerShell core:
     # https://github.com/microsoft/azure-pipelines-tasks/issues/11448
     variables:
@@ -154,16 +162,42 @@ stages:
         6.0-bullseye-tarball:
           container: 6.0-bullseye
           command: tarball
+          
+          7.0-bullseye-deb:
+            container: 7.0-bullseye
+            command: deb
+          7.0-bullseye-rpm:
+            container: 7.0-bullseye
+            command: rpm
+          7.0-bullseye-zip:
+            container: 7.0-bullseye
+            command: zip
+          7.0-bullseye-tarball:
+            container: 7.0-bullseye
+            command: tarball
+              
+            8.0-jammy-deb:
+              container: 8.0-jammy 
+              command: deb
+            8.0-jammy-rpm:
+              container: 8.0-jammy  
+              command: rpm
+            8.0-jammy-zip:
+              container: 8.0-jammy
+              command: zip
+            8.0-jammy-tarball:
+              container: 8.0-jammy
+              command: tarball
 
     container: $[ variables['container'] ]
     pool:
-      vmImage: ubuntu-20.04
+      vmImage: ubuntu-22.04
     steps:
     - template: .azure-pipelines-shared.yml
 
   - job: molecule
     pool:
-      vmImage: ubuntu-20.04
+      vmImage: ubuntu-22.04
     strategy:
       maxParallel: 8
       matrix:
@@ -187,12 +221,26 @@ stages:
         framework-dependent-app-6_0:
           suite: framework-dependent
           framework: net6.0
+        
+        self-contained-7_0:
+          suite: self-contained
+          framework: net7.0
+        framework-dependent-app-7_0:
+          suite: framework-dependent
+          framework: net7.0
+          
+        self-contained-8_0:
+          suite: self-contained
+          framework: net8.0
+        framework-dependent-app-8_0:
+          suite: framework-dependent
+          framework: net8.0
     steps:
     - task: UseDotNet@2
-      displayName: 'Use .NET Core 6.0'
+      displayName: 'Use .NET Core 8.0'
       inputs:
         packageType: sdk
-        version: 6.0.100
+        version: 8.0.x
     - bash: |
         set -e
         export PATH=~/.local/bin/:$PATH
