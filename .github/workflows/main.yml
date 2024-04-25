@@ -1,0 +1,28 @@
+name: main
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build
+        run: |
+          dotnet restore dotnet-packaging.sln
+          dotnet pack dotnet-packaging.sln -c Release -o pkg/
+          cp demo/Directory.Build.props pkg/
+          cp demo/version.txt pkg/
+
+      - name: Test
+        run: |
+          dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj -l "trx;LogFileName=pkg/Packaging.Targets.Tests.trx"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pkg
+          path: pkg/
