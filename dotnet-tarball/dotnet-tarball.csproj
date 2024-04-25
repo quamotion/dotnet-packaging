@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0;net6.0;netcoreapp3.1;net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     <PackageTags>dotnet cli packaging tarball tar.gz archive</PackageTags>
     <Description>Create tarballs (.tar.gz files) of your .NET Core projects straight from the command line.
 
