@@ -167,31 +167,44 @@ stages:
           container: 6.0-bullseye
           command: tarball
           
-          7.0-bullseye-deb:
-            container: 7.0-bullseye
-            command: deb
-          7.0-bullseye-rpm:
-            container: 7.0-bullseye
-            command: rpm
-          7.0-bullseye-zip:
-            container: 7.0-bullseye
-            command: zip
-          7.0-bullseye-tarball:
-            container: 7.0-bullseye
-            command: tarball
+        7.0-bullseye-deb:
+          container: 7.0-bullseye
+          command: deb
+        7.0-bullseye-rpm:
+          container: 7.0-bullseye
+          command: rpm
+        7.0-bullseye-zip:
+          container: 7.0-bullseye
+          command: zip
+        7.0-bullseye-tarball:
+          container: 7.0-bullseye
+          command: tarball
               
-            8.0-jammy-deb:
-              container: 8.0-jammy 
-              command: deb
-            8.0-jammy-rpm:
-              container: 8.0-jammy  
-              command: rpm
-            8.0-jammy-zip:
-              container: 8.0-jammy
-              command: zip
-            8.0-jammy-tarball:
-              container: 8.0-jammy
-              command: tarball
+        8.0-jammy-deb:
+          container: 8.0-jammy 
+          command: deb
+        8.0-jammy-rpm:
+          container: 8.0-jammy  
+          command: rpm
+        8.0-jammy-zip:
+          container: 8.0-jammy
+          command: zip
+        8.0-jammy-tarball:
+          container: 8.0-jammy
+          command: tarball
+        
+        9.0-noble-deb:
+          container: 9.0-noble
+          command: deb
+        9.0-noble-rpm:
+          container: 9.0-noble
+          command: rpm
+        9.0-noble-zip:
+          container: 9.0-noble
+          command: zip
+        9.0-noble-tarball:
+          container: 9.0-noble
+          command: tarball
 
     container: $[ variables['container'] ]
     pool:
@@ -239,12 +252,19 @@ stages:
         framework-dependent-app-8_0:
           suite: framework-dependent
           framework: net8.0
+        
+        self-contained-9_0:
+          suite: self-contained
+          framework: net9.0
+        framework-dependent-app-9_0:
+          suite: framework-dependent
+          framework: net9.0
     steps:
     - task: UseDotNet@2
-      displayName: 'Use .NET Core 8.0'
+      displayName: 'Use .NET Core 9.0'
       inputs:
         packageType: sdk
-        version: 8.0.x
+        version: 9.0.x
     - bash: |
         set -e
         export PATH=~/.local/bin/:$PATH
