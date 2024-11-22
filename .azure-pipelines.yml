@@ -33,12 +33,16 @@ resources:
     image: mcr.microsoft.com/dotnet/sdk:8.0-jammy
   - container: 8.0-nanoserver
     image: mcr.microsoft.com/dotnet/sdk:8.0-nanoserver-1809
+  - container: 9.0-noble
+    image: mcr.microsoft.com/dotnet/sdk:9.0-noble
+  - container: 9.0-nanoserver
+    image: mcr.microsoft.com/dotnet/sdk:9.0-nanoserver-1809
     
 stages:
 - stage: Build
   jobs:
-  - job: build_jammy
-    container: 8.0-jammy
+  - job: build_noble
+    container: 9.0-noble
     pool:
       vmImage: ubuntu-22.04
     steps:
@@ -63,7 +67,7 @@ stages:
   - job: build_windows
     pool:
       vmImage: windows-2019
-    container: 8.0-nanoserver
+    container: 9.0-nanoserver
     # Make sure we can run scripts in PowerShell core:
     # https://github.com/microsoft/azure-pipelines-tasks/issues/11448
     variables:
