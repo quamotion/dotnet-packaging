@@ -2,10 +2,6 @@ name: main
 
 on: [push, pull_request]
 
-# Needed for .NET 9 support, as this is currently not included on ubuntu-latest
-env:
-  DOTNET_VERSION: '9.0.x'
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,7 +14,11 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: |
+            6.0.x
+            7.0.x
+            8.0.x
+            9.0.x
 
       - name: Build
         run: |
