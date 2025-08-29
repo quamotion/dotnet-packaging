@@ -7,14 +7,6 @@ namespace Packaging.Targets.Tests.IO
 {
     public class XZOutputStreamTests
     {
-        // These tests help ensure that the version of liblzma we use on the different operating systems support
-        // multithreading. Single-threaded compression can seriously impact performance.
-        [Fact]
-        public void SupportsMultiThreadingTest()
-        {
-            Assert.True(XZOutputStream.SupportsMultiThreading);
-        }
-
         [Fact]
         public void DefaultThreadsTest()
         {

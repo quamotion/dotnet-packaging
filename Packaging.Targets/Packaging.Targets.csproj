@@ -37,7 +37,8 @@
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="System.Buffers" Version="4.5.1" />
+    <PackageReference Include="System.Buffers" Version="4.6.0" />
+    <PackageReference Include="Joveler.Compression.XZ" Version="5.0.2" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="build\*.*">

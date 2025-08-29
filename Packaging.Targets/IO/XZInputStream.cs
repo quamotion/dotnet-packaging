@@ -1,4 +1,4 @@
-﻿/*
+/*
  * The MIT License (MIT)
 
  * Copyright (c) 2015 Roman Belkov, Kirill Melentyev
@@ -23,30 +23,22 @@
 */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
+using Joveler.Compression.XZ;
 
 namespace Packaging.Targets.IO
 {
     /// <summary>
     /// Represents a <see cref="Stream"/> which can decompress xz-compressed data.
+    /// This is a thin wrapper around Joveler.Compression.XZ that mimics the original XZInputStream behavior.
     /// </summary>
     public class XZInputStream : Stream
     {
-        /// <summary>
-        /// The size of the buffer
-        /// </summary>
-        private const int BufSize = 512;
-
-        private readonly List<byte> internalBuffer = new List<byte>();
         private readonly Stream innerStream;
-        private readonly IntPtr inbuf;
-        private readonly IntPtr outbuf;
-        private LzmaStream lzmaStream;
-        private long length;
+        private readonly XZStream xzStream;
+
         private long position;
-        private bool disposed;
+        private long length;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XZInputStream"/> class.
@@ -61,273 +53,174 @@ namespace Packaging.Targets.IO
                 throw new ArgumentNullException(nameof(stream));
             }
 
+            XZHelper.EnsureInitialized();
             this.innerStream = stream;
+            var decompOpts = new XZDecompressOptions { LeaveOpen = true };
 
-            var ret = NativeMethods.lzma_stream_decoder(ref this.lzmaStream, ulong.MaxValue, LzmaDecodeFlags.Concatenated);
-
-            this.inbuf = Marshal.AllocHGlobal(BufSize);
-            this.outbuf = Marshal.AllocHGlobal(BufSize);
-
-            this.lzmaStream.AvailIn = 0;
-            this.lzmaStream.NextOut = this.outbuf;
-            this.lzmaStream.AvailOut = BufSize;
-
-            if (ret == LzmaResult.OK)
-            {
-                return;
-            }
-
-            switch (ret)
-            {
-                case LzmaResult.MemError:
-                    throw new Exception("Memory allocation failed");
-
-                case LzmaResult.OptionsError:
-                    throw new Exception("Unsupported decompressor flags");
-
-                default:
-                    throw new Exception("Unknown error, possibly a bug");
-            }
+            this.xzStream = new XZStream(stream, decompOpts);
         }
 
         /// <inheritdoc/>
-        public override bool CanRead
-        {
-            get
-            {
-                this.EnsureNotDisposed();
-                return true;
-            }
-        }
+        public override bool CanRead => this.xzStream.CanRead;
 
         /// <inheritdoc/>
-        public override bool CanSeek
-        {
-            get
-            {
-                this.EnsureNotDisposed();
-                return false;
-            }
-        }
+        public override bool CanSeek => false; // XZ decompression streams don't support seeking
 
         /// <inheritdoc/>
-        public override bool CanWrite
-        {
-            get
-            {
-                this.EnsureNotDisposed();
-                return false;
-            }
-        }
+        public override bool CanWrite => false; // Input streams don't support writing
 
         /// <inheritdoc/>
         public override long Length
         {
             get
             {
-                this.EnsureNotDisposed();
-
-                const int streamFooterSize = 12;
-
                 if (this.length == 0)
                 {
-                    var lzmaStreamFlags = default(LzmaStreamFlags);
-                    var streamFooter = new byte[streamFooterSize];
-
-                    this.innerStream.Seek(-streamFooterSize, SeekOrigin.End);
-                    this.innerStream.Read(streamFooter, 0, streamFooterSize);
-
-                    NativeMethods.lzma_stream_footer_decode(ref lzmaStreamFlags, streamFooter);
-                    var indexPointer = new byte[lzmaStreamFlags.BackwardSize];
-
-                    this.innerStream.Seek(-streamFooterSize - (long)lzmaStreamFlags.BackwardSize, SeekOrigin.End);
-                    this.innerStream.Read(indexPointer, 0, (int)lzmaStreamFlags.BackwardSize);
-                    this.innerStream.Seek(0, SeekOrigin.Begin);
-
-                    var index = IntPtr.Zero;
-                    var memLimit = ulong.MaxValue;
-                    uint inPos = 0;
-
-                    NativeMethods.lzma_index_buffer_decode(ref index, ref memLimit, IntPtr.Zero, indexPointer, ref inPos, lzmaStreamFlags.BackwardSize);
-
-                    if (inPos != lzmaStreamFlags.BackwardSize)
-                    {
-                        NativeMethods.lzma_index_end(index, IntPtr.Zero);
-                        throw new Exception("Index decoding failed!");
-                    }
-
-                    var uSize = NativeMethods.lzma_index_uncompressed_size(index);
-
-                    NativeMethods.lzma_index_end(index, IntPtr.Zero);
-                    this.length = (long)uSize;
-                    return this.length;
+                    // Try to parse XZ format directly
+                    this.length = this.ParseXZLength();
                 }
-                else
-                {
-                    return this.length;
-                }
+
+                return this.length;
             }
         }
 
         /// <inheritdoc/>
         public override long Position
         {
-            get
-            {
-                this.EnsureNotDisposed();
-                return this.position;
-            }
-
-            set
-            {
-                this.EnsureNotDisposed();
-                throw new NotSupportedException("XZ Stream does not support setting position");
-            }
+            get => this.position;
+            set => throw new NotSupportedException("XZ Stream does not support setting position");
         }
 
         /// <inheritdoc/>
-        public override void Flush()
-        {
-            this.EnsureNotDisposed();
-
-            throw new NotSupportedException("XZ Stream does not support flush");
-        }
+        public override void Flush() => this.xzStream.Flush();
 
         /// <inheritdoc/>
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            this.EnsureNotDisposed();
-
-            throw new NotSupportedException("XZ Stream does not support seek");
-        }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException("XZ Stream does not support seek");
 
         /// <inheritdoc/>
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException("XZ Stream does not support setting length");
-        }
+        public override void SetLength(long value) => throw new NotSupportedException("XZ Stream does not support setting length");
 
-        /// <summary>
-        /// Reads bytes from stream
-        /// </summary>
-        /// <returns>byte read or -1 on end of stream</returns>
+        /// <inheritdoc/>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            this.EnsureNotDisposed();
-
-            var action = LzmaAction.Run;
-
-            var readBuf = new byte[BufSize];
-            var outManagedBuf = new byte[BufSize];
-
-            while (this.internalBuffer.Count < count)
-            {
-                if (this.lzmaStream.AvailIn == 0)
-                {
-                    this.lzmaStream.AvailIn = (uint)this.innerStream.Read(readBuf, 0, readBuf.Length);
-                    Marshal.Copy(readBuf, 0, this.inbuf, (int)this.lzmaStream.AvailIn);
-                    this.lzmaStream.NextIn = this.inbuf;
-
-                    if (this.lzmaStream.AvailIn == 0)
-                    {
-                        action = LzmaAction.Finish;
-                    }
-                }
-
-                var ret = NativeMethods.lzma_code(ref this.lzmaStream, action);
-
-                if (this.lzmaStream.AvailOut == 0 || ret == LzmaResult.StreamEnd)
-                {
-                    var writeSize = BufSize - (int)this.lzmaStream.AvailOut;
-                    Marshal.Copy(this.outbuf, outManagedBuf, 0, writeSize);
-
-                    this.internalBuffer.AddRange(outManagedBuf);
-                    var tail = outManagedBuf.Length - writeSize;
-                    this.internalBuffer.RemoveRange(this.internalBuffer.Count - tail, tail);
-
-                    this.lzmaStream.NextOut = this.outbuf;
-                    this.lzmaStream.AvailOut = BufSize;
-                }
-
-                if (ret != LzmaResult.OK)
-                {
-                    if (ret == LzmaResult.StreamEnd)
-                    {
-                        break;
-                    }
-
-                    NativeMethods.lzma_end(ref this.lzmaStream);
-
-                    switch (ret)
-                    {
-                        case LzmaResult.MemError:
-                            throw new Exception("Memory allocation failed");
-
-                        case LzmaResult.FormatError:
-                            throw new Exception("The input is not in the .xz format");
-
-                        case LzmaResult.OptionsError:
-                            throw new Exception("Unsupported compression options");
-
-                        case LzmaResult.DataError:
-                            throw new Exception("Compressed file is corrupt");
-
-                        case LzmaResult.BufferError:
-                            throw new Exception("Compressed file is truncated or otherwise corrupt");
-
-                        default:
-                            throw new Exception("Unknown error.Possibly a bug");
-                    }
-                }
-            }
-
-            if (this.internalBuffer.Count >= count)
-            {
-                this.internalBuffer.CopyTo(0, buffer, offset, count);
-                this.internalBuffer.RemoveRange(0, count);
-                this.position += count;
-                return count;
-            }
-            else
-            {
-                var intBufLength = this.internalBuffer.Count;
-                this.internalBuffer.CopyTo(0, buffer, offset, intBufLength);
-                this.internalBuffer.Clear();
-                this.position += intBufLength;
-                return intBufLength;
-            }
+            int bytesRead = this.xzStream.Read(buffer, offset, count);
+            this.position += bytesRead;
+            return bytesRead;
         }
 
         /// <inheritdoc/>
-        public override void Write(byte[] buffer, int offset, int count)
-        {
+        public override void Write(byte[] buffer, int offset, int count) =>
             throw new NotSupportedException("XZ Input stream does not support writing");
-        }
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            if (this.disposed)
-            {
-                return;
-            }
-
-            NativeMethods.lzma_end(ref this.lzmaStream);
-
-            Marshal.FreeHGlobal(this.inbuf);
-            Marshal.FreeHGlobal(this.outbuf);
-
+            this.xzStream?.Dispose();
             base.Dispose(disposing);
-
-            this.disposed = true;
         }
 
-        private void EnsureNotDisposed()
+        private long ParseXZLength()
         {
-            if (this.disposed)
+            const int streamFooterSize = 12;
+
+            var streamFooter = new byte[streamFooterSize];
+            this.innerStream.Seek(-streamFooterSize, SeekOrigin.End);
+            this.innerStream.Read(streamFooter, 0, streamFooterSize);
+
+            var backwardSize = this.DecodeFooter(streamFooter);
+            var indexPointer = new byte[backwardSize];
+
+            this.innerStream.Seek(-streamFooterSize - backwardSize, SeekOrigin.End);
+            this.innerStream.Read(indexPointer, 0, (int)backwardSize);
+            this.innerStream.Seek(0, SeekOrigin.Begin);
+
+            return this.DecodeIndex(indexPointer);
+        }
+
+        private long DecodeFooter(byte[] streamFooter)
+        {
+            // Verify footer magic "YZ" (bytes 10-11)
+            if (streamFooter[10] != 0x59 || streamFooter[11] != 0x5A)
             {
-                throw new ObjectDisposedException(nameof(XZInputStream));
+                throw new InvalidDataException("Invalid XZ stream footer");
             }
+
+            // Extract backward size from footer (bytes 4-7, little-endian)
+            // This is the size of the index in multiples of 4, minus 1
+            var backwardSizeEncoded = BitConverter.ToUInt32(streamFooter, 4);
+            var backwardSize = (backwardSizeEncoded + 1) * 4;
+
+            return (long)backwardSize;
+        }
+
+        private long DecodeIndex(byte[] indexData)
+        {
+            if (indexData.Length < 1)
+            {
+                throw new InvalidDataException("XZ index data is empty");
+            }
+
+            int pos = 0;
+
+            // The index starts with a null byte (0x00) as an indicator
+            if (indexData[0] != 0x00)
+            {
+                throw new InvalidDataException($"XZ index should start with 0x00, but found 0x{indexData[0]:X2}");
+            }
+
+            pos++;
+
+            // Read record count (variable-length integer)
+            var recordCount = this.ReadVarInt(indexData, ref pos);
+
+            if (recordCount == 0)
+            {
+                throw new InvalidDataException("XZ index contains no records");
+            }
+
+            long totalUncompressedSize = 0;
+
+            // Read each record
+            for (ulong i = 0; i < recordCount; i++)
+            {
+                // Each record contains unpadded size and uncompressed size
+                var unpaddedSize = this.ReadVarInt(indexData, ref pos);
+                var uncompressedSize = this.ReadVarInt(indexData, ref pos);
+
+                totalUncompressedSize += (long)uncompressedSize;
+            }
+
+            return totalUncompressedSize;
+        }
+
+        private ulong ReadVarInt(byte[] data, ref int pos)
+        {
+            if (pos >= data.Length)
+            {
+                throw new InvalidDataException("Unexpected end of XZ index data while reading variable-length integer");
+            }
+
+            ulong result = 0;
+            int shift = 0;
+
+            while (pos < data.Length)
+            {
+                byte b = data[pos++];
+                result |= (ulong)(b & 0x7F) << shift;
+
+                if ((b & 0x80) == 0)
+                {
+                    break;
+                }
+
+                shift += 7;
+                if (shift >= 64)
+                {
+                    throw new InvalidDataException("Variable-length integer too large in XZ index");
+                }
+            }
+
+            return result;
         }
     }
 }

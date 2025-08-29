@@ -1,4 +1,4 @@
-﻿/*
+/*
  * The MIT License (MIT)
 
  * Copyright (c) 2015 Roman Belkov, Kirill Melentyev
@@ -23,28 +23,29 @@
 */
 
 using System;
-using System.Diagnostics;
 using System.IO;
+using Joveler.Compression.XZ;
 
 namespace Packaging.Targets.IO
 {
-    public unsafe class XZOutputStream : Stream
+    /// <summary>
+    /// Represents a <see cref="Stream"/> which can compress data using xz compression.
+    /// This is a clean wrapper around Joveler.Compression.XZ.XZStream that provides the original XZOutputStream API.
+    /// </summary>
+    public class XZOutputStream : Stream
     {
         /// <summary>
         /// Default compression preset.
         /// </summary>
         public const uint DefaultPreset = 6;
-        public const uint PresetExtremeFlag = (uint)1 << 31;
 
-        // You can tweak BufSize value to get optimal results
-        // of speed and chunk size
-        private const int BufSize = 4096;
+        /// <summary>
+        /// Default number of threads to use.
+        /// </summary>
+        public static readonly int DefaultThreads = Environment.ProcessorCount;
 
-        private readonly Stream innerStream;
-        private readonly bool leaveOpen;
-        private readonly byte[] outbuf;
-        private LzmaStream lzmaStream;
-        private bool disposed;
+        // Th stream we're wrapping. It is sealed, so we can't inherit from it
+        private readonly XZStream xzStream;
 
         public XZOutputStream(Stream s)
             : this(s, DefaultThreads)
@@ -63,277 +64,84 @@ namespace Packaging.Targets.IO
 
         public XZOutputStream(Stream s, int threads, uint preset, bool leaveOpen)
         {
-            this.innerStream = s;
-            this.leaveOpen = leaveOpen;
-
-            LzmaResult ret;
-            if (threads == 1 || !NativeMethods.SupportsMultiThreading)
+            if (s == null)
             {
-                ret = NativeMethods.lzma_easy_encoder(ref this.lzmaStream, preset, LzmaCheck.Crc64);
+                throw new ArgumentNullException(nameof(s));
+            }
+
+            if (threads <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(threads));
+            }
+
+            XZHelper.EnsureInitialized();
+
+            var compOpts = CreateCompressOptions(preset, leaveOpen);
+
+            // Use parallel compression if threads > 1
+            if (threads > 1)
+            {
+                var threadOpts = CreateParallelOptions(threads);
+                this.xzStream = new XZStream(s, compOpts, threadOpts);
             }
             else
             {
-                if (threads <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(threads));
-                }
-
-                if (threads > Environment.ProcessorCount)
-                {
-                    Trace.TraceWarning("{0} threads required, but only {1} processors available", threads, Environment.ProcessorCount);
-                    threads = Environment.ProcessorCount;
-                }
-
-                var mt = new LzmaMT()
-                {
-                    preset = preset,
-                    check = LzmaCheck.Crc64,
-                    threads = (uint)threads
-                };
-                ret = NativeMethods.lzma_stream_encoder_mt(ref this.lzmaStream, ref mt);
-            }
-
-            if (ret == LzmaResult.OK)
-            {
-                this.outbuf = new byte[BufSize];
-                this.lzmaStream.AvailOut = BufSize;
-                return;
-            }
-
-            GC.SuppressFinalize(this);
-            throw GetError(ret);
-        }
-
-        ~XZOutputStream()
-        {
-            this.Dispose(false);
-        }
-
-        public static int DefaultThreads => Environment.ProcessorCount;
-
-        public static bool SupportsMultiThreading => NativeMethods.SupportsMultiThreading;
-
-        /// <inheritdoc/>
-        public override bool CanRead
-        {
-            get
-            {
-                this.EnsureNotDisposed();
-                return false;
+                this.xzStream = new XZStream(s, compOpts);
             }
         }
 
         /// <inheritdoc/>
-        public override bool CanSeek
-        {
-            get
-            {
-                this.EnsureNotDisposed();
-                return false;
-            }
-        }
+        public override bool CanRead => this.xzStream.CanRead;
 
         /// <inheritdoc/>
-        public override bool CanWrite
-        {
-            get
-            {
-                this.EnsureNotDisposed();
-                return true;
-            }
-        }
+        public override bool CanSeek => this.xzStream.CanSeek;
 
         /// <inheritdoc/>
-        public override long Length
-        {
-            get
-            {
-                this.EnsureNotDisposed();
-                throw new NotSupportedException();
-            }
-        }
+        public override bool CanWrite => this.xzStream.CanWrite;
 
         /// <inheritdoc/>
-        public override long Position
-        {
-            get
-            {
-                this.EnsureNotDisposed();
-                throw new NotSupportedException();
-            }
-
-            set
-            {
-                this.EnsureNotDisposed();
-                throw new NotSupportedException();
-            }
-        }
-
-        /// <summary>
-        /// Single-call buffer encoding
-        /// </summary>
-        public static byte[] Encode(byte[] buffer, uint preset = DefaultPreset)
-        {
-            var res = new byte[(long)NativeMethods.lzma_stream_buffer_bound((UIntPtr)buffer.Length)];
-
-            UIntPtr outPos;
-            var ret = NativeMethods.lzma_easy_buffer_encode(preset, LzmaCheck.Crc64, null, buffer, (UIntPtr)buffer.Length, res, &outPos, (UIntPtr)res.Length);
-            if (ret != LzmaResult.OK)
-            {
-                throw GetError(ret);
-            }
-
-            if ((long)outPos < res.Length)
-            {
-                Array.Resize(ref res, (int)(ulong)outPos);
-            }
-
-            return res;
-        }
+        public override long Length => this.xzStream.Length;
 
         /// <inheritdoc/>
-        public override void Flush()
-        {
-            throw new NotSupportedException();
-        }
+        public override long Position { get => this.xzStream.Position; set => this.xzStream.Position = value; }
 
         /// <inheritdoc/>
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            this.EnsureNotDisposed();
-            throw new NotSupportedException();
-        }
+        public override void Flush() => this.xzStream.Flush();
 
         /// <inheritdoc/>
-        public override void SetLength(long value)
-        {
-            this.EnsureNotDisposed();
-            throw new NotSupportedException();
-        }
+        public override long Seek(long offset, SeekOrigin origin) => this.xzStream.Seek(offset, origin);
 
         /// <inheritdoc/>
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            this.EnsureNotDisposed();
-            throw new NotSupportedException();
-        }
+        public override void SetLength(long value) => this.xzStream.SetLength(value);
 
         /// <inheritdoc/>
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            this.EnsureNotDisposed();
+        public override int Read(byte[] buffer, int offset, int count) => this.xzStream.Read(buffer, offset, count);
 
-            if (count == 0)
-            {
-                return;
-            }
-
-            var guard = buffer[checked((uint)offset + (uint)count) - 1];
-
-            if (this.lzmaStream.AvailIn != 0)
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.lzmaStream.AvailIn = (uint)count;
-            do
-            {
-                LzmaResult ret;
-                fixed (byte* inbuf = &buffer[offset])
-                {
-                    this.lzmaStream.NextIn = (IntPtr)inbuf;
-                    fixed (byte* outbuf = &this.outbuf[BufSize - this.lzmaStream.AvailOut])
-                    {
-                        this.lzmaStream.NextOut = (IntPtr)outbuf;
-                        ret = NativeMethods.lzma_code(ref this.lzmaStream, LzmaAction.Run);
-                    }
-
-                    offset += (int)((ulong)this.lzmaStream.NextIn - (ulong)(IntPtr)inbuf);
-                }
-
-                if (ret != LzmaResult.OK)
-                {
-                    throw this.ThrowError(ret);
-                }
-
-                if (this.lzmaStream.AvailOut == 0)
-                {
-                    this.innerStream.Write(this.outbuf, 0, BufSize);
-                    this.lzmaStream.AvailOut = BufSize;
-                }
-            }
-            while (this.lzmaStream.AvailIn != 0);
-        }
+        /// <inheritdoc/>
+        public override void Write(byte[] buffer, int offset, int count) => this.xzStream.Write(buffer, offset, count);
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            // finish encoding only if all input has been successfully processed
-            if (this.lzmaStream.InternalState != IntPtr.Zero && this.lzmaStream.AvailIn == 0)
-            {
-                LzmaResult ret;
-                do
-                {
-                    fixed (byte* outbuf = &this.outbuf[BufSize - (int)this.lzmaStream.AvailOut])
-                    {
-                        this.lzmaStream.NextOut = (IntPtr)outbuf;
-                        ret = NativeMethods.lzma_code(ref this.lzmaStream, LzmaAction.Finish);
-                    }
-
-                    if (ret > LzmaResult.StreamEnd)
-                    {
-                        throw this.ThrowError(ret);
-                    }
-
-                    var writeSize = BufSize - (int)this.lzmaStream.AvailOut;
-                    if (writeSize != 0)
-                    {
-                        this.innerStream.Write(this.outbuf, 0, writeSize);
-                        this.lzmaStream.AvailOut = BufSize;
-                    }
-                }
-                while (ret != LzmaResult.StreamEnd);
-            }
-
-            NativeMethods.lzma_end(ref this.lzmaStream);
-
-            if (disposing && !this.leaveOpen)
-            {
-                this.innerStream?.Dispose();
-            }
-
+            this.xzStream?.Dispose();
             base.Dispose(disposing);
-
-            this.disposed = true;
         }
 
-        private static Exception GetError(LzmaResult ret)
+        private static XZCompressOptions CreateCompressOptions(uint preset, bool leaveOpen)
         {
-            switch (ret)
+            return new XZCompressOptions
             {
-                case LzmaResult.MemError: return new OutOfMemoryException("Memory allocation failed");
-                case LzmaResult.OptionsError: return new ArgumentException("Specified preset is not supported");
-                case LzmaResult.UnsupportedCheck: return new Exception("Specified integrity check is not supported");
-                case LzmaResult.DataError: return new InvalidDataException("File size limits exceeded");
-                default: return new Exception("Unknown error, possibly a bug: " + ret);
-            }
+                Level = (LzmaCompLevel)Math.Min((int)preset, 9), // Map preset to compression level
+                LeaveOpen = leaveOpen // Forward leaveOpen parameter directly
+            };
         }
 
-        /// <summary>
-        /// Throws an exception if this stream is disposed of.
-        /// </summary>
-        private void EnsureNotDisposed()
+        private static XZParallelCompressOptions CreateParallelOptions(int threads)
         {
-            if (this.disposed)
+            return new XZParallelCompressOptions
             {
-                throw new ObjectDisposedException(nameof(XZOutputStream));
-            }
-        }
-
-        private Exception ThrowError(LzmaResult ret)
-        {
-            NativeMethods.lzma_end(ref this.lzmaStream);
-            return GetError(ret);
+                Threads = threads
+            };
         }
     }
 }
