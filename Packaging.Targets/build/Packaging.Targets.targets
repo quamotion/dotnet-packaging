@@ -100,6 +100,10 @@
       <RpmDotNetDependency Include="dotnet-runtime-9.0" Version="" />
     </ItemGroup>
 
+    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net10.0'">
+      <RpmDotNetDependency Include="dotnet-runtime-10.0" Version="" />
+    </ItemGroup>
+
     <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' != ''">
       <RpmDotNetDependency Include="openssl-libs" Version="" />
       <RpmDotNetDependency Include="libicu" Version="" />
@@ -194,6 +198,10 @@
       <DebDotNetDependencies Include="dotnet-runtime-9.0"/>
     </ItemGroup>
 
+    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net10.0'">
+      <DebDotNetDependencies Include="dotnet-runtime-10.0"/>
+    </ItemGroup>
+
     <!-- Dependency list for netcore3.1, updated to support Ubuntu 20.10/21.04  -->
     <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' != ''">
       <DebDependencies Include="libc6"/>  
@@ -202,7 +210,7 @@
       <DebDependencies Include="libstdc++6"/>
       <DebDependencies Include="zlib1g"/>
       <DebDependencies Include="libssl3 | libssl1.1 | libssl1.0.2 | libssl1.0.1 | libssl1.0.0 | libssl0.9.8"/>
-      <DebDependencies Include="libicu74 | libicu72 | libicu70 | libicu69 | libicu68 | libicu67 | libicu66 | libicu65 | libicu64 | libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
+      <DebDependencies Include="libicu78 | libicu77 | libicu76 | libicu75 | libicu74 | libicu72 | libicu70 | libicu69 | libicu68 | libicu67 | libicu66 | libicu65 | libicu64 | libicu63 | libicu62 | libicu61 | libicu60 | libicu59 | libicu58 | libicu57 | libicu56 | libicu55 | libicu54 | libicu53 | libicu52"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(SkipDebDependencies)' == 'true'">

@@ -37,12 +37,15 @@ resources:
     image: mcr.microsoft.com/dotnet/sdk:9.0-noble
   - container: 9.0-nanoserver
     image: mcr.microsoft.com/dotnet/sdk:9.0-nanoserver-1809
-    
+  - container: 10.0-noble
+    image: mcr.microsoft.com/dotnet/sdk:10.0-noble
+  - container: 10.0-nanoserver
+    image: mcr.microsoft.com/dotnet/sdk:10.0-nanoserver-ltsc2025
 stages:
 - stage: Build
   jobs:
   - job: build_noble
-    container: 9.0-noble
+    container: 10.0-noble
     pool:
       vmImage: ubuntu-22.04
     steps:
@@ -67,7 +70,7 @@ stages:
   - job: build_windows
     pool:
       vmImage: windows-2019
-    container: 9.0-nanoserver
+    container: 10.0-nanoserver-ltsc2025
     # Make sure we can run scripts in PowerShell core:
     # https://github.com/microsoft/azure-pipelines-tasks/issues/11448
     variables:
@@ -206,6 +209,18 @@ stages:
           container: 9.0-noble
           command: tarball
 
+        10.0-noble-deb:
+          container: 10.0-noble
+          command: deb
+        10.0-noble-rpm:
+          container: 10.0-noble
+          command: rpm
+        10.0-noble-zip:
+          container: 10.0-noble
+          command: zip
+        10.0-noble-tarball:
+          container: 10.0-noble
+          command: tarball
     container: $[ variables['container'] ]
     pool:
       vmImage: ubuntu-22.04
@@ -259,12 +274,19 @@ stages:
         framework-dependent-app-9_0:
           suite: framework-dependent
           framework: net9.0
+
+        self-contained-10_0:
+          suite: self-contained
+          framework: net10.0
+        framework-dependent-app-10_0:
+          suite: framework-dependent
+          framework: net10.0
     steps:
     - task: UseDotNet@2
-      displayName: 'Use .NET Core 9.0'
+      displayName: 'Use .NET Core 10.0'
       inputs:
         packageType: sdk
-        version: 9.0.x
+        version: 10.0.x
     - bash: |
         set -e
         export PATH=~/.local/bin/:$PATH
