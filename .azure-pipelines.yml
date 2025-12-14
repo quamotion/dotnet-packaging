@@ -3,32 +3,6 @@ trigger:
 
 resources:
   containers:
-  - container: 2.2-bionic
-    image: mcr.microsoft.com/dotnet/core/sdk:2.2-bionic
-  - container: 3.0-disco
-    image: mcr.microsoft.com/dotnet/core/sdk:3.0-disco
-  - container: 3.0-buster
-    image: mcr.microsoft.com/dotnet/core/sdk:3.0-buster
-  - container: 3.1-focal
-    image: mcr.microsoft.com/dotnet/core/sdk:3.1-focal
-  - container: 5.0-focal
-    image: mcr.microsoft.com/dotnet/sdk:5.0-focal
-  - container: 5.0-buster
-    image: mcr.microsoft.com/dotnet/sdk:5.0-buster-slim
-  - container: 5.0-bullseye
-    image: mcr.microsoft.com/dotnet/sdk:5.0-bullseye-slim
-  - container: 5.0-nanoserver
-    image: mcr.microsoft.com/dotnet/sdk:5.0-nanoserver-1809
-  - container: 6.0-focal
-    image: mcr.microsoft.com/dotnet/sdk:6.0-focal
-  - container: 6.0-bullseye
-    image: mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim
-  - container: 6.0-nanoserver
-    image: mcr.microsoft.com/dotnet/sdk:6.0-nanoserver-1809
-  - container: 7.0-bullseye
-    image: mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim
-  - container: 7.0-nanoserver
-    image: mcr.microsoft.com/dotnet/sdk:7.0-nanoserver-1809
   - container: 8.0-jammy
     image: mcr.microsoft.com/dotnet/sdk:8.0-jammy
   - container: 8.0-nanoserver
@@ -92,102 +66,11 @@ stages:
     strategy:
       maxParallel: 8
       matrix:
-        3.1-focal-deb:
-          container: 3.1-focal
-          command: deb
-        3.1-disco-rpm:
-          container: 3.1-focal
-          command: rpm
-        3.1-focal-zip:
-          container: 3.1-focal
-          command: zip
-        3.1-focal-tarball:
-          container: 3.1-focal
-          command: tarball
-
-        5.0-focal-deb:
-          container: 5.0-focal
-          command: deb
-        5.0-focal-rpm:
-          container: 5.0-focal
-          command: rpm
-        5.0-focal-zip:
-          container: 5.0-focal
-          command: zip
-        5.0-focal-tarball:
-          container: 5.0-focal
-          command: tarball
-
-        5.0-buster-deb:
-          container: 5.0-buster
-          command: deb
-        5.0-buster-rpm:
-          container: 5.0-buster
-          command: rpm
-        5.0-buster-zip:
-          container: 5.0-buster
-          command: zip
-        5.0-buster-tarball:
-          container: 5.0-buster
-          command: tarball
-
-        5.0-bullseye-deb:
-          container: 5.0-bullseye
-          command: deb
-        5.0-bullseye-rpm:
-          container: 5.0-bullseye
-          command: rpm
-        5.0-bullseye-zip:
-          container: 5.0-bullseye
-          command: zip
-        5.0-bullseye-tarball:
-          container: 5.0-bullseye
-          command: tarball
-
-        6.0-focal-deb:
-          container: 6.0-focal
-          command: deb
-        6.0-focal-rpm:
-          container: 6.0-focal
-          command: rpm
-        6.0-focal-zip:
-          container: 6.0-focal
-          command: zip
-        6.0-focal-tarball:
-          container: 6.0-focal
-          command: tarball
-
-        6.0-bullseye-deb:
-          container: 6.0-bullseye
-          command: deb
-        6.0-bullseye-rpm:
-          container: 6.0-bullseye
-          command: rpm
-        6.0-bullseye-zip:
-          container: 6.0-bullseye
-          command: zip
-        6.0-bullseye-tarball:
-          container: 6.0-bullseye
-          command: tarball
-          
-        7.0-bullseye-deb:
-          container: 7.0-bullseye
-          command: deb
-        7.0-bullseye-rpm:
-          container: 7.0-bullseye
-          command: rpm
-        7.0-bullseye-zip:
-          container: 7.0-bullseye
-          command: zip
-        7.0-bullseye-tarball:
-          container: 7.0-bullseye
-          command: tarball
-              
         8.0-jammy-deb:
-          container: 8.0-jammy 
+          container: 8.0-jammy
           command: deb
         8.0-jammy-rpm:
-          container: 8.0-jammy  
+          container: 8.0-jammy
           command: rpm
         8.0-jammy-zip:
           container: 8.0-jammy
@@ -195,7 +78,7 @@ stages:
         8.0-jammy-tarball:
           container: 8.0-jammy
           command: tarball
-        
+
         9.0-noble-deb:
           container: 9.0-noble
           command: deb
@@ -233,41 +116,13 @@ stages:
     strategy:
       maxParallel: 8
       matrix:
-        self-contained-3_1:
-          suite: self-contained
-          framework: netcoreapp3.1
-        framework-dependent-app-3_1:
-          suite: framework-dependent
-          framework: netcoreapp3.1
-          
-        self-contained-5_0:
-          suite: self-contained
-          framework: net5.0
-        framework-dependent-app-5_0:
-          suite: framework-dependent
-          framework: net5.0
-          
-        self-contained-6_0:
-          suite: self-contained
-          framework: net6.0
-        framework-dependent-app-6_0:
-          suite: framework-dependent
-          framework: net6.0
-        
-        self-contained-7_0:
-          suite: self-contained
-          framework: net7.0
-        framework-dependent-app-7_0:
-          suite: framework-dependent
-          framework: net7.0
-          
         self-contained-8_0:
           suite: self-contained
           framework: net8.0
         framework-dependent-app-8_0:
           suite: framework-dependent
           framework: net8.0
-        
+
         self-contained-9_0:
           suite: self-contained
           framework: net9.0
@@ -399,7 +254,7 @@ stages:
       inputs:
         artifactName: 'nuget'
       displayName: 'Download NuGet artifacts'
-      
+
     - task: NuGetToolInstaller@0
       displayName: Install NuGet
 

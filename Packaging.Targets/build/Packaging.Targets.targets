@@ -10,7 +10,7 @@
            and allow the user to override this. -->
       <PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' != ''">$(Version)</PackageVersion>
       <PackageVersion Condition="'$(PackageVersion)' == '' AND '$(Version)' == ''">1.0.0</PackageVersion>
-      
+
       <PackagePrefix Condition="'$(PackagePrefix)' == ''">$(TargetName)</PackagePrefix>
       <PackageName Condition="'$(PackageName)' == '' AND '$(RuntimeIdentifier)' != ''">$(PackagePrefix).$(PackageVersion).$(RuntimeIdentifier)</PackageName>
       <PackageName Condition="'$(PackageName)' == ''">$(PackagePrefix).$(PackageVersion)</PackageName>
@@ -51,7 +51,7 @@
         https://github.com/dotnet/core-setup/blob/release/2.2/src/pkg/packaging/rpm/
         https://github.com/dotnet/core-setup/blob/master/src/pkg/packaging/rpm/
 	    	https://github.com/dotnet/runtime/tree/v6.0.0/src/installer/pkg/sfx/installers/dotnet-runtime-deps
-    
+
         The syntax for "boolean dependencies" is described here (available starting
         with rpm 3.14):
         https://rpm.org/user_doc/boolean_dependencies.html
@@ -64,34 +64,6 @@
         - Upstream lists compat libraries for OpenSSL 1.0 instead of OpenSSL 1.1, that
           seems like an oversight.
         -->
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
-      <RpmDotNetDependency Include="dotnet-runtime-2.1" Version="" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
-      <RpmDotNetDependency Include="dotnet-runtime-2.2" Version="" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
-      <RpmDotNetDependency Include="dotnet-runtime-3.0" Version="" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
-      <RpmDotNetDependency Include="dotnet-runtime-3.1" Version="" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net5.0'">
-      <RpmDotNetDependency Include="dotnet-runtime-5.0" Version="" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net6.0'">
-      <RpmDotNetDependency Include="dotnet-runtime-6.0" Version="" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net7.0'">
-      <RpmDotNetDependency Include="dotnet-runtime-7.0" Version="" />
-    </ItemGroup>
-
     <ItemGroup Condition="'@(RpmDotNetDependency)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net8.0'">
       <RpmDotNetDependency Include="dotnet-runtime-8.0" Version="" />
     </ItemGroup>
@@ -112,12 +84,12 @@
 
     <ItemGroup Condition="'$(SkipRpmDependencies)' == 'true'">
       <RpmDotNetDependency Remove="@(RpmDotNetDependency)"/>
-    </ItemGroup>    
+    </ItemGroup>
 
     <Message Text="Creating RPM package $(RpmPath)" Importance="high"/>
 
     <MakeDir Directories="$(PackageDir)"/>
-    
+
     <RpmTask PublishDir="$(PublishDir)"
              RpmPath="$(RpmPath)"
              CpioPath="$(CpioPath)"
@@ -161,34 +133,6 @@
       <!-- DebPackageArchitecture is the architecture used for the deb package. Values like any, i386, amd64, arm and arm64 are supported -->
       <DebPackageArchitecture Condition="'$(DebPackageArchitecture)' == ''"></DebPackageArchitecture>
     </PropertyGroup>
-    
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.1'">
-      <DebDotNetDependencies Include="dotnet-runtime-2.1"/>
-    </ItemGroup>
-    
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp2.2'">
-      <DebDotNetDependencies Include="dotnet-runtime-2.2"/>
-    </ItemGroup>
-    
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.0'">
-      <DebDotNetDependencies Include="dotnet-runtime-3.0"/>
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'netcoreapp3.1'">
-      <DebDotNetDependencies Include="dotnet-runtime-3.1"/>
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net5.0'">
-      <DebDotNetDependencies Include="dotnet-runtime-5.0"/>
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net6.0'">
-      <DebDotNetDependencies Include="dotnet-runtime-6.0"/>
-    </ItemGroup>
-
-    <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net7.0'">
-      <DebDotNetDependencies Include="dotnet-runtime-7.0"/>
-    </ItemGroup>
 
     <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' == '' AND '$(TargetFramework)' == 'net8.0'">
       <DebDotNetDependencies Include="dotnet-runtime-8.0"/>
@@ -204,7 +148,7 @@
 
     <!-- Dependency list for netcore3.1, updated to support Ubuntu 20.10/21.04  -->
     <ItemGroup Condition="'@(DebDotNetDependencies)' == '' AND '$(RuntimeIdentifier)' != ''">
-      <DebDependencies Include="libc6"/>  
+      <DebDependencies Include="libc6"/>
       <DebDependencies Include="libgcc1"/>
       <DebDependencies Include="libgssapi-krb5-2"/>
       <DebDependencies Include="libstdc++6"/>
@@ -215,11 +159,11 @@
 
     <ItemGroup Condition="'$(SkipDebDependencies)' == 'true'">
       <DebDotNetDependencies Remove="@(DebDotNetDependencies)"/>
-    </ItemGroup>    
-    
+    </ItemGroup>
+
     <MakeDir Directories="$(PackageDir)"/>
-    
-    <DebTask PublishDir="$(PublishDir)" 
+
+    <DebTask PublishDir="$(PublishDir)"
              DebPath="$(DebPath)"
              DebTarPath="$(DebTarPath)"
              DebTarXzPath="$(DebTarXzPath)"
@@ -258,7 +202,7 @@
     <Message Text="Creating tarball $(TarballPath)" Importance="high"/>
 
     <MakeDir Directories="$(PackageDir)"/>
-    
+
     <TarballTask PublishDir="$(PublishDir)"
                  TarballPath="$(TarballPath)"
                  Prefix="$(TarballPrefix)"
@@ -273,7 +217,7 @@
     <Message Text="Creating zip package $(ZipPath)" Importance="high"/>
 
     <MakeDir Directories="$(PackageDir)"/>
-    
+
     <ZipTask PublishDir="$(PublishDir)"
              ZipPath="$(ZipPath)"/>
   </Target>
