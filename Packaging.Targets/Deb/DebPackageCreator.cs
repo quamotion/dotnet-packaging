@@ -93,7 +93,7 @@ namespace Packaging.Targets.Deb
 
             if (!string.IsNullOrEmpty(preInstallScript))
             {
-                pkg.PreInstallScript += preInstallScript;
+                pkg.PreInstallScript += preInstallScript.Trim().Replace("\r\n", "\n");
 
                 if (!preInstallScript.EndsWith("\n"))
                 {
@@ -103,7 +103,7 @@ namespace Packaging.Targets.Deb
 
             if (!string.IsNullOrEmpty(postInstallScript))
             {
-                pkg.PostInstallScript += postInstallScript;
+                pkg.PostInstallScript += postInstallScript.Trim().Replace("\r\n", "\n");
 
                 if (!postInstallScript.EndsWith("\n"))
                 {
@@ -113,7 +113,7 @@ namespace Packaging.Targets.Deb
 
             if (!string.IsNullOrEmpty(preRemoveScript))
             {
-                pkg.PreRemoveScript += preRemoveScript;
+                pkg.PreRemoveScript += preRemoveScript.Trim().Replace("\r\n", "\n");
 
                 if (!preRemoveScript.EndsWith("\n"))
                 {
@@ -123,7 +123,7 @@ namespace Packaging.Targets.Deb
 
             if (!string.IsNullOrEmpty(postRemoveScript))
             {
-                pkg.PostRemoveScript += postRemoveScript;
+                pkg.PostRemoveScript += postRemoveScript.Trim().Replace("\r\n", "\n");
 
                 if (!postRemoveScript.EndsWith("\n"))
                 {
