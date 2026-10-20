@@ -68,9 +68,9 @@ namespace Packaging.Targets.IO
             this.inbuf = Marshal.AllocHGlobal(BufSize);
             this.outbuf = Marshal.AllocHGlobal(BufSize);
 
-            this.lzmaStream.AvailIn = 0;
+            this.lzmaStream.AvailIn = (UIntPtr)0;
             this.lzmaStream.NextOut = this.outbuf;
-            this.lzmaStream.AvailOut = BufSize;
+            this.lzmaStream.AvailOut = (UIntPtr)BufSize;
 
             if (ret == LzmaResult.OK)
             {
@@ -222,13 +222,13 @@ namespace Packaging.Targets.IO
 
             while (this.internalBuffer.Count < count)
             {
-                if (this.lzmaStream.AvailIn == 0)
+                if ((ulong)this.lzmaStream.AvailIn == 0)
                 {
-                    this.lzmaStream.AvailIn = (uint)this.innerStream.Read(readBuf, 0, readBuf.Length);
+                    this.lzmaStream.AvailIn = (UIntPtr)this.innerStream.Read(readBuf, 0, readBuf.Length);
                     Marshal.Copy(readBuf, 0, this.inbuf, (int)this.lzmaStream.AvailIn);
                     this.lzmaStream.NextIn = this.inbuf;
 
-                    if (this.lzmaStream.AvailIn == 0)
+                    if ((ulong)this.lzmaStream.AvailIn == 0)
                     {
                         action = LzmaAction.Finish;
                     }
@@ -236,7 +236,7 @@ namespace Packaging.Targets.IO
 
                 var ret = NativeMethods.lzma_code(ref this.lzmaStream, action);
 
-                if (this.lzmaStream.AvailOut == 0 || ret == LzmaResult.StreamEnd)
+                if ((ulong)this.lzmaStream.AvailOut == 0 || ret == LzmaResult.StreamEnd)
                 {
                     var writeSize = BufSize - (int)this.lzmaStream.AvailOut;
                     Marshal.Copy(this.outbuf, outManagedBuf, 0, writeSize);
@@ -246,7 +246,7 @@ namespace Packaging.Targets.IO
                     this.internalBuffer.RemoveRange(this.internalBuffer.Count - tail, tail);
 
                     this.lzmaStream.NextOut = this.outbuf;
-                    this.lzmaStream.AvailOut = BufSize;
+                    this.lzmaStream.AvailOut = (UIntPtr)BufSize;
                 }
 
                 if (ret != LzmaResult.OK)

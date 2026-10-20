@@ -96,7 +96,7 @@ namespace Packaging.Targets.IO
             if (ret == LzmaResult.OK)
             {
                 this.outbuf = new byte[BufSize];
-                this.lzmaStream.AvailOut = BufSize;
+                this.lzmaStream.AvailOut = (UIntPtr)BufSize;
                 return;
             }
 
@@ -230,19 +230,19 @@ namespace Packaging.Targets.IO
 
             var guard = buffer[checked((uint)offset + (uint)count) - 1];
 
-            if (this.lzmaStream.AvailIn != 0)
+            if ((ulong)this.lzmaStream.AvailIn != 0)
             {
                 throw new InvalidOperationException();
             }
 
-            this.lzmaStream.AvailIn = (uint)count;
+            this.lzmaStream.AvailIn = (UIntPtr)count;
             do
             {
                 LzmaResult ret;
                 fixed (byte* inbuf = &buffer[offset])
                 {
                     this.lzmaStream.NextIn = (IntPtr)inbuf;
-                    fixed (byte* outbuf = &this.outbuf[BufSize - this.lzmaStream.AvailOut])
+                    fixed (byte* outbuf = &this.outbuf[(ulong)BufSize - (ulong)this.lzmaStream.AvailOut])
                     {
                         this.lzmaStream.NextOut = (IntPtr)outbuf;
                         ret = NativeMethods.lzma_code(ref this.lzmaStream, LzmaAction.Run);
@@ -256,20 +256,20 @@ namespace Packaging.Targets.IO
                     throw this.ThrowError(ret);
                 }
 
-                if (this.lzmaStream.AvailOut == 0)
+                if ((ulong)this.lzmaStream.AvailOut == 0)
                 {
                     this.innerStream.Write(this.outbuf, 0, BufSize);
-                    this.lzmaStream.AvailOut = BufSize;
+                    this.lzmaStream.AvailOut = (UIntPtr)BufSize;
                 }
             }
-            while (this.lzmaStream.AvailIn != 0);
+            while ((ulong)this.lzmaStream.AvailIn != 0);
         }
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             // finish encoding only if all input has been successfully processed
-            if (this.lzmaStream.InternalState != IntPtr.Zero && this.lzmaStream.AvailIn == 0)
+            if (this.lzmaStream.InternalState != IntPtr.Zero && (ulong)this.lzmaStream.AvailIn == 0)
             {
                 LzmaResult ret;
                 do
@@ -289,7 +289,7 @@ namespace Packaging.Targets.IO
                     if (writeSize != 0)
                     {
                         this.innerStream.Write(this.outbuf, 0, writeSize);
-                        this.lzmaStream.AvailOut = BufSize;
+                        this.lzmaStream.AvailOut = (UIntPtr)BufSize;
                     }
                 }
                 while (ret != LzmaResult.StreamEnd);
