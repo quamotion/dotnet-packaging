@@ -63,7 +63,7 @@ namespace Packaging.Targets.IO
         /// <summary>
         /// Number of available input bytes in next_in.
         /// </summary>
-        public uint AvailIn;
+        public nuint AvailIn;
 
         /// <summary>
         /// Total number of bytes read by liblzma.
@@ -78,7 +78,7 @@ namespace Packaging.Targets.IO
         /// <summary>
         /// Amount of free space in next_out.
         /// </summary>
-        public uint AvailOut;
+        public nuint AvailOut;
 
         /// <summary>
         /// Total number of bytes written by liblzma.
@@ -113,8 +113,8 @@ namespace Packaging.Targets.IO
         private readonly IntPtr reservedPtr4;
         private readonly ulong reservedInt1;
         private readonly ulong reservedInt2;
-        private readonly uint reservedInt3;
-        private readonly uint reservedInt4;
+        private readonly nuint reservedInt3;
+        private readonly nuint reservedInt4;
         private readonly uint reservedEnum1;
         private readonly uint reservedEnum2;
     }

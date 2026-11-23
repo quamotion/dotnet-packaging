@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <Description>This package supports the dotnet-pack and dotnet-zip packages. Once you've installed this package together with dotnet-zip or dotnet-tarball, you can run commands such as dotnet zip or dotnet tarball to generate .zip or .tar.gz archives which contain the published output of your project.</Description>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
