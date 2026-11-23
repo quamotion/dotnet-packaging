@@ -69,3 +69,37 @@ jobs:
         with:
           name: pkg
           path: pkg/
+
+  publish:
+    permissions:
+      id-token: write
+      contents: read
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.0.x
+
+      - name: Build
+        run: |
+          dotnet restore dotnet-packaging.sln
+          dotnet pack dotnet-packaging.sln -c Release -o pkg/
+
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: qmfrederik
+    
+      # Push to NuGet (master only)
+      - name: NuGet push
+        run: |
+          dotnet nuget push pkg/*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+          dotnet nuget push pkg/*.snupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
