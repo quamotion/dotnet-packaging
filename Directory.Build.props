@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NerdBank.GitVersioning" Version="3.6.133" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="NerdBank.GitVersioning" Version="3.10.94" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="11.0.100" PrivateAssets="All"/>
   </ItemGroup>
 </Project>
