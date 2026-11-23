@@ -28,7 +28,7 @@ jobs:
         run: |
           dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj -l "trx;LogFileName=pkg/Packaging.Targets.Tests.trx"
 
-      - name: Integration Test
+      - name: Integration Test - Build Packages
         run: |
           set -e
           export PATH="$PATH:/$HOME/.dotnet/tools"
@@ -43,15 +43,27 @@ jobs:
           dotnet tool install --global dotnet-zip --version $version
           dotnet tool install --global dotnet-tarball --version $version
 
-          # Install Packaging.Targets
-          dotnet deb install
-
           # Use dotnet-packaging
           dotnet deb cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/deb
           dotnet rpm cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/rpm
           dotnet zip cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/zip
           dotnet tarball cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/tarball
 
+      # Install the .deb and .rpm packages (for self-contained apps) in a
+      # Ubuntu and RHEL Docker container.
+      # The self-contained app is a xunit test suite, which ensures the app
+      # is installed correctly.
+      - name: Integration Test - Install Packages
+        run: |
+          set -e
+          export PATH="$PATH:/$HOME/.dotnet/tools"
+
+          # Test a rpm-based build
+          ./run-tests.sh -r rhel.10-x64
+
+          # Test a deb-based build
+          ./run-tests.sh -r ubuntu.26.04-x64
+        working-directory: demo/cliscd
       - uses: actions/upload-artifact@v4
         if: github.event_name != 'pull_request'
         with:

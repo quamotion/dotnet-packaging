@@ -1,11 +1,14 @@
-FROM debian:9
+FROM redhat/ubi10
 
-ENV rid=debian.9-x64
-COPY cliscd.1.0.0.$rid.deb /pkg/
+ENV rid=linux-x64
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+
+COPY cliscd.1.0.0.$rid.rpm /pkg/
 COPY reference.txt /pkg/
 
-RUN apt-get update \
-&& dpkg -i /pkg/cliscd.1.0.0.$rid.deb || apt-get install -f -y
+RUN yum update -y \
+&& yum install -y diffutils \
+&& yum install -y /pkg/cliscd.1.0.0.$rid.rpm
 
 RUN ls -a /usr/share/cliscd >> ~/testoutput.log 2>&1 || exit 0
 RUN ls -a /etc/cliscd >> ~/testoutput.log 2>&1 || exit 0

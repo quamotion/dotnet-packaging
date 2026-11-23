@@ -66,6 +66,14 @@ namespace Dotnet.Packaging
                 });
 
             rootCommand.AddOption(new Option(
+                new string[] { "-sc", "--self-contained" },
+                $"Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.",
+                arity: ArgumentArity.Zero)
+                {
+                    Name = "self-contained"
+                });
+
+            rootCommand.AddOption(new Option(
                 new string[] { "-c", "--configuration" },
                 $"Target configuration of the {outputName}. The default for most projects is 'Debug'.",
                 arity: ArgumentArity.ExactlyOne)
@@ -149,7 +157,7 @@ namespace Dotnet.Packaging
                     })
                 });
 
-            rootCommand.Handler = CommandHandler.Create<IConsole, string, string, string, string, string, bool, bool, string>((console, runtime, framework, configuration, output, versionSuffix, noRestore, verbose, project) =>
+            rootCommand.Handler = CommandHandler.Create<IConsole, string, string, bool, string, string, string, bool, bool, string>((console, runtime, framework, selfContained, configuration, output, versionSuffix, noRestore, verbose, project) =>
             {
                 console.Out.WriteLine($"dotnet {this.commandName} ({ThisAssembly.AssemblyInformationalVersion})");
 
@@ -157,6 +165,7 @@ namespace Dotnet.Packaging
                 {
                     console.Out.WriteLine($"{nameof(runtime)}: {runtime}");
                     console.Out.WriteLine($"{nameof(framework)}: {framework}");
+                    console.Out.WriteLine($"{nameof(selfContained)}: {selfContained}");
                     console.Out.WriteLine($"{nameof(configuration)}: {configuration}");
                     console.Out.WriteLine($"{nameof(output)}: {output}");
                     console.Out.WriteLine($"{nameof(versionSuffix)}: {versionSuffix}");
@@ -193,6 +202,11 @@ namespace Dotnet.Packaging
                 if (!string.IsNullOrWhiteSpace(framework))
                 {
                     msbuildArguments.Append($"/p:TargetFramework={framework} ");
+                }
+                
+                if (selfContained)
+                {
+                    msbuildArguments.Append($"/p:SelfContained=true ");
                 }
 
                 if (!string.IsNullOrWhiteSpace(configuration))
