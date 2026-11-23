@@ -24,9 +24,33 @@ jobs:
           cp demo/Directory.Build.props pkg/
           cp demo/version.txt pkg/
 
-      - name: Test
+      - name: Unit Test
         run: |
           dotnet test Packaging.Targets.Tests/Packaging.Targets.Tests.csproj -l "trx;LogFileName=pkg/Packaging.Targets.Tests.trx"
+
+      - name: Integration Test
+        run: |
+          set -e
+          export PATH="$PATH:/$HOME/.dotnet/tools"
+
+          cd demo
+
+          version=$(cat version.txt)
+
+          # Install the dotnet-${{ matrix. command }} tool
+          dotnet tool install --global dotnet-deb --version $version
+          dotnet tool install --global dotnet-rpm --version $version
+          dotnet tool install --global dotnet-zip --version $version
+          dotnet tool install --global dotnet-tarball --version $version
+
+          # Install Packaging.Targets
+          dotnet deb install
+
+          # Use dotnet-packaging
+          dotnet deb cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/deb
+          dotnet rpm cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/rpm
+          dotnet zip cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/zip
+          dotnet tarball cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/tarball
 
       - uses: actions/upload-artifact@v4
         if: github.event_name != 'pull_request'
