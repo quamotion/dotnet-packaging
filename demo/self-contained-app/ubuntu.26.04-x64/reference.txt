@@ -171,11 +171,6 @@ System.Xml.XmlSerializer.dll
 System.Xml.dll
 System.dll
 WindowsBase.dll
-cliscd
-cliscd.deps.json
-cliscd.dll
-cliscd.pdb
-cliscd.runtimeconfig.json
 createdump
 libMonoPosixHelper.so
 libSystem.Globalization.Native.so
@@ -194,10 +189,15 @@ libmscordaccore.so
 libmscordbi.so
 mscorlib.dll
 netstandard.dll
+self-contained-app
+self-contained-app.deps.json
+self-contained-app.dll
+self-contained-app.pdb
+self-contained-app.runtimeconfig.json
 xunit.abstractions.dll
 xunit.assert.dll
 xunit.core.dll
 xunit.execution.dotnet.dll
 xunit.runner.utility.netcoreapp10.dll
-ls: cannot access '/etc/cliscd': No such file or directory
-ls: cannot access '/root/.cliscd': No such file or directory
+ls: cannot access '/etc/self-contained-app': No such file or directory
+ls: cannot access '/root/.self-contained-app': No such file or directory
