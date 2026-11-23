@@ -31,7 +31,7 @@ namespace Packaging.Targets.Rpm
                     using (Stream stream = file.Open())
                     {
                         byte[] data = new byte[stream.Length];
-                        stream.Read(data, 0, data.Length);
+                        stream.ReadExactly(data);
                     }
                 }
             }

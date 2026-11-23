@@ -135,7 +135,7 @@ namespace Packaging.Targets.IO
                     var streamFooter = new byte[streamFooterSize];
 
                     this.innerStream.Seek(-streamFooterSize, SeekOrigin.End);
-                    this.innerStream.Read(streamFooter, 0, streamFooterSize);
+                    this.innerStream.ReadExactly(streamFooter);
 
                     NativeMethods.lzma_stream_footer_decode(ref lzmaStreamFlags, streamFooter);
                     var indexPointer = new byte[lzmaStreamFlags.BackwardSize];

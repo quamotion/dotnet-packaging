@@ -124,7 +124,7 @@ namespace Packaging.Targets.Tests
         public override void Write(byte[] buffer, int offset, int count)
         {
             byte[] expected = new byte[buffer.Length];
-            this.expectedOutput.Read(expected, offset, count);
+            expectedOutput.ReadExactly(expected, offset, count);
 
             byte[] bufferChunk = buffer.Skip(offset).Take(count).ToArray();
             byte[] expectedChunk = expected.Skip(offset).Take(count).ToArray();

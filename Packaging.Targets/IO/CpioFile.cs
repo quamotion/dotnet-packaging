@@ -161,7 +161,7 @@ namespace Packaging.Targets.IO
             }
 
             byte[] nameBytes = new byte[this.entryHeader.NameSize];
-            this.Stream.Read(nameBytes, 0, nameBytes.Length);
+            this.Stream.ReadExactly(nameBytes);
 
             this.FileName = Encoding.UTF8.GetString(nameBytes, 0, (int)this.entryHeader.NameSize - 1);
 

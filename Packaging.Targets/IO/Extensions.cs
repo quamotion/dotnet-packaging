@@ -12,7 +12,7 @@ namespace Packaging.Targets.IO
             using (var stream = file.Open())
             {
                 byte[] data = new byte[stream.Length];
-                stream.Read(data, 0, data.Length);
+                stream.ReadExactly(data);
 
                 return Encoding.UTF8.GetString(data);
             }
