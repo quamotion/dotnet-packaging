@@ -79,7 +79,7 @@ namespace Packaging.Targets.IO
             if (!this.magicRead)
             {
                 byte[] buffer = new byte[Magic.Length];
-                this.Stream.Read(buffer, 0, buffer.Length);
+                this.Stream.ReadExactly(buffer);
                 var magic = Encoding.ASCII.GetString(buffer);
 
                 if (!string.Equals(magic, Magic, StringComparison.Ordinal))

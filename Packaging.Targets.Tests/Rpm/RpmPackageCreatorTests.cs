@@ -190,10 +190,10 @@ namespace Packaging.Targets.Tests.Rpm
                 using (Stream headerStream = creator.GetHeaderStream(package))
                 {
                     byte[] originalData = new byte[originalHeaderStream.Length];
-                    originalHeaderStream.Read(originalData, 0, originalData.Length);
+                    originalHeaderStream.ReadExactly(originalData);
 
                     byte[] data = new byte[headerStream.Length];
-                    headerStream.Read(data, 0, data.Length);
+                    headerStream.ReadExactly(data);
 
                     int delta = 0;
                     int dataDelta = 0;
@@ -409,12 +409,12 @@ namespace Packaging.Targets.Tests.Rpm
 
                 while (originalStream.Position < originalStream.Length)
                 {
-                    originalStream.Read(originalBuffer, 0, originalBuffer.Length);
-                    targetStream.Read(targetBuffer, 0, targetBuffer.Length);
+                    var read = originalStream.Read(originalBuffer, 0, originalBuffer.Length);
+                    targetStream.ReadExactly(targetBuffer, 0, read);
 
-                    Assert.Equal(originalBuffer, targetBuffer);
+                    Assert.Equal(originalBuffer.Take(read), targetBuffer.Take(read));
 
-                    index += originalBuffer.Length;
+                    index += read;
                 }
             }
         }

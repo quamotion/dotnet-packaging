@@ -58,7 +58,7 @@ namespace Packaging.Targets.Rpm
             }
 
             var data = new byte[section.Header.HeaderSize];
-            stream.Read(data, 0, (int)section.Header.HeaderSize);
+            stream.ReadExactly(data);
 
             var headerSize = Marshal.SizeOf<IndexHeader>() * section.Records.Count;
 
