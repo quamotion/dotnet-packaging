@@ -62,8 +62,6 @@
     <RpmDotNetDependency Include="krb5-libs" Version="" />
     <RpmDotNetDependency Include="libicu" Version="" />
     <RpmDotNetDependency Include="zlib" Version="" />
-    <RpmDotNetDependency Include="libunwind" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
-    <RpmDotNetDependency Include="libuuid" Version="" Condition="'$(TargetFramework)'=='netcoreapp2.0'" />
   </ItemGroup>
 
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('opensuse'))">
