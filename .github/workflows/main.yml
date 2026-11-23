@@ -44,10 +44,10 @@ jobs:
           dotnet tool install --global dotnet-tarball --version $version
 
           # Use dotnet-packaging
-          dotnet deb cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/deb
-          dotnet rpm cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/rpm
-          dotnet zip cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/zip
-          dotnet tarball cliscd/cliscd.csproj -o ${{ github.workspace }}/pkg/tarball
+          dotnet deb self-contained-app/self-contained-app.csproj -o ${{ github.workspace }}/pkg/deb
+          dotnet rpm self-contained-app/self-contained-app.csproj -o ${{ github.workspace }}/pkg/rpm
+          dotnet zip self-contained-app/self-contained-app.csproj -o ${{ github.workspace }}/pkg/zip
+          dotnet tarball self-contained-app/self-contained-app.csproj -o ${{ github.workspace }}/pkg/tarball
 
       # Install the .deb and .rpm packages (for self-contained apps) in a
       # Ubuntu and RHEL Docker container.
@@ -63,7 +63,7 @@ jobs:
 
           # Test a deb-based build
           ./run-tests.sh -r ubuntu.26.04-x64
-        working-directory: demo/cliscd
+        working-directory: demo/self-contained-app
       - uses: actions/upload-artifact@v4
         if: github.event_name != 'pull_request'
         with:

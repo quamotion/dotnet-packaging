@@ -39,21 +39,21 @@ then
 fi
 
 dotnet $format -c Release -r linux-x64 -f net10.0 --self-contained
-cp bin/Release/net10.0/linux-x64/cliscd.1.0.0.linux-x64.$format $rid
-docker build -t clisc:$rid $rid
-docker run clisc:$rid
+cp bin/Release/net10.0/linux-x64/self-contained-app.1.0.0.linux-x64.$format $rid
+docker build -t sca:$rid $rid
+docker run sca:$rid
 
 if [[ $format == deb ]]
 then
-    docker run clisc:$rid /usr/bin/apt-get remove -y cliscd
+    docker run sca:$rid /usr/bin/apt-get remove -y self-contained-app
 fi
 
 if [[ $format == rpm ]]
 then
     if [[ $rid == opensuse* ]]
     then
-        docker run clisc:$rid /usr/bin/zypper -n rm cliscd
+        docker run sca:$rid /usr/bin/zypper -n rm self-contained-app
     else
-        docker run clisc:$rid /usr/bin/rpm -e cliscd
+        docker run sca:$rid /usr/bin/rpm -e self-contained-app
     fi
 fi

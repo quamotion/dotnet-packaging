@@ -28,6 +28,26 @@ namespace cliscd
             Assert.True(File.Exists("/home/quamotion/.cliscd/cliscd.user.config"));
         }
 
+        [Fact]
+        public void ReadmeFileExists()
+        {
+            Assert.True(File.Exists("/etc/dotnet-packaging/README.md"));
+        }
+
+        [Fact]
+        public void LinuxFileModeIsCorrect_Directory()
+        {
+            var directoryInfo = new UnixDirectoryInfo("/etc/dotnet-packaging");
+            Assert.Equal(0b111_111_000, (int)directoryInfo.FileAccessPermissions & 0b111_111_111);
+        }
+
+        [Fact]
+        public void LinuxFileModeIsCorrect_File()
+        {
+            var fileInfo = new UnixFileInfo("/etc/dotnet-packaging/LICENSE");
+            Assert.Equal(0b111_101_101, (int)fileInfo.FileAccessPermissions & 0b111_111_111);
+        }
+
         [Theory]
         [InlineData("/var/log/quamotion")]
         [InlineData("/var/run/quamotion")]
