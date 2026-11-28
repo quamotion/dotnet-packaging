@@ -26,9 +26,9 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.12.2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <!-- BoncyCastle is included in the lib\ folder in the Packaging.Targets package (see below), so we don't need an
-         explicit dependency on it, either -->
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7">
+    <!-- BoncyCastle and SharpZipLib are included in the lib\ folder in the Packaging.Targets package (see below), so we don't need an
+         explicit dependency on them, either -->
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.7.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2">
@@ -42,7 +42,7 @@
     </Content>
 
     <!-- Bouncy Castle-->
-    <Content Include="$(NuGetPackageRoot)\portable.bouncycastle\1.8.6.7\lib\netstandard2.0\BouncyCastle.Crypto.dll" Link="BouncyCastle.Crypto.dll">
+    <Content Include="$(NuGetPackageRoot)\bouncycastle.cryptography\2.7.0\lib\net6.0\BouncyCastle.Cryptography.dll" Link="BouncyCastle.Cryptography.dll">
       <Pack>true</Pack>
       <PackagePath>tools\net10.0\</PackagePath>
     </Content>
