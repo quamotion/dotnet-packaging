@@ -11,7 +11,7 @@
     <PackageReference Include="Moq" Version="4.14.5" />
 
     <!-- The BouncyCastle dependency is defined as Private for Packaging.Targets, so we need to re-define it here. -->
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7" />
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.7.0" />
 
     <!-- Defined as a private dependency, so we need to re-define it here -->
     <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409" />
