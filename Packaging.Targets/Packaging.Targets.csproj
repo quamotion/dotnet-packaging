@@ -26,12 +26,9 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.12.2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <!-- BoncyCastle and SharpZipLib are included in the lib\ folder in the Packaging.Targets package (see below), so we don't need an
-         explicit dependency on them, either -->
+    <!-- BoncyCastle is included in the lib\ folder in the Packaging.Targets package (see below), so we don't need an
+         explicit dependency on it, either -->
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="SharpZipLib" Version="1.3.3">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2">
@@ -42,12 +39,6 @@
     <Content Include="build\*.*">
       <Pack>true</Pack>
       <PackagePath>build\</PackagePath>
-    </Content>
-
-    <!-- SharpZipLib -->
-    <Content Include="$(NuGetPackageRoot)\sharpziplib\1.3.3\lib\netstandard2.0\ICSharpCode.SharpZipLib.dll" Link="ICSharpCode.SharpZipLib.dll">
-      <Pack>true</Pack>
-      <PackagePath>tools\net10.0\</PackagePath>
     </Content>
 
     <!-- Bouncy Castle-->
