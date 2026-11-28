@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 
 namespace Packaging.Targets.Deb
 {
@@ -53,7 +55,7 @@ namespace Packaging.Targets.Deb
                         var ext = Path.GetExtension(archive.FileName);
                         if (ext == ".gz")
                         {
-                            return new GZipDecompressor(archive.Open(), false);
+                            return new GZipStream(archive.Open(), CompressionMode.Decompress, leaveOpen: false);
                         }
 
                         if (ext == ".xz")
@@ -100,22 +102,19 @@ namespace Packaging.Targets.Deb
             package.ControlExtras = new Dictionary<string, DebPackageControlFileData>();
             package.Md5Sums = new Dictionary<string, string>();
             using (Stream stream = archive.Open())
-            using (GZipDecompressor decompressedStream = new GZipDecompressor(stream, leaveOpen: true))
-            using (TarFile tarFile = new TarFile(decompressedStream, leaveOpen: true))
+            using (GZipStream decompressedStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true))
+            using (TarReader tarReader = new TarReader(decompressedStream, leaveOpen: true))
             {
-                while (tarFile.Read())
+                TarEntry entry;
+                while ((entry = tarReader.GetNextEntry()) != null)
                 {
-                    switch (tarFile.FileName)
+                    switch (entry.Name)
                     {
                         case "./control":
-                            using (Stream controlFile = tarFile.Open())
-                            {
-                                package.ControlFile = ControlFileParser.Read(controlFile);
-                            }
-
+                            package.ControlFile = ControlFileParser.Read(entry.DataStream);
                             break;
                         case "./md5sums":
-                            using (var sums = new StreamReader(tarFile.Open()))
+                            using (var sums = new StreamReader(entry.DataStream))
                             {
                                 string line;
                                 while ((line = sums.ReadLine()) != null)
@@ -127,30 +126,43 @@ namespace Packaging.Targets.Deb
 
                             break;
                         case "./preinst":
-                            package.PreInstallScript = tarFile.ReadAsUtf8String();
+                            package.PreInstallScript = ReadAsUtf8String(entry);
                             break;
                         case "./postinst":
-                            package.PostInstallScript = tarFile.ReadAsUtf8String();
+                            package.PostInstallScript = ReadAsUtf8String(entry);
                             break;
                         case "./prerm":
-                            package.PreRemoveScript = tarFile.ReadAsUtf8String();
+                            package.PreRemoveScript = ReadAsUtf8String(entry);
                             break;
                         case "./postrm":
-                            package.PostRemoveScript = tarFile.ReadAsUtf8String();
+                            package.PostRemoveScript = ReadAsUtf8String(entry);
                             break;
 
                         case "./":
-                            tarFile.Skip();
                             break;
                         default:
-                            package.ControlExtras[tarFile.FileName] = new DebPackageControlFileData
+                            package.ControlExtras[entry.Name] = new DebPackageControlFileData
                             {
-                                Mode = tarFile.FileHeader.FileMode,
-                                Contents = tarFile.ReadAsUtf8String()
+                                Mode = (LinuxFileMode)(int)entry.Mode,
+                                Contents = ReadAsUtf8String(entry)
                             };
                             break;
                     }
                 }
+            }
+        }
+
+        private static string ReadAsUtf8String(TarEntry entry)
+        {
+            if (entry.DataStream == null)
+            {
+                return string.Empty;
+            }
+
+            using (var data = new MemoryStream())
+            {
+                entry.DataStream.CopyTo(data);
+                return Encoding.UTF8.GetString(data.GetBuffer(), 0, (int)data.Length);
             }
         }
     }

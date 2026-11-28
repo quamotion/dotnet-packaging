@@ -2,6 +2,7 @@
 using Packaging.Targets.IO;
 using System;
 using System.Collections.ObjectModel;
+using System.Formats.Tar;
 using System.IO;
 using System.Security.Cryptography;
 using Xunit;
@@ -35,33 +36,29 @@ namespace Packaging.Targets.Tests.Deb
 
                 stream.Seek(0, SeekOrigin.Begin);
                 using (var payload = DebPackageReader.GetPayloadStream(stream))
-                using (var tarFile = new TarFile(payload, leaveOpen: true))
+                using (var tarReader = new TarReader(payload, leaveOpen: true))
                 {
-                    while (tarFile.Read())
+                    TarEntry entry;
+                    while ((entry = tarReader.GetNextEntry()) != null)
                     {
-                        var tarHeader = (TarHeader)tarFile.FileHeader;
-                        Assert.Equal(tarHeader.Checksum, tarHeader.ComputeChecksum());
-                        if (tarHeader.TypeFlag != TarTypeFlag.RegType)
+                        if (entry.EntryType != TarEntryType.RegularFile)
                         {
-                            tarFile.Skip();
+                            continue;
                         }
-                        else
-                        {
-                            var fname = tarFile.FileName;
-                            Assert.StartsWith("./", fname);
-                            fname = fname.Substring(2);
-                            if (!package.Md5Sums.TryGetValue(fname, out var sum))
-                            {
-                                throw new Exception($"Checksum for {fname} not found");
-                            }
 
-                            string hash;
-                            using (var fileStream = tarFile.Open())
-                            using (var md5 = MD5.Create())
-                                hash = BitConverter.ToString(md5.ComputeHash(fileStream)).Replace("-", string.Empty)
-                                    .ToLower();
-                            Assert.Equal(sum, hash);
+                        var fname = entry.Name;
+                        Assert.StartsWith("./", fname);
+                        fname = fname.Substring(2);
+                        if (!package.Md5Sums.TryGetValue(fname, out var sum))
+                        {
+                            throw new Exception($"Checksum for {fname} not found");
                         }
+
+                        string hash;
+                        using (var md5 = MD5.Create())
+                            hash = BitConverter.ToString(md5.ComputeHash(entry.DataStream)).Replace("-", string.Empty)
+                                .ToLower();
+                        Assert.Equal(sum, hash);
                     }
                 }
             }
@@ -81,11 +78,12 @@ namespace Packaging.Targets.Tests.Deb
 
                 stream.Seek(0, SeekOrigin.Begin);
                 using (var payload = DebPackageReader.GetPayloadStream(stream))
-                using (var tarFile = new TarFile(payload, leaveOpen: true))
+                using (var tarReader = new TarReader(payload, leaveOpen: true))
                 {
-                    while (tarFile.Read())
+                    TarEntry entry;
+                    while ((entry = tarReader.GetNextEntry()) != null)
                     {
-                        fileNames.Add(tarFile.FileName);
+                        fileNames.Add(entry.Name);
                     }
                 }
 

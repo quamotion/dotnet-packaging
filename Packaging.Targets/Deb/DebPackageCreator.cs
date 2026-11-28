@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -161,51 +162,53 @@ namespace Packaging.Targets.Deb
         private static void WriteControl(Stream targetStream, DebPackage pkg, List<ArchiveEntry> entries)
         {
             var controlTar = new MemoryStream();
-            WriteControlEntry(controlTar, "./");
-            WriteControlEntry(
-                controlTar,
-                "./control",
-                string.Join("\n", pkg.ControlFile
-                    .OrderByDescending(x => x.Key == "Package").ThenBy(x => x.Key)
-                    .Select(x => $"{x.Key}: {x.Value}")) + "\n");
-
-            WriteControlEntry(
-                controlTar,
-                "./md5sums",
-                string.Join("\n", pkg.Md5Sums.Select(x => $"{x.Value}  {x.Key}")) + "\n");
-
-            var execMode = LinuxFileMode.S_IRUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IXUSR |
-                           LinuxFileMode.S_IRGRP | LinuxFileMode.S_IROTH;
-
-            if (!string.IsNullOrWhiteSpace(pkg.PreInstallScript))
+            using (var writer = TarFileCreator.CreateWriter(controlTar))
             {
-                WriteControlEntry(controlTar, "./preinst", $"#!/bin/sh\n{pkg.PreInstallScript}\n", execMode);
+                WriteControlEntry(writer, "./");
+                WriteControlEntry(
+                    writer,
+                    "./control",
+                    string.Join("\n", pkg.ControlFile
+                        .OrderByDescending(x => x.Key == "Package").ThenBy(x => x.Key)
+                        .Select(x => $"{x.Key}: {x.Value}")) + "\n");
+
+                WriteControlEntry(
+                    writer,
+                    "./md5sums",
+                    string.Join("\n", pkg.Md5Sums.Select(x => $"{x.Value}  {x.Key}")) + "\n");
+
+                var execMode = LinuxFileMode.S_IRUSR | LinuxFileMode.S_IWUSR | LinuxFileMode.S_IXUSR |
+                               LinuxFileMode.S_IRGRP | LinuxFileMode.S_IROTH;
+
+                if (!string.IsNullOrWhiteSpace(pkg.PreInstallScript))
+                {
+                    WriteControlEntry(writer, "./preinst", $"#!/bin/sh\n{pkg.PreInstallScript}\n", execMode);
+                }
+
+                if (!string.IsNullOrWhiteSpace(pkg.PostInstallScript))
+                {
+                    WriteControlEntry(writer, "./postinst", $"#!/bin/sh\n{pkg.PostInstallScript}\n", execMode);
+                }
+
+                if (!string.IsNullOrWhiteSpace(pkg.PreRemoveScript))
+                {
+                    WriteControlEntry(writer, "./prerm", $"#!/bin/sh\n{pkg.PreRemoveScript}\n", execMode);
+                }
+
+                if (!string.IsNullOrWhiteSpace(pkg.PostRemoveScript))
+                {
+                    WriteControlEntry(writer, "./postrm", $"#!/bin/sh\n{pkg.PostRemoveScript}\n", execMode);
+                }
+
+                var confFiles = entries
+                    .Where(e => e.Mode.HasFlag(LinuxFileMode.S_IFREG) && e.TargetPath.StartsWith("/etc/"))
+                    .Select(e => e.TargetPath).ToList();
+                if (confFiles.Any())
+                {
+                    WriteControlEntry(writer, "./conffiles", string.Join("\n", confFiles) + "\n");
+                }
             }
 
-            if (!string.IsNullOrWhiteSpace(pkg.PostInstallScript))
-            {
-                WriteControlEntry(controlTar, "./postinst", $"#!/bin/sh\n{pkg.PostInstallScript}\n", execMode);
-            }
-
-            if (!string.IsNullOrWhiteSpace(pkg.PreRemoveScript))
-            {
-                WriteControlEntry(controlTar, "./prerm", $"#!/bin/sh\n{pkg.PreRemoveScript}\n", execMode);
-            }
-
-            if (!string.IsNullOrWhiteSpace(pkg.PostRemoveScript))
-            {
-                WriteControlEntry(controlTar, "./postrm", $"#!/bin/sh\n{pkg.PostRemoveScript}\n", execMode);
-            }
-
-            var confFiles = entries
-                .Where(e => e.Mode.HasFlag(LinuxFileMode.S_IFREG) && e.TargetPath.StartsWith("/etc/"))
-                .Select(e => e.TargetPath).ToList();
-            if (confFiles.Any())
-            {
-                WriteControlEntry(controlTar, "./conffiles", string.Join("\n", confFiles) + "\n");
-            }
-
-            TarFileCreator.WriteTrailer(controlTar);
             controlTar.Seek(0, SeekOrigin.Begin);
 
             var controlTarGz = new MemoryStream();
@@ -218,26 +221,27 @@ namespace Packaging.Targets.Deb
             ArFileCreator.WriteEntry(targetStream, "control.tar.gz", ArFileMode, controlTarGz);
         }
 
-        private static void WriteControlEntry(Stream tar, string name, string data = null, LinuxFileMode? fileMode = null)
+        private static void WriteControlEntry(TarWriter writer, string name, string data = null, LinuxFileMode? fileMode = null)
         {
-            var s = (data != null) ? new MemoryStream(Encoding.UTF8.GetBytes(data)) : new MemoryStream();
             var mode = fileMode ?? LinuxFileMode.S_IRUSR | LinuxFileMode.S_IWUSR |
                        LinuxFileMode.S_IRGRP | LinuxFileMode.S_IROTH;
             mode |= data == null
                 ? LinuxFileMode.S_IFDIR | LinuxFileMode.S_IXUSR | LinuxFileMode.S_IXGRP | LinuxFileMode.S_IXOTH
                 : LinuxFileMode.S_IFREG;
-            var hdr = new TarHeader
+
+            var entry = new ArchiveEntry
             {
-                FileMode = mode,
-                FileName = name,
-                FileSize = (uint)s.Length,
-                GroupName = "root",
-                UserName = "root",
-                LastModified = DateTimeOffset.UtcNow,
-                Magic = "ustar",
-                TypeFlag = data == null ? TarTypeFlag.DirType : TarTypeFlag.RegType,
+                Mode = mode,
+                TargetPath = name,
+                Owner = "root",
+                Group = "root",
+                Modified = DateTimeOffset.UtcNow,
             };
-            TarFileCreator.WriteEntry(tar, hdr, s);
+
+            using (var s = new MemoryStream(data != null ? Encoding.UTF8.GetBytes(data) : Array.Empty<byte>()))
+            {
+                TarFileCreator.WriteEntry(writer, entry, s);
+            }
         }
     }
 }

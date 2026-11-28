@@ -1,151 +1,94 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Formats.Tar;
 using System.IO;
-using System.Text;
 
 namespace Packaging.Targets.IO
 {
     internal static class TarFileCreator
     {
         /// <summary>
-        /// Generates a <see cref="CpioFile"/> based on a list of <see cref="ArchiveEntry"/>
+        /// Generates a <c>.tar</c> archive based on a list of <see cref="ArchiveEntry"/>
         /// values.
         /// </summary>
         /// <param name="archiveEntries">
-        /// The values based on which to generate the <see cref="CpioFile"/>.
+        /// The values based on which to generate the archive.
         /// </param>
         /// <param name="targetStream">
-        /// The <see cref="Stream"/> which will hold the <see cref="CpioFile"/>.
+        /// The <see cref="Stream"/> which will hold the archive.
         /// </param>
         public static void FromArchiveEntries(List<ArchiveEntry> archiveEntries, Stream targetStream)
         {
-            using (TarFile cpioFile = new TarFile(targetStream, leaveOpen: true))
+            using (var writer = CreateWriter(targetStream))
             {
                 foreach (var entry in archiveEntries)
                 {
-                    WriteEntry(targetStream, entry);
+                    WriteEntry(writer, entry);
                 }
-
-                WriteTrailer(targetStream);
             }
         }
 
-        public static void WriteTrailer(Stream stream)
+        /// <summary>
+        /// Creates a <see cref="TarWriter"/> which writes GNU-format tar archives. The GNU format
+        /// is used because it transparently supports long file names (using <c>././@LongLink</c> entries),
+        /// which are understood by <c>dpkg</c>, <c>rpm</c> and GNU <c>tar</c>.
+        /// </summary>
+        /// <param name="targetStream">
+        /// The <see cref="Stream"/> which will hold the archive. The stream is left open when the writer is disposed of.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="TarWriter"/>. The tar trailer is written when the writer is disposed of.
+        /// </returns>
+        public static TarWriter CreateWriter(Stream targetStream)
         {
-            // The stream should already be aligned; as it is aligned after every entry.
-            // As a safety measure, for streams which can report on .Position, align the
-            // stream again.
-            if (stream.CanSeek)
-            {
-                Align(stream);
-            }
-
-            var trailer = new byte[1024];
-            stream.Write(trailer, 0, trailer.Length);
+            return new TarWriter(targetStream, TarEntryFormat.Gnu, leaveOpen: true);
         }
 
-        public static void WriteEntry(Stream stream, TarHeader header, Stream data)
-        {
-            header.Checksum = header.ComputeChecksum();
-            int written = stream.WriteStruct(header);
-            Align(stream, written);
-            data.CopyTo(stream);
-            Align(stream, data.Length);
-        }
-
-        public static void WriteEntry(Stream stream, ArchiveEntry entry, Stream data = null)
+        public static void WriteEntry(TarWriter writer, ArchiveEntry entry, Stream data = null)
         {
             var targetPath = entry.TargetPath;
-            if (!targetPath.StartsWith("."))
+            if (!targetPath.StartsWith(".", StringComparison.Ordinal))
             {
                 targetPath = "." + targetPath;
-            }
-
-            // Handle long file names (> 99 characters). If this is the case, add a "././@LongLink" pseudo-entry
-            // which contains the full name.
-            if (targetPath.Length > 99)
-            {
-                // Must include a trailing \0
-                var nameLength = Encoding.UTF8.GetByteCount(targetPath);
-                byte[] entryName = new byte[nameLength + 1];
-
-                Encoding.UTF8.GetBytes(targetPath, 0, targetPath.Length, entryName, 0);
-
-                ArchiveEntry nameEntry = new ArchiveEntry()
-                {
-                    Mode = entry.Mode,
-                    Modified = entry.Modified,
-                    TargetPath = "././@LongLink",
-                    Owner = entry.Owner,
-                    Group = entry.Group
-                };
-
-                using (MemoryStream nameStream = new MemoryStream(entryName))
-                {
-                    WriteEntry(stream, nameEntry, nameStream);
-                }
-
-                targetPath = targetPath.Substring(0, 99);
             }
 
             var isDir = entry.Mode.HasFlag(LinuxFileMode.S_IFDIR);
             var isLink = !isDir && !string.IsNullOrWhiteSpace(entry.LinkTo);
             var isFile = !isDir && !isLink;
 
-            TarTypeFlag type;
+            TarEntryType type = isDir ? TarEntryType.Directory : isLink ? TarEntryType.SymbolicLink : TarEntryType.RegularFile;
 
-            if (entry.TargetPath == "././@LongLink")
+            // The tar header has a dedicated field for the file type, so only the permission bits are stored in the mode.
+            var tarEntry = new GnuTarEntry(type, targetPath)
             {
-                type = TarTypeFlag.LongName;
-            }
-            else if (isFile)
+                Mode = (UnixFileMode)(entry.Mode & LinuxFileMode.PermissionsMask),
+                ModificationTime = entry.Modified,
+                Uid = 0,
+                Gid = 0,
+                UserName = entry.Owner ?? string.Empty,
+                GroupName = entry.Group ?? string.Empty,
+            };
+
+            if (isLink)
             {
-                type = TarTypeFlag.RegType;
-            }
-            else if (isDir)
-            {
-                type = TarTypeFlag.DirType;
-            }
-            else
-            {
-                type = TarTypeFlag.SymType;
+                tarEntry.LinkName = entry.LinkTo;
             }
 
             bool dispose = false;
-            if (data == null)
+            if (isFile)
             {
-                if (isFile)
+                if (data == null)
                 {
                     dispose = true;
                     data = File.OpenRead(entry.SourceFilename);
                 }
-                else
-                {
-                    data = new MemoryStream();
-                }
+
+                tarEntry.DataStream = data;
             }
 
             try
             {
-                var hdr = new TarHeader()
-                {
-                    // No need to set the file type, the tar header has a special field for that.
-                    FileMode = entry.Mode & LinuxFileMode.PermissionsMask,
-                    DevMajor = null,
-                    DevMinor = null,
-                    FileName = targetPath,
-                    FileSize = (uint)data.Length,
-                    GroupId = 0,
-                    UserId = 0,
-                    GroupName = entry.Group,
-                    LinkName = isLink ? entry.LinkTo : string.Empty,
-                    Prefix = string.Empty,
-                    TypeFlag = type,
-                    UserName = entry.Owner,
-                    Version = null,
-                    LastModified = entry.Modified,
-                    Magic = "ustar"
-                };
-                WriteEntry(stream, hdr, data);
+                writer.WriteEntry(tarEntry);
             }
             finally
             {
@@ -154,23 +97,6 @@ namespace Packaging.Targets.IO
                     data.Dispose();
                 }
             }
-        }
-
-        private static void Align(Stream stream)
-        {
-            Align(stream, stream.Position);
-        }
-
-        private static void Align(Stream stream, long position)
-        {
-            var spos = position % 512;
-            if (spos == 0)
-            {
-                return;
-            }
-
-            var align = new byte[512 - spos];
-            stream.Write(align, 0, align.Length);
         }
     }
 }
